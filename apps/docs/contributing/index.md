@@ -31,9 +31,9 @@ bun dev
 ```
 
 Visit:
-- **Web App**: http://localhost:3001
-- **API**: http://localhost:3000
-- **Documentation**: http://localhost:5173 (if running docs dev)
+- **Web App**: `http://localhost:3001`
+- **API**: `http://localhost:3000`  
+- **Documentation**: `http://localhost:5173` (if running docs dev)
 
 ## 🏗️ Project Structure
 

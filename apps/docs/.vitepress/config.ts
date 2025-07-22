@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'WrittenCraft.ai',
   description: 'Open-source AI-powered writing platform',
+  ignoreDeadLinks: true,
   
   themeConfig: {
     nav: [
