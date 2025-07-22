@@ -15,7 +15,7 @@ OpenWrite is a full-stack TypeScript application built with the Better-T-Stack, 
 ### Backend (apps/server/)
 - **Framework**: Hono with Cloudflare Workers runtime
 - **API Layer**: ORPC for end-to-end type-safe RPC calls
-- **Database**: SQLite/Turso with Drizzle ORM
+- **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
 - **Authentication**: Better Auth with email/password support
 - **Key Files**:
   - `src/index.ts`: Main Hono application with CORS, auth handlers, and RPC setup
@@ -61,11 +61,12 @@ bun db:migrate       # Run database migrations
 Navigate to specific app directories for additional commands:
 - `apps/server/`: Wrangler commands for Cloudflare Workers deployment
 - `apps/web/`: Vite commands and Cloudflare Pages deployment
+- `apps/docs/`: VitePress documentation site commands
 
 ## Development Setup
 
 1. Install dependencies: `bun install`
-2. Set up environment variables in `apps/server/.env`
+2. Set up environment variables in `apps/server/.dev.vars`
 3. Initialize database: `bun db:push`
 4. Start development: `bun dev`
 
@@ -74,3 +75,13 @@ The web application runs on http://localhost:3001 and the API on http://localhos
 ## Testing
 
 Type checking is the primary validation method. Run `bun check-types` before committing changes to ensure type safety across the full-stack application.
+
+## Documentation Strategy
+
+All project documentation is centralized in the `apps/docs/` directory using VitePress:
+
+- **API Documentation**: `apps/docs/api/` - Server API endpoints and usage
+- **User Guide**: `apps/docs/guide/` - End-user features and tutorials  
+- **Contributing Guide**: `apps/docs/contributing/` - Development setup, architecture, deployment
+
+This includes technical documentation like database configuration, deployment guides, and architectural decisions. The docs app serves as the single source of truth for all project documentation, making it easily discoverable and maintainable.
