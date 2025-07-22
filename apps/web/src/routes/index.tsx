@@ -23,7 +23,10 @@ const TITLE_TEXT = `
  `
 
 async function checkApiHealth() {
-  const baseUrl = import.meta.env.VITE_SERVER_URL || window.location.origin
+  // In development, use VITE_SERVER_URL. In production, use same origin
+  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    import.meta.env.VITE_SERVER_URL : 
+    window.location.origin
   const response = await fetch(`${baseUrl}/api/health`)
   return response.ok
 }

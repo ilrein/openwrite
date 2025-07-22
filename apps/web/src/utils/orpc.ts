@@ -22,7 +22,9 @@ export const queryClient = new QueryClient({
 })
 
 export const link = new RPCLink({
-  url: import.meta.env.VITE_SERVER_URL ? `${import.meta.env.VITE_SERVER_URL}/rpc` : "/rpc",
+  url: import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    `${import.meta.env.VITE_SERVER_URL}/rpc` : 
+    "/rpc",
   fetch(url, options) {
     return fetch(url, {
       ...options,
