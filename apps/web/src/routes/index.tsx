@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { orpc } from "@/utils/orpc"
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -22,8 +21,20 @@ const TITLE_TEXT = `
     ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
  `
 
+async function checkApiHealth() {
+  const baseUrl = import.meta.env.VITE_SERVER_URL || window.location.origin
+  const response = await fetch(`${baseUrl}/api/auth/session`, {
+    credentials: 'include'
+  })
+  return response.ok
+}
+
 function HomeComponent() {
-  const healthCheck = useQuery(orpc.healthCheck.queryOptions())
+  const healthCheck = useQuery({
+    queryKey: ['api-health'],
+    queryFn: checkApiHealth,
+    retry: 1
+  })
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-2">
