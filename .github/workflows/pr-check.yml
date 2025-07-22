@@ -1,0 +1,45 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate PR
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Generate server types
+        working-directory: ./apps/server
+        run: bunx tsc --declaration --emitDeclarationOnly --outDir dist
+
+      - name: Type check
+        run: bun check-types
+
+      - name: Build web app
+        run: bun run build --filter=@openwrite/web
+
+      - name: Validate deployment config
+        working-directory: ./apps/server
+        run: bunx wrangler deploy --dry-run
+
+      - name: Validation Complete
+        run: |
+          echo "✅ PR Validation Passed!"
+          echo "- Type checking: ✅"
+          echo "- Build: ✅" 
+          echo "- Deployment config: ✅"
+          echo "Ready to merge and deploy to production!"

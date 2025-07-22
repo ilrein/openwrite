@@ -7,7 +7,11 @@ import { auth } from "./lib/auth"
 import { createContext } from "./lib/context"
 import { appRouter } from "./routers/index"
 
-const app = new Hono()
+interface Env {
+  ASSETS: Fetcher
+}
+
+const app = new Hono<{ Bindings: Env }>()
 
 app.use(logger())
 app.use(
@@ -36,8 +40,17 @@ app.use("/rpc/*", async (c, next) => {
   await next()
 })
 
-app.get("/", (c) => {
-  return c.text("OK")
+// Serve static assets (SPA) for non-API routes
+app.get("*", async (c) => {
+  const url = new URL(c.req.url)
+  
+  // Let API routes pass through to return 404 if not handled above
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/rpc/")) {
+    return c.notFound()
+  }
+  
+  // For SPA: serve static files or fallback to index.html for client-side routing
+  return c.env.ASSETS.fetch(c.req.raw)
 })
 
 export default app

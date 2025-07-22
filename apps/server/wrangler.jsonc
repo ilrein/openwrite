@@ -1,8 +1,13 @@
 {
-  "name": "openwrite-server",
+  "name": "openwrite",
   "main": "src/index.ts",
   "compatibility_date": "2025-06-15",
   "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
   "vars": {
     "NODE_ENV": "production"
     // Add public environment variables here

@@ -1,0 +1,60 @@
+name: Deploy OpenWrite
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Generate server types
+        working-directory: ./apps/server
+        run: npx tsc --declaration --emitDeclarationOnly --outDir dist
+
+      - name: Type check
+        run: bun check-types
+
+      - name: Build web app
+        run: bun run build --filter=@openwrite/web
+
+      - name: Deploy to Production
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "./apps/server"
+          command: deploy
+          secrets: |
+            BETTER_AUTH_SECRET
+        env:
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+
+      - name: Run Database Migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "./apps/server"
+          command: d1 migrations apply openwrite-dev --remote
+
+      - name: Print Deployment URL
+        run: |
+          echo "🚀 Deployed to: https://openwrite.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
+          echo "📱 Includes both API and web app in a single Worker"
