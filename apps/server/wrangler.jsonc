@@ -7,12 +7,11 @@
     "NODE_ENV": "production"
     // Add public environment variables here
     // Example: "CORS_ORIGIN": "https://your-domain.com"
-  }
+  },
   // For sensitive data, use:
   // wrangler secret put SECRET_NAME
   // Don't add secrets to "vars" - they're visible in the dashboard!
 
-  ,
   // To set up D1 database:
   // 1. Run: wrangler login
   // 2. Run: wrangler d1 create your-database-name

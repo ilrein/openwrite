@@ -33,5 +33,7 @@
     "formatter": {
       "enabled": true
     }
-  }
+  },
+  "extends": ["ultracite"],
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json"
 }

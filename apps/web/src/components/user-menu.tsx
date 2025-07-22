@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "@tanstack/react-router"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -5,27 +6,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
-import { Button } from "./ui/button";
-import { Skeleton } from "./ui/skeleton";
-import { Link } from "@tanstack/react-router";
+} from "@/components/ui/dropdown-menu"
+import { authClient } from "@/lib/auth-client"
+import { Button } from "./ui/button"
+import { Skeleton } from "./ui/skeleton"
 
 export default function UserMenu() {
-  const navigate = useNavigate();
-  const { data: session, isPending } = authClient.useSession();
+  const navigate = useNavigate()
+  const { data: session, isPending } = authClient.useSession()
 
   if (isPending) {
-    return <Skeleton className="h-9 w-24" />;
+    return <Skeleton className="h-9 w-24" />
   }
 
   if (!session) {
     return (
-      <Button variant="outline" asChild>
+      <Button asChild variant="outline">
         <Link to="/login">Sign In</Link>
       </Button>
-    );
+    )
   }
 
   return (
@@ -39,7 +38,6 @@ export default function UserMenu() {
         <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
-            variant="destructive"
             className="w-full"
             onClick={() => {
               authClient.signOut({
@@ -47,16 +45,17 @@ export default function UserMenu() {
                   onSuccess: () => {
                     navigate({
                       to: "/",
-                    });
+                    })
                   },
                 },
-              });
+              })
             }}
+            variant="destructive"
           >
             Sign Out
           </Button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }
