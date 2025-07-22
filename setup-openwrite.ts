@@ -75,10 +75,7 @@ devVarsContent = devVarsContent
   .replace("CLOUDFLARE_ACCOUNT_ID=", "CLOUDFLARE_ACCOUNT_ID=auto-detected")
   .replace("CLOUDFLARE_DATABASE_ID=", `CLOUDFLARE_DATABASE_ID=${databaseId}`)
   .replace("CLOUDFLARE_D1_TOKEN=", "CLOUDFLARE_D1_TOKEN=auto-detected")
-  .replace(
-    /BETTER_AUTH_SECRET=.*/,
-    `BETTER_AUTH_SECRET=${authSecret}`
-  )
+  .replace(/BETTER_AUTH_SECRET=.*/, `BETTER_AUTH_SECRET=${authSecret}`)
 
 writeFileSync(devVarsPath, devVarsContent)
 try {
