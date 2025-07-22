@@ -14,19 +14,19 @@
     "format": "turbo format",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
-    "dev:server": "turbo -F server dev",
+    "dev:server": "turbo -F @openwrite/server dev",
     "dev:docs": "turbo -F @openwrite/docs dev",
     "docs:build": "turbo -F @openwrite/docs build",
     "docs:preview": "turbo -F @openwrite/docs preview",
-    "db:push": "turbo -F server db:push",
-    "db:studio": "turbo -F server db:studio",
-    "db:generate": "turbo -F server db:generate",
-    "db:migrate": "turbo -F server db:migrate"
+    "db:push": "turbo -F @openwrite/server db:push",
+    "db:studio": "turbo -F @openwrite/server db:studio",
+    "db:generate": "turbo -F @openwrite/server db:generate",
+    "db:migrate": "turbo -F @openwrite/server db:migrate"
   },
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
-    "turbo": "^2.5.4",
+    "turbo": "^2.5.5",
     "ultracite": "5.0.47"
   },
   "packageManager": "bun@1.2.19"
