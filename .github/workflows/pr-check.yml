@@ -8,6 +8,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     name: Validate PR
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,13 +36,10 @@ jobs:
         working-directory: ./apps/server
         run: npx wrangler deploy --dry-run
 
-      - name: Comment on PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ **PR Validation Passed**\n\n- Type checking: ✅\n- Build: ✅\n- Deployment config: ✅\n\nReady to merge and deploy to production!'
-            })
+      - name: Validation Complete
+        run: |
+          echo "✅ PR Validation Passed!"
+          echo "- Type checking: ✅"
+          echo "- Build: ✅" 
+          echo "- Deployment config: ✅"
+          echo "Ready to merge and deploy to production!"
