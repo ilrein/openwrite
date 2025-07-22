@@ -17,5 +17,12 @@
   },
   "references": [{
     "path": "../server"
-  }]
+  }],
+  "exclude": [
+    "wrangler.jsonc",
+    "*.config.js",
+    "*.config.ts", 
+    "dist",
+    "node_modules"
+  ]
 }

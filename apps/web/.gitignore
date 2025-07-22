@@ -57,3 +57,4 @@ dev-dist
 .dev.vars*
 
 .open-next
+routeTree.gen.ts

@@ -25,5 +25,14 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "exclude": [
+    "wrangler.jsonc",
+    "*.config.js",
+    "*.config.ts",
+    "dist",
+    "node_modules",
+    ".vitepress/dist",
+    ".vitepress/cache"
+  ]
 }

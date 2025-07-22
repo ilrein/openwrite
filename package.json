@@ -9,6 +9,8 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
+    "lint": "turbo lint",
+    "format": "turbo format",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
@@ -22,7 +24,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.5.4"
+    "turbo": "^2.5.4",
+    "@biomejs/biome": "^1.9.4"
   },
   "packageManager": "bun@1.2.19"
 }

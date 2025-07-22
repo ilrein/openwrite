@@ -18,5 +18,12 @@
     "composite": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
-  }
+  },
+  "exclude": [
+    "wrangler.jsonc",
+    "*.config.js",
+    "*.config.ts",
+    "dist",
+    "node_modules"
+  ]
 }

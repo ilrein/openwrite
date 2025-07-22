@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "lint": "biome lint *.ts *.md",
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@types/bun": "latest",
