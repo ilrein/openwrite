@@ -5,8 +5,7 @@ This guide covers deploying OpenWrite to Cloudflare using GitHub Actions.
 ## Prerequisites
 
 1. **Cloudflare Account**: You need a Cloudflare account with access to:
-   - Cloudflare Workers (for the server)
-   - Cloudflare Pages (for the web app)
+   - Cloudflare Workers (for the unified full-stack app)
    - Cloudflare D1 (for the database)
 
 2. **GitHub Repository Secrets**: Add the following secrets to your GitHub repository:
@@ -32,7 +31,6 @@ Navigate to your GitHub repository → Settings → Secrets and Variables → Ac
    - Account: `Cloudflare Workers:Edit`
    - Zone: `Zone:Read` (for your domain, if using custom domain)
    - Account: `Account:Read`
-   - Zone: `Page Rules:Edit`
    - Account: `D1:Edit`
 5. Add account resource: `Include - All accounts` or select specific account
 6. Add zone resource (if using custom domain): `Include - Specific zone - yourdomain.com`
@@ -84,23 +82,21 @@ The GitHub Actions workflow automatically deploys when you push to the `main` br
 
 1. **Type checks** all TypeScript code
 2. **Builds** the web application
-3. **Deploys** the server to Cloudflare Workers
-4. **Deploys** the web app to Cloudflare Pages
-5. **Runs** database migrations on production (main branch only)
+3. **Deploys** the unified full-stack app to Cloudflare Workers (includes both API and static assets)
+4. **Runs** database migrations on production (main branch only)
 
 ### Manual Deployment
 
 You can also deploy manually:
 
 ```bash
-# Deploy server
-cd apps/server
-npx wrangler deploy
-
-# Deploy web app
+# Build web app first
 cd apps/web
 bun build
-npx wrangler pages deploy dist --project-name=openwrite-web
+
+# Deploy unified app (API + Static Assets)
+cd ../server
+npx wrangler deploy
 ```
 
 ## Environment Variables
@@ -134,26 +130,23 @@ Public environment variables go in `apps/server/wrangler.jsonc`:
 
 ## Custom Domains
 
-### Worker (Server) Custom Domain
+### Worker (Full-Stack App) Custom Domain
 
-1. In Cloudflare Dashboard → Workers & Pages → openwrite-server
+1. In Cloudflare Dashboard → Workers & Pages → openwrite
 2. Go to Settings → Triggers
 3. Add Custom Domain
-4. Enter your domain (e.g., `api.yourdomain.com`)
+4. Enter your domain (e.g., `yourdomain.com`)
 
-### Pages (Web App) Custom Domain
-
-1. In Cloudflare Dashboard → Workers & Pages → openwrite-web
-2. Go to Custom Domains
-3. Add your domain (e.g., `yourdomain.com`)
+The unified Worker serves both the API endpoints (e.g., `/api/*`, `/rpc/*`) and the web app (static files + SPA routing).
 
 ## Monitoring
 
-After deployment, monitor your applications:
+After deployment, monitor your application:
 
-- **Workers**: Cloudflare Dashboard → Workers & Pages → openwrite-server
-- **Pages**: Cloudflare Dashboard → Workers & Pages → openwrite-web
+- **Worker**: Cloudflare Dashboard → Workers & Pages → openwrite
 - **D1**: Cloudflare Dashboard → D1 → openwrite-app
+
+The unified Worker handles all requests - both API calls and web app serving.
 
 ## Troubleshooting
 

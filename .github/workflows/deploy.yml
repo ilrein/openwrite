@@ -36,7 +36,7 @@ jobs:
       - name: Build web app
         run: bun run build --filter=@openwrite/web
 
-      - name: Deploy Server (Cloudflare Workers)
+      - name: Deploy Unified App (Cloudflare Workers + Static Assets)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -47,15 +47,6 @@ jobs:
             BETTER_AUTH_SECRET
         env:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-
-      - name: Deploy Web App (Cloudflare Pages)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: "./apps/web"
-          command: pages deploy dist --project-name=openwrite-web
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Database Migrations (Production)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -69,5 +60,5 @@ jobs:
       - name: Print Deployment URLs
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          echo "🚀 Server deployed to: https://openwrite-server.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
-          echo "🌐 Web app deployed to: https://openwrite-web.pages.dev"
+          echo "🚀 Unified app deployed to: https://openwrite.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
+          echo "📱 Includes both API and web app in a single Worker"
