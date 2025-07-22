@@ -29,11 +29,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "writtencraft.ai",
+        title: "openwrite",
       },
       {
         name: "description",
-        content: "writtencraft.ai is a web application",
+        content: "openwrite is a web application",
       },
     ],
     links: [

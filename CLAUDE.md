@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a full-stack TypeScript application built with the Better-T-Stack, featuring a monorepo structure managed by Turborepo. The project consists of two main applications:
+OpenWrite is a full-stack TypeScript application built with the Better-T-Stack, featuring a monorepo structure managed by Turborepo. This open-source AI-powered writing platform consists of three main applications:
 
 - **Web App** (`apps/web/`): React frontend with TanStack Router, TailwindCSS, and shadcn/ui components
-- **Server** (`apps/server/`): Hono-based API server with ORPC for type-safe RPC, deployed on Cloudflare Workers
+- **Server** (`apps/server/`): Hono-based API server with ORPC for type-safe RPC, deployed on Cloudflare Workers  
+- **Documentation** (`apps/docs/`): VitePress documentation site
 
 ## Architecture
 

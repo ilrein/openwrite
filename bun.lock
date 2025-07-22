@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "writtencraft.ai",
+      "name": "openwrite",
       "devDependencies": {
         "turbo": "^2.5.4",
       },

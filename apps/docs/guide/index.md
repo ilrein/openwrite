@@ -1,6 +1,6 @@
-# What is WrittenCraft.ai?
+# What is OpenWrite?
 
-WrittenCraft.ai is an open-source, AI-powered writing platform designed specifically for novelists, screenwriters, and creative writers. It combines the best features of existing tools like Sudowrite and NovelCrafter into a single, powerful platform.
+OpenWrite is an open-source, AI-powered writing platform designed specifically for novelists, screenwriters, and creative writers. It combines the best features of existing tools like Sudowrite and NovelCrafter into a single, powerful platform.
 
 ## Key Features
 
@@ -56,7 +56,7 @@ WrittenCraft.ai is an open-source, AI-powered writing platform designed specific
 
 ## Comparison with Existing Tools
 
-| Feature | WrittenCraft.ai | Sudowrite | NovelCrafter |
+| Feature | OpenWrite | Sudowrite | NovelCrafter |
 |---------|-----------------|-----------|--------------|
 | Open Source | ✅ | ❌ | ❌ |
 | Self-Hosting | ✅ | ❌ | ❌ |
@@ -71,7 +71,7 @@ WrittenCraft.ai is an open-source, AI-powered writing platform designed specific
 
 ## Getting Started
 
-Ready to start your writing journey? Check out our [Getting Started Guide](./getting-started.md) to set up WrittenCraft.ai and create your first project.
+Ready to start your writing journey? Check out our [Getting Started Guide](./getting-started.md) to set up OpenWrite and create your first project.
 
 ## Community & Support
 

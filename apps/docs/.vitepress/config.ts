@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'WrittenCraft.ai',
+  title: 'OpenWrite',
   description: 'Open-source AI-powered writing platform',
   ignoreDeadLinks: true,
   
@@ -10,7 +10,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/' },
       { text: 'API Reference', link: '/api/' },
       { text: 'Contributing', link: '/contributing/' },
-      { text: 'GitHub', link: 'https://github.com/ilrein/writtencraft-ai' }
+      { text: 'GitHub', link: 'https://github.com/ilrein/openwrite' }
     ],
 
     sidebar: {
@@ -18,7 +18,7 @@ export default defineConfig({
         {
           text: 'Introduction',
           items: [
-            { text: 'What is WrittenCraft.ai?', link: '/guide/' },
+            { text: 'What is OpenWrite.ai?', link: '/guide/' },
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Features Overview', link: '/guide/features' }
           ]
@@ -72,12 +72,12 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/ilrein/writtencraft-ai' }
+      { icon: 'github', link: 'https://github.com/ilrein/openwrite' }
     ],
 
     footer: {
       message: 'Released under the AGPLv3 License.',
-      copyright: 'Copyright © 2025 WrittenCraft.ai Contributors'
+      copyright: 'Copyright © 2025 OpenWrite Contributors'
     },
 
     search: {

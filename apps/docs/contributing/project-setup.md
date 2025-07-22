@@ -1,8 +1,8 @@
-# GitHub Projects Setup for WrittenCraft.ai
+# GitHub Projects Setup for OpenWrite.ai
 
 ## Project Structure
 
-### **Project Name**: WrittenCraft.ai Development
+### **Project Name**: OpenWrite.ai Development
 ### **Description**: Master project for building an open-source AI writing platform
 
 ## Custom Fields to Create

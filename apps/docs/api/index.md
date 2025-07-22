@@ -1,10 +1,10 @@
 # API Reference
 
-Welcome to the WrittenCraft.ai API documentation. This section provides comprehensive information about our RESTful API and WebSocket endpoints.
+Welcome to the OpenWrite API documentation. This section provides comprehensive information about our RESTful API and WebSocket endpoints.
 
 ## Overview
 
-The WrittenCraft.ai API is built with:
+The OpenWrite API is built with:
 - **ORPC** for type-safe RPC calls
 - **Hono** framework for fast, lightweight endpoints
 - **Zod** for runtime validation and type safety
@@ -20,7 +20,7 @@ All API requests require authentication. We support:
 ## Base URL
 
 ```
-Production: https://api.writtencraft.ai
+Production: https://api.openwrite.dev
 Development: http://localhost:3000
 ```
 

@@ -1,6 +1,6 @@
-# Contributing to WrittenCraft.ai
+# Contributing to OpenWrite
 
-Thank you for your interest in contributing to WrittenCraft.ai! This guide will help you get started with development and understand our contribution process.
+Thank you for your interest in contributing to OpenWrite! This guide will help you get started with development and understand our contribution process.
 
 ## 🚀 Quick Start
 
@@ -13,8 +13,8 @@ Thank you for your interest in contributing to WrittenCraft.ai! This guide will 
 
 ```bash
 # 1. Fork and clone the repository
-git clone https://github.com/your-username/writtencraft-ai.git
-cd writtencraft-ai
+git clone https://github.com/your-username/openwrite.git
+cd openwrite
 
 # 2. Install dependencies
 bun install
@@ -38,7 +38,7 @@ Visit:
 ## 🏗️ Project Structure
 
 ```
-writtencraft-ai/
+openwrite/
 ├── apps/
 │   ├── web/           # React frontend with TanStack Router
 │   ├── server/        # Hono API with ORPC
@@ -50,7 +50,7 @@ writtencraft-ai/
 ## 📋 How to Contribute
 
 ### 1. **Find an Issue**
-- Browse [GitHub Issues](https://github.com/ilrein/writtencraft-ai/issues)
+- Browse [GitHub Issues](https://github.com/ilrein/openwrite/issues)
 - Check the [GitHub Project Board](https://github.com/users/ilrein/projects/2)
 - Look for issues labeled `good first issue` or `help wanted`
 
@@ -165,7 +165,7 @@ For new features:
 
 ## 📝 License
 
-By contributing to WrittenCraft.ai, you agree that your contributions will be licensed under the [AGPLv3 License](https://github.com/ilrein/writtencraft-ai/blob/main/LICENSE).
+By contributing to OpenWrite, you agree that your contributions will be licensed under the [AGPLv3 License](https://github.com/ilrein/openwrite/blob/main/LICENSE).
 
 ---
 

@@ -2,19 +2,19 @@
 layout: home
 
 hero:
-  name: "WrittenCraft.ai"
+  name: "OpenWrite"
   text: "Open-Source AI Writing Platform"
   tagline: "The future of creative writing with AI assistance"
   image:
     src: /logo.svg
-    alt: WrittenCraft.ai
+    alt: OpenWrite
   actions:
     - theme: brand
       text: Get Started
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/ilrein/writtencraft-ai
+      link: https://github.com/ilrein/openwrite
 
 features:
   - icon: 🤖
@@ -43,9 +43,9 @@ features:
 
 ---
 
-## Why WrittenCraft.ai?
+## Why OpenWrite?
 
-WrittenCraft.ai combines the best features of Sudowrite and NovelCrafter into a single, open-source platform. Built for writers, by writers.
+OpenWrite combines the best features of Sudowrite and NovelCrafter into a single, open-source platform. Built for writers, by writers.
 
 ### 🎯 **For Individual Writers**
 - Complete your novels faster with AI assistance
@@ -69,7 +69,7 @@ WrittenCraft.ai combines the best features of Sudowrite and NovelCrafter into a 
 
 ```bash
 # Clone the repository
-git clone https://github.com/ilrein/writtencraft-ai.git
+git clone https://github.com/ilrein/openwrite.git
 
 # Install dependencies
 bun install
@@ -85,11 +85,11 @@ Visit `http://localhost:3001` to start writing!
 
 ## Community
 
-- **GitHub**: [ilrein/writtencraft-ai](https://github.com/ilrein/writtencraft-ai)
-- **Documentation**: [docs.writtencraft.ai](https://docs.writtencraft.ai)
+- **GitHub**: [ilrein/openwrite](https://github.com/ilrein/openwrite)
+- **Documentation**: [docs.openwrite.dev](https://docs.openwrite.dev)
 - **Discord**: Coming soon
-- **Twitter**: [@WrittenCraftAI](https://twitter.com/WrittenCraftAI)
+- **Twitter**: [@OpenWriteAI](https://twitter.com/OpenWriteAI)
 
 ---
 
-*WrittenCraft.ai is in active development. Star the repo to follow our progress!*
+*OpenWrite is in active development. Star the repo to follow our progress!*

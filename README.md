@@ -1,6 +1,8 @@
-# writtencraft.ai
+# OpenWrite
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, ORPC, and more.
+**Open-source AI-powered writing platform for novelists, screenwriters, and creative writers.**
+
+OpenWrite combines the best features of Sudowrite and NovelCrafter into a single, powerful, and fully open-source platform. Built with a modern TypeScript stack including React, TanStack Router, Hono, ORPC, and more.
 
 ## Features
 
@@ -52,7 +54,7 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 ## Project Structure
 
 ```
-writtencraft.ai/
+openwrite/
 ├── apps/
 │   ├── web/         # Frontend application (React + TanStack Router)
 │   └── server/      # Backend API (Hono, ORPC)

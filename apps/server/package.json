@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "@openwrite/server",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {

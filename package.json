@@ -1,5 +1,5 @@
 {
-  "name": "writtencraft.ai",
+  "name": "openwrite",
   "private": true,
   "workspaces": [
     "apps/*",

@@ -1,4 +1,4 @@
-# WrittenCraft.ai Implementation Plan
+# OpenWrite.ai Implementation Plan
 
 ## Project Vision
 Build an open-source AI-powered writing platform that combines the best features of Sudowrite and NovelCrafter, with extensible architecture for community contributions.
