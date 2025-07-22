@@ -27,10 +27,16 @@ function validateRemoteCredentials(): void {
   const token = process.env.CLOUDFLARE_D1_TOKEN
 
   if (!accountId || !databaseId || !token) {
-    const missing = []
-    if (!accountId) missing.push('CLOUDFLARE_ACCOUNT_ID')
-    if (!databaseId) missing.push('CLOUDFLARE_DATABASE_ID')
-    if (!token) missing.push('CLOUDFLARE_D1_TOKEN')
+    const missing: string[] = []
+    if (!accountId) {
+      missing.push('CLOUDFLARE_ACCOUNT_ID')
+    }
+    if (!databaseId) {
+      missing.push('CLOUDFLARE_DATABASE_ID')
+    }
+    if (!token) {
+      missing.push('CLOUDFLARE_D1_TOKEN')
+    }
     
     throw new Error(`Missing required environment variables for remote D1 configuration: ${missing.join(', ')}`)
   }
@@ -71,16 +77,16 @@ export default defineConfig({
     ? {
         // Local development - use SQLite file directly
         dbCredentials: {
-          url: localPath!,
+          url: localPath as string,
         },
       }
     : {
         // Remote/production - use D1 HTTP API
         driver: "d1-http",
         dbCredentials: {
-          accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
-          databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
-          token: process.env.CLOUDFLARE_D1_TOKEN!,
+          accountId: process.env.CLOUDFLARE_ACCOUNT_ID as string,
+          databaseId: process.env.CLOUDFLARE_DATABASE_ID as string,
+          token: process.env.CLOUDFLARE_D1_TOKEN as string,
         },
       }),
 })
