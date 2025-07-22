@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate server types
         working-directory: ./apps/server
-        run: npx tsc --declaration --emitDeclarationOnly --outDir dist
+        run: bunx tsc --declaration --emitDeclarationOnly --outDir dist
 
       - name: Type check
         run: bun check-types
@@ -34,7 +34,7 @@ jobs:
 
       - name: Validate deployment config
         working-directory: ./apps/server
-        run: npx wrangler deploy --dry-run
+        run: bunx wrangler deploy --dry-run
 
       - name: Validation Complete
         run: |
