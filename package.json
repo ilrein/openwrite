@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "setup": "node setup-openwrite.js",
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
