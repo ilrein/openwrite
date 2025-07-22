@@ -36,13 +36,27 @@ jobs:
       - name: Build web app
         run: bun run build --filter=@openwrite/web
 
-      - name: Deploy Unified App (Cloudflare Workers + Static Assets)
+      - name: Deploy to Production (main branch)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "./apps/server"
           command: deploy
+          secrets: |
+            BETTER_AUTH_SECRET
+        env:
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+
+      - name: Deploy PR Preview
+        if: github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "./apps/server"
+          command: deploy --name openwrite-pr-${{ github.event.number }} --compatibility-date $(date +%Y-%m-%d)
           secrets: |
             BETTER_AUTH_SECRET
         env:
@@ -57,8 +71,14 @@ jobs:
           workingDirectory: "./apps/server"
           command: d1 migrations apply openwrite-dev --remote
 
-      - name: Print Deployment URLs
+      - name: Print Production Deployment URL
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          echo "🚀 Unified app deployed to: https://openwrite.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
+          echo "🚀 Production deployed to: https://openwrite.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
           echo "📱 Includes both API and web app in a single Worker"
+
+      - name: Print PR Preview URL
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 PR Preview deployed to: https://openwrite-pr-${{ github.event.number }}.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
+          echo "📝 This is a preview environment for PR #${{ github.event.number }}"
