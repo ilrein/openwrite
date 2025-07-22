@@ -1,87 +1,85 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress"
 
 export default defineConfig({
-  title: 'OpenWrite',
-  description: 'Open-source AI-powered writing platform',
+  title: "OpenWrite",
+  description: "Open-source AI-powered writing platform",
   ignoreDeadLinks: true,
-  
+
   themeConfig: {
     nav: [
-      { text: 'Guide', link: '/guide/' },
-      { text: 'API Reference', link: '/api/' },
-      { text: 'Contributing', link: '/contributing/' },
-      { text: 'GitHub', link: 'https://github.com/ilrein/openwrite' }
+      { text: "Guide", link: "/guide/" },
+      { text: "API Reference", link: "/api/" },
+      { text: "Contributing", link: "/contributing/" },
+      { text: "GitHub", link: "https://github.com/ilrein/openwrite" },
     ],
 
     sidebar: {
-      '/guide/': [
+      "/guide/": [
         {
-          text: 'Introduction',
+          text: "Introduction",
           items: [
-            { text: 'What is OpenWrite.ai?', link: '/guide/' },
-            { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Features Overview', link: '/guide/features' }
-          ]
+            { text: "What is OpenWrite.ai?", link: "/guide/" },
+            { text: "Getting Started", link: "/guide/getting-started" },
+            { text: "Features Overview", link: "/guide/features" },
+          ],
         },
         {
-          text: 'User Guide',
+          text: "User Guide",
           items: [
-            { text: 'Writing Interface', link: '/guide/writing' },
-            { text: 'AI Assistant', link: '/guide/ai-assistant' },
-            { text: 'Project Management', link: '/guide/projects' },
-            { text: 'Collaboration', link: '/guide/collaboration' },
-            { text: 'Import & Export', link: '/guide/import-export' }
-          ]
+            { text: "Writing Interface", link: "/guide/writing" },
+            { text: "AI Assistant", link: "/guide/ai-assistant" },
+            { text: "Project Management", link: "/guide/projects" },
+            { text: "Collaboration", link: "/guide/collaboration" },
+            { text: "Import & Export", link: "/guide/import-export" },
+          ],
         },
         {
-          text: 'Advanced Features',
+          text: "Advanced Features",
           items: [
-            { text: 'Story Canvas', link: '/guide/story-canvas' },
-            { text: 'Character Management', link: '/guide/characters' },
-            { text: 'Codex System', link: '/guide/codex' },
-            { text: 'Analytics', link: '/guide/analytics' }
-          ]
-        }
+            { text: "Story Canvas", link: "/guide/story-canvas" },
+            { text: "Character Management", link: "/guide/characters" },
+            { text: "Codex System", link: "/guide/codex" },
+            { text: "Analytics", link: "/guide/analytics" },
+          ],
+        },
       ],
-      
-      '/api/': [
+
+      "/api/": [
         {
-          text: 'API Reference',
+          text: "API Reference",
           items: [
-            { text: 'Overview', link: '/api/' },
-            { text: 'Authentication', link: '/api/auth' },
-            { text: 'Projects', link: '/api/projects' },
-            { text: 'AI Integration', link: '/api/ai' },
-            { text: 'WebSocket Events', link: '/api/websocket' }
-          ]
-        }
+            { text: "Overview", link: "/api/" },
+            { text: "Authentication", link: "/api/auth" },
+            { text: "Projects", link: "/api/projects" },
+            { text: "AI Integration", link: "/api/ai" },
+            { text: "WebSocket Events", link: "/api/websocket" },
+          ],
+        },
       ],
-      
-      '/contributing/': [
+
+      "/contributing/": [
         {
-          text: 'Contributing',
+          text: "Contributing",
           items: [
-            { text: 'Overview', link: '/contributing/' },
-            { text: 'Development Setup', link: '/contributing/setup' },
-            { text: 'Architecture', link: '/contributing/architecture' },
-            { text: 'Database Schema', link: '/contributing/database' },
-            { text: 'Plugin Development', link: '/contributing/plugins' }
-          ]
-        }
-      ]
+            { text: "Overview", link: "/contributing/" },
+            { text: "Development Setup", link: "/contributing/setup" },
+            { text: "Architecture", link: "/contributing/architecture" },
+            { text: "Database Schema", link: "/contributing/database" },
+            { text: "Plugin Development", link: "/contributing/plugins" },
+          ],
+        },
+      ],
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/ilrein/openwrite' }
-    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/ilrein/openwrite" }],
 
     footer: {
-      message: 'Released under the AGPLv3 License.',
-      copyright: 'Copyright © 2025 OpenWrite Contributors'
+      message: "Released under the AGPLv3 License.",
+      copyright: "Copyright © 2025 OpenWrite Contributors",
     },
 
     search: {
-      provider: 'local'
-    }
-  }
+      provider: "local",
+    },
+  },
 })

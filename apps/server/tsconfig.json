@@ -9,12 +9,9 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"]
-          },
+    },
     "outDir": "./dist",
-    "types": [
-      "./worker-configuration",
-      "node"
-    ],
+    "types": ["./worker-configuration", "node"],
     "composite": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"

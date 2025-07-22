@@ -15,13 +15,15 @@
       "@/*": ["./src/*"]
     }
   },
-  "references": [{
-    "path": "../server"
-  }],
+  "references": [
+    {
+      "path": "../server"
+    }
+  ],
   "exclude": [
     "wrangler.jsonc",
     "*.config.js",
-    "*.config.ts", 
+    "*.config.ts",
     "dist",
     "node_modules"
   ]
