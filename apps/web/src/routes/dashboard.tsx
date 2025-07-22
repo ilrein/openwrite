@@ -1,37 +1,83 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect } from "react"
-import { authClient } from "@/lib/auth-client"
-import { orpc } from "@/utils/orpc"
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 })
 
-function RouteComponent() {
-  const { data: session, isPending } = authClient.useSession()
+async function fetchSession() {
+  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    import.meta.env.VITE_SERVER_URL : 
+    window.location.origin
+  
+  const response = await fetch(`${baseUrl}/api/session`, {
+    credentials: 'include'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch session')
+  }
+  
+  return response.json()
+}
 
+async function fetchPrivateData() {
+  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    import.meta.env.VITE_SERVER_URL : 
+    window.location.origin
+  
+  const response = await fetch(`${baseUrl}/api/private-data`, {
+    credentials: 'include'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch private data')
+  }
+  
+  return response.json()
+}
+
+function RouteComponent() {
   const navigate = Route.useNavigate()
 
-  const privateData = useQuery(orpc.privateData.queryOptions())
+  const sessionQuery = useQuery({
+    queryKey: ['session'],
+    queryFn: fetchSession,
+    retry: false
+  })
+
+  const privateDataQuery = useQuery({
+    queryKey: ['private-data'],
+    queryFn: fetchPrivateData,
+    enabled: sessionQuery.data?.authenticated === true,
+    retry: false
+  })
 
   useEffect(() => {
-    if (!(session || isPending)) {
+    if (sessionQuery.data && !sessionQuery.data.authenticated) {
       navigate({
         to: "/login",
       })
     }
-  }, [session, isPending, navigate])
+  }, [sessionQuery.data, navigate])
 
-  if (isPending) {
+  if (sessionQuery.isLoading) {
     return <div>Loading...</div>
+  }
+
+  if (!sessionQuery.data?.authenticated) {
+    return <div>Redirecting to login...</div>
   }
 
   return (
     <div>
       <h1>Dashboard</h1>
-      <p>Welcome {session?.user.name}</p>
-      <p>privateData: {privateData.data?.message}</p>
+      <p>Welcome {sessionQuery.data.session?.user?.name || 'User'}</p>
+      <p>privateData: {privateDataQuery.data?.message || 'Loading...'}</p>
+      {privateDataQuery.error && (
+        <p>Error loading private data: {privateDataQuery.error.message}</p>
+      )}
     </div>
   )
 }

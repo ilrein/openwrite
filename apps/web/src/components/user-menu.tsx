@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,19 +8,64 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { authClient } from "@/lib/auth-client"
 import { Button } from "./ui/button"
 import { Skeleton } from "./ui/skeleton"
 
+async function fetchSession() {
+  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    import.meta.env.VITE_SERVER_URL : 
+    window.location.origin
+  
+  const response = await fetch(`${baseUrl}/api/session`, {
+    credentials: 'include'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch session')
+  }
+  
+  return response.json()
+}
+
+async function signOut() {
+  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    import.meta.env.VITE_SERVER_URL : 
+    window.location.origin
+  
+  const response = await fetch(`${baseUrl}/api/auth/sign-out`, {
+    method: 'POST',
+    credentials: 'include'
+  })
+  
+  return response.ok
+}
+
 export default function UserMenu() {
   const navigate = useNavigate()
-  const { data: session, isPending } = authClient.useSession()
+  const queryClient = useQueryClient()
+  
+  const sessionQuery = useQuery({
+    queryKey: ['session'],
+    queryFn: fetchSession,
+    retry: false
+  })
 
-  if (isPending) {
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      // Invalidate session query to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['session'] })
+      navigate({ to: "/" })
+    } catch (error) {
+      console.error('Sign out error:', error)
+    }
+  }
+
+  if (sessionQuery.isLoading) {
     return <Skeleton className="h-9 w-24" />
   }
 
-  if (!session) {
+  if (!sessionQuery.data?.authenticated) {
     return (
       <Button asChild variant="outline">
         <Link to="/login">Sign In</Link>
@@ -27,10 +73,12 @@ export default function UserMenu() {
     )
   }
 
+  const session = sessionQuery.data.session
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{session.user.name}</Button>
+        <Button variant="outline">{session.user.name || 'User'}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -39,17 +87,7 @@ export default function UserMenu() {
         <DropdownMenuItem asChild>
           <Button
             className="w-full"
-            onClick={() => {
-              authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    navigate({
-                      to: "/",
-                    })
-                  },
-                },
-              })
-            }}
+            onClick={handleSignOut}
             variant="destructive"
           >
             Sign Out
