@@ -38,10 +38,19 @@ const dbOutput = execSync("npx wrangler d1 create openwrite-app", {
 // Extract database ID from output
 const dbMatch = dbOutput.match(/"database_id":\s*"([^"]+)"/)
 if (!dbMatch) {
+  console.error("Failed to extract database ID from Wrangler output:")
+  console.error(dbOutput)
+  console.error("Please check the Wrangler command output format")
   process.exit(1)
 }
 
 const databaseId = dbMatch[1]
+
+// Validate the extracted database ID
+if (!databaseId || databaseId.length < 10) {
+  console.error(`Invalid database ID extracted: "${databaseId}"`)
+  process.exit(1)
+}
 
 // Update wrangler.jsonc
 const wranglerPath = "./apps/server/wrangler.jsonc"
