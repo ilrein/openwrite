@@ -1,0 +1,10 @@
+# Global code ownership for writtencraft.ai
+# This ensures @ilrein is automatically requested as a reviewer for all PRs
+
+* @ilrein
+
+# Future: You can add more specific ownership rules here if needed
+# Example:
+# /apps/server/ @ilrein
+# /apps/web/ @ilrein
+# /docs/ @ilrein @other-maintainer 
