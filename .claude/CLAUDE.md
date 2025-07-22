@@ -245,7 +245,7 @@ Ultracite enforces strict type safety, accessibility standards, and consistent c
 - Don't compare against -0.
 - Don't use labeled statements that aren't loops.
 - Don't use void type outside of generic or return types.
-- Don't use console.
+- Don't use console, except for console.error() and console.warn() in error handling contexts.
 - Don't use control characters and escape sequences that match control characters in regular expression literals.
 - Don't use debugger.
 - Don't assign directly to document.cookie.
