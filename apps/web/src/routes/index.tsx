@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -23,9 +24,7 @@ const TITLE_TEXT = `
 
 async function checkApiHealth() {
   const baseUrl = import.meta.env.VITE_SERVER_URL || window.location.origin
-  const response = await fetch(`${baseUrl}/api/auth/session`, {
-    credentials: 'include'
-  })
+  const response = await fetch(`${baseUrl}/api/health`)
   return response.ok
 }
 

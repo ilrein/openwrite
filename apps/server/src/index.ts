@@ -24,8 +24,12 @@ app.use(
   })
 )
 
-app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw))
+// Simple health check endpoint
+app.get("/api/health", (c) => c.json({ status: "ok" }))
 
+app.all("/api/auth/*", (c) => auth.handler(c.req.raw))
+
+// Handle RPC routes
 const handler = new RPCHandler(appRouter)
 app.use("/rpc/*", async (c, next) => {
   const context = await createContext({ context: c })
@@ -40,11 +44,11 @@ app.use("/rpc/*", async (c, next) => {
   await next()
 })
 
-// Serve static assets (SPA) for non-API routes
+// Serve static assets (SPA) - this must be last
 app.get("*", async (c) => {
   const url = new URL(c.req.url)
   
-  // Let API routes pass through to return 404 if not handled above
+  // Skip API routes - they should be handled by earlier route handlers
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/rpc/")) {
     return c.notFound()
   }
