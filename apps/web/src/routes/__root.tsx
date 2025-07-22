@@ -51,7 +51,7 @@ function RootComponent() {
   })
 
   const [client] = useState<RouterClient<typeof appRouter>>(() => createORPCClient(link))
-  const [orpcUtils] = useState(() => createTanstackQueryUtils(client))
+  const [_orpcUtils] = useState(() => createTanstackQueryUtils(client))
 
   return (
     <>

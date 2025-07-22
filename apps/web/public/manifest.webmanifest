@@ -1,0 +1,16 @@
+{
+  "name": "OpenWrite",
+  "short_name": "OpenWrite",
+  "description": "AI-powered writing platform",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}
