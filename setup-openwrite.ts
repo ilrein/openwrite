@@ -72,12 +72,22 @@ devVarsContent = devVarsContent
   )
 
 writeFileSync(devVarsPath, devVarsContent)
-execSync("bun run db:generate", {
-  stdio: "inherit",
-  cwd: "./apps/server",
-})
+try {
+  console.log("Generating database schema...")
+  execSync("bun run db:generate", {
+    stdio: "inherit",
+    cwd: "./apps/server",
+  })
 
-execSync("npx wrangler d1 migrations apply openwrite-app --local", {
-  stdio: "inherit",
-  cwd: "./apps/server",
-})
+  console.log("Applying local migrations...")
+  execSync("npx wrangler d1 migrations apply openwrite-app --local", {
+    stdio: "inherit",
+    cwd: "./apps/server",
+  })
+
+  console.log("✅ OpenWrite setup completed successfully!")
+} catch (error) {
+  console.error("❌ Setup failed during database operations:")
+  console.error(error.message)
+  process.exit(1)
+}
