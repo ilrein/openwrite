@@ -56,7 +56,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "./apps/server"
-          command: deploy --name openwrite-pr-${{ github.event.number }} --compatibility-date $(date +%Y-%m-%d)
+          command: deploy --name openwrite-pr-${{ github.event.number }}
           secrets: |
             BETTER_AUTH_SECRET
         env:
