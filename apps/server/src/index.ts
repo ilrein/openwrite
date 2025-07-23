@@ -2,6 +2,10 @@ import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
 import { getAuth } from "./lib/auth"
+import { openApiApp } from "./lib/openapi"
+// Import route definitions to register them
+import "./routes/health"
+import "./routes/user"
 
 interface Env {
   ASSETS: Fetcher
@@ -23,17 +27,20 @@ app.use(
   })
 )
 
-// API routes
-app.get("/api/health", (c) => c.json({ status: "ok" }))
+// Mount OpenAPI routes
+app.route("/api", openApiApp)
+
+// Legacy API routes (keeping existing functionality)
+app.get("/api/health-legacy", (c) => c.json({ status: "ok" }))
 
 app.get("/api/auth/*", async (c) => {
   const auth = getAuth(c.env)
-  return auth.handler(c.req.raw)
+  return await auth.handler(c.req.raw)
 })
 
 app.post("/api/auth/*", async (c) => {
   const auth = getAuth(c.env)
-  return auth.handler(c.req.raw)
+  return await auth.handler(c.req.raw)
 })
 
 app.get("/api/session", async (c) => {
