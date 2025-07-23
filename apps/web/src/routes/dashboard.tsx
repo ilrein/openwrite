@@ -35,24 +35,6 @@ function DashboardLayout() {
               <BookOpen className="mr-3 h-5 w-5" />
               Novels
             </Link>
-
-            <Link
-              activeProps={{ className: "text-blue-600" }}
-              className="mt-2 flex items-center rounded-lg px-4 py-2 [&.active]:text-blue-600"
-              to="/dashboard/organization"
-            >
-              <Users className="mr-3 h-5 w-5" />
-              Organization
-            </Link>
-
-            <Link
-              activeProps={{ className: "text-blue-600" }}
-              className="mt-2 flex items-center rounded-lg px-4 py-2 [&.active]:text-blue-600"
-              to="/dashboard/settings"
-            >
-              <Settings className="mr-3 h-5 w-5" />
-              Settings
-            </Link>
           </div>
         </nav>
       </div>

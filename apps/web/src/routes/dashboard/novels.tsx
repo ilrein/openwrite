@@ -119,12 +119,9 @@ function NovelsPage() {
     return (
       <div className="flex-1 p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="animate-pulse">
-            <div className="mb-4 h-8 w-64 rounded bg-gray-300" />
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }, (_, i) => (
-                <div className="h-48 rounded-lg bg-gray-200" key={`skeleton-${i}`} />
-              ))}
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="text-lg">Loading...</div>
             </div>
           </div>
         </div>
