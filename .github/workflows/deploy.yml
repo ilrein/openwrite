@@ -88,7 +88,7 @@ jobs:
           workingDirectory: "./apps/server"
           command: whoami
 
-      - name: Debug - Check wrangler config
+      - name: Debug - Check wrangler version and config
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -96,7 +96,7 @@ jobs:
           workingDirectory: "./apps/server"
           command: --version
 
-      - name: Check Migration Status (with verbose logging)
+      - name: Check Migration Status
         continue-on-error: true
         uses: cloudflare/wrangler-action@v3
         with:
@@ -105,32 +105,14 @@ jobs:
           workingDirectory: "./apps/server"
           command: d1 migrations list DB --remote
 
-      - name: Try migrations with database name instead of binding
+      - name: Run Database Migrations
         continue-on-error: true
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "./apps/server"
-          command: d1 migrations list openwrite-dev --remote
-
-      - name: Try migrations with database ID
-        continue-on-error: true
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: "./apps/server"
-          command: d1 migrations list 71198766-b4ea-4e7e-ab8c-ae76037060ff --remote
-
-      - name: Run Database Migrations (if any of the above worked)
-        continue-on-error: true
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: "./apps/server"
-          command: d1 migrations apply DB --remote --yes
+          command: d1 migrations apply DB --remote
 
       - name: Deploy Documentation
         continue-on-error: true
