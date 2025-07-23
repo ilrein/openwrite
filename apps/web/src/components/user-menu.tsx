@@ -1,5 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
+import { Monitor, Moon, Sun } from "lucide-react"
+import { useTheme } from "@/components/theme-provider"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +47,7 @@ async function signOut() {
 export default function UserMenu() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { setTheme, theme } = useTheme()
 
   const sessionQuery = useQuery({
     queryKey: ["session"],
@@ -85,10 +88,31 @@ export default function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline">{session.user.name || "User"}</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card">
+      <DropdownMenuContent className="w-56 bg-card">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+        <DropdownMenuItem disabled>{session.user.email}</DropdownMenuItem>
+        <DropdownMenuSeparator />
+
+        {/* Theme Selection */}
+        <DropdownMenuLabel>Theme</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          <Sun className="mr-2 h-4 w-4" />
+          Light
+          {theme === "light" && <span className="ml-auto">✓</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          <Moon className="mr-2 h-4 w-4" />
+          Dark
+          {theme === "dark" && <span className="ml-auto">✓</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          <Monitor className="mr-2 h-4 w-4" />
+          System
+          {theme === "system" && <span className="ml-auto">✓</span>}
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Button className="w-full" onClick={handleSignOut} variant="destructive">
             Sign Out

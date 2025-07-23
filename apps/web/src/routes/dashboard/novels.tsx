@@ -241,11 +241,7 @@ function NovelsPage() {
         {novels && novels.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {novels.map((novel: Novel) => (
-              <Link
-                key={novel.id}
-                params={{ novelId: novel.id }}
-                to="/dashboard/novel/$novelId/write"
-              >
+              <Link key={novel.id} params={{ novelId: novel.id }} to="/write/$novelId/write">
                 <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                   <CardHeader>
                     <div className="flex items-start justify-between">
