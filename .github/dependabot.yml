@@ -1,0 +1,41 @@
+version: 2
+updates:
+  # Enable version updates for npm (covers bun as well)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "ilia-reingold"
+    assignees:
+      - "ilia-reingold"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier*"
+          - "@typescript-eslint/*"
+          - "typescript"
+          - "vitest"
+          - "jest"
+      production-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "*"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "ilia-reingold"
+    assignees:
+      - "ilia-reingold"
+    commit-message:
+      prefix: "ci"

@@ -10,7 +10,6 @@ interface Env {
   BETTER_AUTH_URL: string
 }
 
-
 const app = new Hono<{ Bindings: Env }>()
 
 app.use(logger())
@@ -86,6 +85,24 @@ app.get("/api/private-data", async (c) => {
   }
 })
 
-// Export the Hono app - with run_worker_first: true, 
+// Export the Hono app - with run_worker_first: true,
 // unhandled routes will fall through to static assets
+app.get("*", async (c) => {
+  const url = new URL(c.req.url)
+
+  // If this is an API route that wasn't handled above, return 404
+  if (url.pathname.startsWith("/api/")) {
+    return c.notFound()
+  }
+
+  // For SPA: serve static files or fallback to index.html for client-side routing
+  try {
+    const assetResponse = await c.env.ASSETS.fetch(c.req.raw)
+    return assetResponse
+  } catch (error) {
+    console.error("Assets fetch error:", error)
+    return c.notFound()
+  }
+})
+
 export default app
