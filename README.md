@@ -1,6 +1,6 @@
 # OpenWrite
 
-**Open-source AI-powered writing platform for novelists, screenwriters, and creative writers.**
+**Open-source AI-powered writing platform for novelists, screenwriters, and creative writers. ✨📝**
 
 OpenWrite combines the best features of Sudowrite and NovelCrafter into a single, powerful, and fully open-source platform. Built with a modern TypeScript stack including React, TanStack Router, Hono, ORPC, and more.
 

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun quality"
+            "command": "echo 'Running quality check...' && bun quality && echo 'Quality check completed!'"
           }
         ]
       }
