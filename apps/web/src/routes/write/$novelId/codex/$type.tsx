@@ -4,6 +4,18 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+// Helper functions for singular forms
+const typeToSingular: Record<string, string> = {
+  characters: "character",
+  locations: "location",
+  lore: "lore item",
+  plot: "plot thread",
+}
+
+const getSingularForm = (type: string): string => {
+  return typeToSingular[type] || type
+}
+
 export const Route = createFileRoute("/write/$novelId/codex/$type")({
   component: CodexTypeInterface,
 })
@@ -159,8 +171,7 @@ function CodexTypeInterface() {
             <IconComponent className="mx-auto mb-4 h-16 w-16 opacity-50" />
             <h3 className="mb-2 font-medium text-xl">No {config.title.toLowerCase()} yet</h3>
             <p className="mb-6 text-muted-foreground">
-              Create your first {getSingularForm(type)} to start building
-              your story world.
+              Create your first {getSingularForm(type)} to start building your story world.
             </p>
             <Button>
               <Plus className="mr-2 h-4 w-4" />

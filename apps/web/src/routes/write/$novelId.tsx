@@ -89,10 +89,10 @@ function WriteLayout() {
     )
   }
 
-  const targetWordCount = novel.targetWordCount || 0;
+  const targetWordCount = novel.targetWordCount || 0
   const progressPercentage = targetWordCount
     ? Math.min((novel.currentWordCount / targetWordCount) * 100, 100)
-    : 0;
+    : 0
 
   return (
     <SidebarProvider>
