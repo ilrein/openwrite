@@ -2,8 +2,45 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import TiptapEditor from "@/components/tiptap-editor"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { 
+  FileText, 
+  FolderOpen, 
+  Plus, 
+  Settings, 
+  User,
+  BarChart3,
+  PenTool,
+  Save,
+  Download,
+  Share,
+  Calendar,
+  LogOut,
+  ChevronUp
+} from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
@@ -25,24 +62,10 @@ async function fetchSession() {
   return response.json()
 }
 
-async function fetchPrivateData() {
-  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
-    import.meta.env.VITE_SERVER_URL : 
-    window.location.origin
-  
-  const response = await fetch(`${baseUrl}/api/private-data`, {
-    credentials: 'include'
-  })
-  
-  if (!response.ok) {
-    throw new Error('Failed to fetch private data')
-  }
-  
-  return response.json()
-}
 
 function RouteComponent() {
   const navigate = Route.useNavigate()
+  const queryClient = useQueryClient()
   const [content, setContent] = useState('<p>Welcome to your writing space! Start typing...</p>')
 
   const sessionQuery = useQuery({
@@ -53,12 +76,6 @@ function RouteComponent() {
     gcTime: 0 // Don't cache
   })
 
-  const privateDataQuery = useQuery({
-    queryKey: ['private-data'],
-    queryFn: fetchPrivateData,
-    enabled: sessionQuery.data?.authenticated === true,
-    retry: false
-  })
 
   useEffect(() => {
     // Only redirect if query is not loading and definitely not authenticated
@@ -81,6 +98,25 @@ function RouteComponent() {
     // You could show a toast notification here
   }
 
+  const handleSignOut = async () => {
+    try {
+      const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+        import.meta.env.VITE_SERVER_URL : 
+        window.location.origin
+      
+      await fetch(`${baseUrl}/api/auth/sign-out`, {
+        method: 'POST',
+        credentials: 'include'
+      })
+      
+      // Invalidate session query to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['session'] })
+      navigate({ to: "/" })
+    } catch (error) {
+      console.error('Sign out error:', error)
+    }
+  }
+
   if (sessionQuery.isLoading) {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -97,92 +133,120 @@ function RouteComponent() {
     )
   }
 
+  const menuItems = [
+    {
+      title: "Documents",
+      items: [
+        { title: "New Document", icon: Plus, action: () => setContent('<p>New document...</p>') },
+        { title: "Recent Files", icon: FileText, action: () => console.log('Recent files') },
+        { title: "All Documents", icon: FolderOpen, action: () => console.log('All documents') },
+      ]
+    },
+    {
+      title: "Actions",
+      items: [
+        { title: "Save", icon: Save, action: handleSave },
+        { title: "Export", icon: Download, action: () => console.log('Export') },
+        { title: "Share", icon: Share, action: () => console.log('Share') },
+      ]
+    },
+    {
+      title: "Tools",
+      items: [
+        { title: "Writing Stats", icon: BarChart3, action: () => console.log('Stats') },
+        { title: "Writing Tools", icon: PenTool, action: () => console.log('Tools') },
+        { title: "Calendar", icon: Calendar, action: () => console.log('Calendar') },
+      ]
+    }
+  ]
+
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      {/* Welcome Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {sessionQuery.data.session?.user?.name || 'Writer'}!
-        </h1>
-        <p className="text-muted-foreground">
-          Ready to create something amazing? Your writing space awaits.
-        </p>
-      </div>
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        <Sidebar>
+          <SidebarHeader>
+            <div className="flex items-center gap-2 px-4 py-2">
+              <PenTool className="h-6 w-6" />
+              <span className="font-bold">OpenWrite</span>
+            </div>
+          </SidebarHeader>
+          
+          <SidebarContent>
+            {menuItems.map((group) => (
+              <SidebarGroup key={group.title}>
+                <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton onClick={item.action} className="w-full">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
+          </SidebarContent>
+          
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton className="w-full">
+                      <User className="h-4 w-4" />
+                      <span>{sessionQuery.data?.session?.user?.name || 'User'}</span>
+                      <ChevronUp className="ml-auto h-4 w-4" />
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Settings className="h-4 w-4 mr-2" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
 
-      {/* Main Writing Area */}
-      <div className="grid gap-6 lg:grid-cols-4">
-        {/* Editor - Main Column */}
-        <div className="lg:col-span-3">
-          <TiptapEditor
-            content={content}
-            onUpdate={handleContentUpdate}
-            placeholder="What's on your mind today?"
-          />
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Document Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Document</CardTitle>
-              <CardDescription>Manage your writing</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button onClick={handleSave} className="w-full">
-                Save Draft
-              </Button>
-              <Button variant="outline" className="w-full">
-                Export
-              </Button>
-              <Button variant="outline" className="w-full">
-                Share
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Writing Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Writing Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Words:</span>
-                  <span className="font-medium">
-                    {content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Characters:</span>
-                  <span className="font-medium">
-                    {content.replace(/<[^>]*>/g, '').length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Status:</span>
-                  <span className="font-medium text-green-600">Auto-saving</span>
-                </div>
+        <SidebarInset className="flex flex-1 flex-col">
+          {/* Header */}
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger />
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold">
+                Welcome back, {sessionQuery.data?.session?.user?.name || 'Writer'}!
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                {content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length} words
               </div>
-            </CardContent>
-          </Card>
+              <div className="text-sm text-green-600">Auto-saving</div>
+            </div>
+          </header>
 
-          {/* API Status */}
-          {privateDataQuery.data && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Connection</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  {privateDataQuery.data.message}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto p-6">
+            <TiptapEditor
+              content={content}
+              onUpdate={handleContentUpdate}
+              placeholder="What's on your mind today?"
+            />
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }

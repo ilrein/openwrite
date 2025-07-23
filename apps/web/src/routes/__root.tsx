@@ -42,6 +42,12 @@ function RootComponent() {
   const isFetching = useRouterState({
     select: (s) => s.isLoading,
   })
+  
+  const location = useRouterState({
+    select: (s) => s.location.pathname,
+  })
+  
+  const isDashboard = location === '/dashboard'
 
   return (
     <>
@@ -52,10 +58,18 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Header />
-          {isFetching ? <Loader /> : <Outlet />}
-        </div>
+        {isDashboard ? (
+          // Dashboard uses its own layout with sidebar
+          <div className="h-svh">
+            {isFetching ? <Loader /> : <Outlet />}
+          </div>
+        ) : (
+          // Other pages use header layout
+          <div className="grid h-svh grid-rows-[auto_1fr]">
+            <Header />
+            {isFetching ? <Loader /> : <Outlet />}
+          </div>
+        )}
         <Toaster richColors />
       </ThemeProvider>
       <TanStackRouterDevtools position="bottom-left" />
