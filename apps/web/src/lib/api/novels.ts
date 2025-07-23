@@ -47,6 +47,9 @@ export const novelApi: ApiClient<Novel, CreateNovelData, UpdateNovelData> = {
 
   async get(id: string): Promise<Novel> {
     const response = await apiCall(`/api/novels/${id}`)
+    if (!response?.novel) {
+      throw new Error(`Novel with id ${id} not found in response`)
+    }
     return response.novel
   },
 
