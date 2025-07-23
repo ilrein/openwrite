@@ -1,7 +1,7 @@
 import { Hono, type Context } from "hono"
 import { getAuth } from "../lib/auth"
 import { db } from "../db"
-import { novel, organization, member, user } from "../db/schema"
+import { novel, organization, member } from "../db/schema"
 import { eq, and, desc } from "drizzle-orm"
 
 interface Env {
@@ -11,9 +11,20 @@ interface Env {
 }
 
 interface Variables {
-  user: any
-  session: any
-  activeOrganization: any
+  user: {
+    id: string
+    email: string
+    name: string
+  }
+  session: {
+    id: string
+    userId: string
+  }
+  activeOrganization: {
+    id: string
+    name: string
+    slug: string
+  } | null
 }
 
 const router = new Hono<{ Bindings: Env; Variables: Variables }>()
@@ -48,15 +59,15 @@ const requireAuth = async (c: Context<{ Bindings: Env; Variables: Variables }>, 
       .limit(1)
       .get()
 
-    if (!userMembership) {
+    if (userMembership) {
+      c.set("activeOrganization", userMembership.organization)
+    } else {
       // For certain endpoints, we allow requests without an organization
       // The dashboard can handle the case where user needs to create an organization
       c.set("activeOrganization", null)
-    } else {
-      c.set("activeOrganization", userMembership.organization)
     }
     await next()
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: "Authentication failed" }, 401)
   }
 }
@@ -204,7 +215,7 @@ router.post("/novels", requireAuth, async (c: Context<{ Bindings: Env; Variables
       title: title.trim(),
       description: description?.trim() || null,
       genre: genre?.trim() || null,
-      targetWordCount: targetWordCount ? parseInt(targetWordCount) : null,
+      targetWordCount: targetWordCount ? Number.parseInt(targetWordCount, 10) : null,
       currentWordCount: 0,
       status: "draft",
       visibility,
@@ -215,7 +226,7 @@ router.post("/novels", requireAuth, async (c: Context<{ Bindings: Env; Variables
     })
 
     return c.json({ success: true, id })
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: "Failed to create novel" }, 500)
   }
 })
@@ -230,7 +241,7 @@ router.put("/novels/:id", requireAuth, async (c: Context<{ Bindings: Env; Variab
     const body = await c.req.json()
     const updateData = { ...body, updatedAt: new Date() }
     
-    const result = await db
+    await db
       .update(novel)
       .set(updateData)
       .where(
@@ -242,7 +253,7 @@ router.put("/novels/:id", requireAuth, async (c: Context<{ Bindings: Env; Variab
       )
 
     return c.json({ success: true })
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: "Failed to update novel" }, 500)
   }
 })
@@ -265,7 +276,7 @@ router.delete("/novels/:id", requireAuth, async (c: Context<{ Bindings: Env; Var
       )
 
     return c.json({ success: true })
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: "Failed to delete novel" }, 500)
   }
 })

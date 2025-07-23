@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus, BookOpen, Calendar, User, Settings } from "lucide-react"
+import { Plus, BookOpen } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" 
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
 
@@ -22,7 +21,7 @@ export const Route = createFileRoute("/dashboard")({
       if (!session) {
         throw new Error("Not authenticated")
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error("Not authenticated")
     }
   }
@@ -44,7 +43,6 @@ interface Novel {
 }
 
 function DashboardComponent() {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [createForm, setCreateForm] = useState({
@@ -123,7 +121,7 @@ function DashboardComponent() {
           title: novelData.title,
           description: novelData.description || null,
           genre: novelData.genre || null,
-          targetWordCount: novelData.targetWordCount ? parseInt(novelData.targetWordCount) : null,
+          targetWordCount: novelData.targetWordCount ? Number.parseInt(novelData.targetWordCount, 10) : null,
           visibility: novelData.visibility
         }),
       })
@@ -163,9 +161,9 @@ function DashboardComponent() {
   if (isLoading) {
     return (
       <div className="container mx-auto max-w-6xl p-6">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
             <p className="text-muted-foreground">Loading your dashboard...</p>
           </div>
         </div>
@@ -177,15 +175,15 @@ function DashboardComponent() {
   if (novelsData?.needsOrganization) {
     return (
       <div className="container mx-auto max-w-4xl p-6">
-        <div className="text-center space-y-6">
+        <div className="space-y-6 text-center">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Welcome to OpenWrite!</h1>
-            <p className="text-muted-foreground text-lg">
+            <h1 className="font-bold text-3xl">Welcome to OpenWrite!</h1>
+            <p className="text-lg text-muted-foreground">
               Let's set up your personal workspace to start writing.
             </p>
           </div>
           
-          <Card className="max-w-md mx-auto">
+          <Card className="mx-auto max-w-md">
             <CardHeader>
               <CardTitle>Create Your Workspace</CardTitle>
               <CardDescription>
@@ -212,9 +210,9 @@ function DashboardComponent() {
   return (
     <div className="container mx-auto max-w-6xl p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="font-bold text-3xl">Dashboard</h1>
           <p className="text-muted-foreground">Manage your novels and track your writing progress</p>
         </div>
         
@@ -306,42 +304,42 @@ function DashboardComponent() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-8">
+      <div className="mb-8 grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Novels</CardTitle>
+            <CardTitle className="font-medium text-sm">Total Novels</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{novels.length}</div>
+            <div className="font-bold text-2xl">{novels.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Words</CardTitle>
+            <CardTitle className="font-medium text-sm">Total Words</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-bold text-2xl">
               {novels.reduce((sum: number, novel: Novel) => sum + novel.currentWordCount, 0).toLocaleString()}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="font-medium text-sm">In Progress</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-bold text-2xl">
               {novels.filter((novel: Novel) => novel.status === "in_progress").length}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="font-medium text-sm">Completed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-bold text-2xl">
               {novels.filter((novel: Novel) => novel.status === "completed").length}
             </div>
           </CardContent>
@@ -352,7 +350,7 @@ function DashboardComponent() {
       {novels.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {novels.map((novel: Novel) => (
-            <Card key={novel.id} className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card key={novel.id} className="cursor-pointer transition-shadow hover:shadow-md">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -370,7 +368,7 @@ function DashboardComponent() {
               </CardHeader>
               <CardContent>
                 {novel.description && (
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                  <p className="mb-4 line-clamp-3 text-muted-foreground text-sm">
                     {novel.description}
                   </p>
                 )}
@@ -382,9 +380,9 @@ function DashboardComponent() {
                   </div>
                   
                   {novel.targetWordCount && (
-                    <div className="w-full bg-secondary rounded-full h-2">
+                    <div className="h-2 w-full rounded-full bg-secondary">
                       <div 
-                        className="bg-primary h-2 rounded-full transition-all"
+                        className="h-2 rounded-full bg-primary transition-all"
                         style={{ 
                           width: `${Math.min(100, (novel.currentWordCount / novel.targetWordCount) * 100)}%` 
                         }}
@@ -392,7 +390,7 @@ function DashboardComponent() {
                     </div>
                   )}
                   
-                  <div className="flex justify-between text-xs text-muted-foreground">
+                  <div className="flex justify-between text-muted-foreground text-xs">
                     <span>Updated {new Date(novel.updatedAt).toLocaleDateString()}</span>
                     {novel.targetWordCount && (
                       <span>
@@ -406,11 +404,11 @@ function DashboardComponent() {
           ))}
         </div>
       ) : (
-        <Card className="text-center py-12">
+        <Card className="py-12 text-center">
           <CardContent>
-            <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No novels yet</h3>
-            <p className="text-muted-foreground mb-4">
+            <BookOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+            <h3 className="mb-2 font-semibold text-lg">No novels yet</h3>
+            <p className="mb-4 text-muted-foreground">
               Start your writing journey by creating your first novel.
             </p>
             <Button onClick={() => setIsCreateDialogOpen(true)}>

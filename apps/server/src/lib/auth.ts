@@ -59,7 +59,7 @@ export function createAuthInstance(env: AuthEnv) {
       databaseHooks: {
         user: {
           create: {
-            after: async (user) => {
+            after: async (createdUser) => {
               // Automatically create a personal organization for new users
               const orgId = crypto.randomUUID()
               const memberId = crypto.randomUUID()
@@ -68,8 +68,8 @@ export function createAuthInstance(env: AuthEnv) {
               // Create personal organization
               await db.insert(organizationTable).values({
                 id: orgId,
-                name: `${user.name}'s Workspace`,
-                slug: `${user.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+                name: `${createdUser.name}'s Workspace`,
+                slug: `${createdUser.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
                 createdAt: now,
                 updatedAt: now
               })
@@ -77,13 +77,11 @@ export function createAuthInstance(env: AuthEnv) {
               // Add user as owner
               await db.insert(member).values({
                 id: memberId,
-                userId: user.id,
+                userId: createdUser.id,
                 organizationId: orgId,
                 role: "owner",
                 createdAt: now
               })
-
-              console.log(`Auto-created personal workspace for user ${user.email}`)
             }
           }
         }
@@ -99,9 +97,9 @@ export function createAuthInstance(env: AuthEnv) {
           // Organization creation settings
           organizationCreation: {
             disabled: false,
-            afterCreate: async ({ organization, member, user }) => {
+            afterCreate: ({ organization: _createdOrg, user: _orgUser }) => {
               // Set up default resources for manually created organizations
-              console.log(`Created organization ${organization.name} for user ${user.email}`)
+              // Could add default resources, notifications, etc. here in the future
             }
           }
         })

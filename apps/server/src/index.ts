@@ -29,7 +29,9 @@ app.use(
       ]
       
       // Allow same-origin requests (no origin header) by returning the origin
-      if (!origin) return origin || "*"
+      if (!origin) {
+        return origin || "*"
+      }
       
       // Check if origin is in allowed list and return the origin if allowed
       if (allowedOrigins.includes(origin)) {
