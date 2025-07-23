@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import LoginBlock from "@/components/login-block"
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/register")({
   component: RouteComponent,
 })
 
@@ -10,10 +10,10 @@ function RouteComponent() {
 
   return (
     <LoginBlock 
-      mode="signin" 
+      mode="signup" 
       onModeChange={() => {
-        // Navigate to register page when switching to signup
-        navigate({ to: "/register" })
+        // Navigate to login page when switching to signin
+        navigate({ to: "/login" })
       }} 
     />
   )

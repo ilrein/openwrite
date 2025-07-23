@@ -88,7 +88,7 @@ function HomeComponent() {
         </p>
         <div className="flex gap-4 justify-center mb-6">
           <Button asChild size="lg">
-            <Link to="/dashboard">Get Started</Link>
+            <Link to="/register">Get Started</Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
             <Link to="/login">Sign In</Link>
