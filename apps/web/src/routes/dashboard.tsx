@@ -122,24 +122,66 @@ function RouteComponent() {
       title: "Documents",
       items: [
         { title: "New Document", icon: Plus, action: () => setContent("<p>New document...</p>") },
-        { title: "Recent Files", icon: FileText, action: () => { /* TODO: Implement recent files */ } },
-        { title: "All Documents", icon: FolderOpen, action: () => { /* TODO: Implement all documents */ } },
+        {
+          title: "Recent Files",
+          icon: FileText,
+          action: () => {
+            /* TODO: Implement recent files */
+          },
+        },
+        {
+          title: "All Documents",
+          icon: FolderOpen,
+          action: () => {
+            /* TODO: Implement all documents */
+          },
+        },
       ],
     },
     {
       title: "Actions",
       items: [
         { title: "Save", icon: Save, action: handleSave },
-        { title: "Export", icon: Download, action: () => { /* TODO: Implement export */ } },
-        { title: "Share", icon: Share, action: () => { /* TODO: Implement share */ } },
+        {
+          title: "Export",
+          icon: Download,
+          action: () => {
+            /* TODO: Implement export */
+          },
+        },
+        {
+          title: "Share",
+          icon: Share,
+          action: () => {
+            /* TODO: Implement share */
+          },
+        },
       ],
     },
     {
       title: "Tools",
       items: [
-        { title: "Writing Stats", icon: BarChart3, action: () => { /* TODO: Implement writing stats */ } },
-        { title: "Writing Tools", icon: PenTool, action: () => { /* TODO: Implement writing tools */ } },
-        { title: "Calendar", icon: Calendar, action: () => { /* TODO: Implement calendar */ } },
+        {
+          title: "Writing Stats",
+          icon: BarChart3,
+          action: () => {
+            /* TODO: Implement writing stats */
+          },
+        },
+        {
+          title: "Writing Tools",
+          icon: PenTool,
+          action: () => {
+            /* TODO: Implement writing tools */
+          },
+        },
+        {
+          title: "Calendar",
+          icon: Calendar,
+          action: () => {
+            /* TODO: Implement calendar */
+          },
+        },
       ],
     },
   ]

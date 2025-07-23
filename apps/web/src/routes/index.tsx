@@ -240,9 +240,10 @@ function HomeComponent() {
               className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
             />
             <span className="text-sm">
-              API:{" "}
-              {(() => {
-                if (healthCheck.isLoading) { return "Checking..." }
+              API: {(() => {
+                if (healthCheck.isLoading) {
+                  return "Checking..."
+                }
                 return healthCheck.data ? "Connected" : "Disconnected"
               })()}
             </span>

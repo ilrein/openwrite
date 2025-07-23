@@ -38,11 +38,15 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         // Check if sign-in was successful - look for either user data or successful response
         const isSuccess =
           result &&
-          ((typeof result === 'object' && 'user' in result && result.user) ||
-            (typeof result === 'object' && 'data' in result && 
-             typeof result.data === 'object' && result.data && 'user' in result.data && result.data.user) ||
+          ((typeof result === "object" && "user" in result && result.user) ||
+            (typeof result === "object" &&
+              "data" in result &&
+              typeof result.data === "object" &&
+              result.data &&
+              "user" in result.data &&
+              result.data.user) ||
             // If no errors and we got a response, consider it successful
-            (result && typeof result === "object" && !('error' in result)))
+            (result && typeof result === "object" && !("error" in result)))
 
         if (isSuccess) {
           toast.success("Sign in successful")

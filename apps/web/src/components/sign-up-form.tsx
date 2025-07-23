@@ -38,7 +38,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         )
 
         // Check if sign-up was successful (user object exists)
-        if (result && typeof result === 'object' && 'user' in result && result.user) {
+        if (result && typeof result === "object" && "user" in result && result.user) {
           toast.success("Sign up successful")
 
           // Function to fetch fresh session data
