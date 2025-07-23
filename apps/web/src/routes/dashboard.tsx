@@ -123,12 +123,19 @@ function DashboardLayout() {
           <header className="flex h-16 items-center justify-between border-b px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
-              <div className="relative">
+              <div className="relative hidden sm:block">
                 <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  className="w-96 pl-10"
+                  className="w-48 pl-10 sm:w-64 lg:w-96"
                   placeholder="Search novels, characters, locations..."
                 />
+              </div>
+
+              {/* Mobile Search Button */}
+              <div className="sm:hidden">
+                <Button size="icon" variant="ghost">
+                  <Search className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 

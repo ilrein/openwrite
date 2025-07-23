@@ -132,17 +132,20 @@ function DashboardHome() {
             <CardContent>
               <div className="space-y-4">
                 {recentNovels.map((novel: Novel) => (
-                  <div className="flex items-center justify-between" key={novel.id}>
+                  <div
+                    className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
+                    key={novel.id}
+                  >
                     <div className="flex items-center space-x-4">
                       <BookOpen className="h-8 w-8 text-blue-600" />
-                      <div>
-                        <p className="font-medium">{novel.title}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{novel.title}</p>
                         <p className="text-muted-foreground text-sm">
                           {novel.currentWordCount.toLocaleString()} words
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-between space-x-2 sm:justify-end">
                       <Badge variant={novel.status === "draft" ? "secondary" : "default"}>
                         {novel.status}
                       </Badge>

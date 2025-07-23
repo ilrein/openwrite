@@ -254,7 +254,9 @@ function WriteLayout() {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>{novel.title}</BreadcrumbPage>
+                    <BreadcrumbPage className="max-w-32 truncate sm:max-w-48">
+                      {novel.title}
+                    </BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -270,7 +272,7 @@ function WriteLayout() {
                     Codex
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-96" side="right">
+                <SheetContent className="w-full sm:w-96" side="right">
                   <SheetHeader>
                     <SheetTitle>Novel Codex</SheetTitle>
                   </SheetHeader>

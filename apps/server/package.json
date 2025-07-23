@@ -8,7 +8,8 @@
     "lint": "biome check src",
     "format": "biome format --write .",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "bunx wrangler types --env-interface CloudflareBindings && wrangler dev --port=3000",
+    "dev": "wrangler dev --port=3000 --local",
+    "dev:types": "bunx wrangler types --env-interface CloudflareBindings",
     "start": "wrangler dev",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
@@ -19,6 +20,7 @@
   },
   "dependencies": {
     "@hono/zod-openapi": "^1.0.2",
+    "@libsql/client": "^0.15.10",
     "@orpc/client": "^1.5.0",
     "@orpc/server": "^1.5.0",
     "@radix-ui/react-select": "^2.2.5",
@@ -35,6 +37,6 @@
     "drizzle-kit": "^0.31.2",
     "tsdown": "^0.13.0",
     "typescript": "^5.8.2",
-    "wrangler": "^4.23.0"
+    "wrangler": "^4.25.1"
   }
 }
