@@ -36,5 +36,5 @@
     "turbo": "^2.5.5",
     "ultracite": "5.0.47"
   },
-  "packageManager": "bun@1.2.19"
+  "packageManager": "bun@1.2.24"
 }
