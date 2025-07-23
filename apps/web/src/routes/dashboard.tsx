@@ -1,12 +1,9 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
 import { Bell, BookOpen, Brain, Search, Settings, Users } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -26,6 +23,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import UserMenu from "@/components/user-menu"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/dashboard")({
@@ -135,35 +133,24 @@ function DashboardLayout() {
             </div>
 
             <div className="flex items-center gap-4">
-              <Button className="relative" size="icon" variant="ghost">
-                <Bell className="h-4 w-4" />
-                <Badge
-                  className="-right-1 -top-1 absolute h-5 w-5 rounded-full p-0 text-xs"
-                  variant="destructive"
-                >
-                  2
-                </Badge>
-              </Button>
-
+              {/* Notifications Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="relative h-8 w-8 rounded-full" variant="ghost">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage alt="User" src="/avatars/01.png" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
+                  <Button size="icon" variant="ghost">
+                    <Bell className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Billing</DropdownMenuItem>
-                  <DropdownMenuItem>Keyboard shortcuts</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    No notifications yet
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* User Menu */}
+              <UserMenu />
             </div>
           </header>
 

@@ -47,7 +47,7 @@ function RootComponent() {
     select: (s) => s.location.pathname,
   })
 
-  const isDashboard = location === "/dashboard"
+  const isDashboard = location.startsWith("/dashboard") || location.startsWith("/write")
 
   return (
     <>
@@ -59,10 +59,10 @@ function RootComponent() {
         storageKey="vite-ui-theme"
       >
         {isDashboard ? (
-          // Dashboard uses its own layout with sidebar
+          // Dashboard and write pages use their own layouts with sidebars
           <div className="h-svh">{isFetching ? <Loader /> : <Outlet />}</div>
         ) : (
-          // Other pages use header layout
+          // Landing and other pages use the consolidated header layout
           <div className="min-h-svh">
             <AppHeader />
             <main className="flex-1">{isFetching ? <Loader /> : <Outlet />}</main>

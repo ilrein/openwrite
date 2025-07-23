@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
 import {
+  Bell,
   BookOpen,
   ChevronRight,
   FileEdit,
@@ -22,6 +23,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -40,6 +48,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import UserMenu from "@/components/user-menu"
 import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/write/$novelId")({
@@ -90,27 +100,12 @@ function WriteLayout() {
         <Sidebar>
           <SidebarHeader>
             <div className="px-4 py-2">
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link to="/dashboard/novels">Novels</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>{novel.title}</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-
-              <div className="mt-2">
-                <h1 className="truncate font-bold text-lg">{novel.title}</h1>
+              <div className="space-y-2">
                 <p className="text-muted-foreground text-sm">
                   {novel.currentWordCount.toLocaleString()} words
                 </p>
                 {novel.targetWordCount && (
-                  <div className="mt-2">
+                  <div>
                     <Progress className="h-2" value={progressPercentage} />
                     <p className="mt-1 text-muted-foreground text-xs">
                       {Math.round(progressPercentage)}% of {novel.targetWordCount.toLocaleString()}{" "}
@@ -154,13 +149,24 @@ function WriteLayout() {
                   <SidebarMenuItem>
                     <Collapsible>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
-                          <ChevronRight className="h-4 w-4" />
-                          <span>Chapter 1: The Beginning</span>
-                          <Badge className="ml-auto" variant="secondary">
-                            3
-                          </Badge>
-                        </SidebarMenuButton>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <SidebarMenuButton>
+                                <ChevronRight className="h-4 w-4" />
+                                <span className="truncate">
+                                  Chapter 1: The Beginning and the Call to Adventure
+                                </span>
+                                <Badge className="ml-auto" variant="secondary">
+                                  3
+                                </Badge>
+                              </SidebarMenuButton>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Chapter 1: The Beginning and the Call to Adventure</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="ml-6 space-y-1">
@@ -180,13 +186,24 @@ function WriteLayout() {
                   <SidebarMenuItem>
                     <Collapsible>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
-                          <ChevronRight className="h-4 w-4" />
-                          <span>Chapter 2: The Journey</span>
-                          <Badge className="ml-auto" variant="secondary">
-                            2
-                          </Badge>
-                        </SidebarMenuButton>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <SidebarMenuButton>
+                                <ChevronRight className="h-4 w-4" />
+                                <span className="truncate">
+                                  Chapter 2: The Journey Through the Dark Forest
+                                </span>
+                                <Badge className="ml-auto" variant="secondary">
+                                  2
+                                </Badge>
+                              </SidebarMenuButton>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Chapter 2: The Journey Through the Dark Forest</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="ml-6 space-y-1">
@@ -221,6 +238,25 @@ function WriteLayout() {
           <header className="flex h-16 items-center justify-between border-b px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to="/dashboard">Dashboard</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to="/dashboard/novels">Novels</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{novel.title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
               <Badge variant="outline">{novel.status}</Badge>
             </div>
 
@@ -354,6 +390,25 @@ function WriteLayout() {
               <Button size="sm" variant="ghost">
                 Word Count: {novel.currentWordCount.toLocaleString()}
               </Button>
+
+              {/* Notifications Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <Bell className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    No notifications yet
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* User Menu */}
+              <UserMenu />
             </div>
           </header>
 
