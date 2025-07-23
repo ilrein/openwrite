@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "setup": "bunx setup-openwrite.js",
+    "setup": "bun run setup-openwrite.ts",
     "dev": "turbo dev db:studio --parallel",
     "build": "turbo build",
     "build:web": "turbo -F @openwrite/web build",

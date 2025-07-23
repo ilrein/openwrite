@@ -30,7 +30,7 @@ try {
 } catch (_error) {
   execSync("npx wrangler login", { stdio: "inherit" })
 }
-const dbOutput = execSync("npx wrangler d1 create openwrite-app", {
+const dbOutput = execSync("npx wrangler d1 create openwrite-dev", {
   encoding: "utf-8",
   cwd: "./apps/server",
 })
@@ -54,7 +54,7 @@ let wranglerContent = readFileSync(wranglerPath, "utf-8")
 
 // Replace placeholder values
 wranglerContent = wranglerContent
-  .replace('"database_name": "YOUR_DB_NAME"', '"database_name": "openwrite-app"')
+  .replace('"database_name": "YOUR_DB_NAME"', '"database_name": "openwrite-dev"')
   .replace('"database_id": "YOUR_DB_ID"', `"database_id": "${databaseId}"`)
 
 writeFileSync(wranglerPath, wranglerContent)
@@ -79,7 +79,7 @@ try {
     stdio: "inherit",
     cwd: "./apps/server",
   })
-  execSync("npx wrangler d1 migrations apply openwrite-app --local", {
+  execSync("npx wrangler d1 migrations apply openwrite-dev --local", {
     stdio: "inherit",
     cwd: "./apps/server",
   })
