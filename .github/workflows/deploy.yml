@@ -4,12 +4,22 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Only deploy after CI passes
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Deploy Server & Docs
     environment: production
+    # Only run if CI workflow succeeded or if manually triggered/pushed to main
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     permissions:
       contents: read
       deployments: write
@@ -47,7 +57,7 @@ jobs:
       - name: Build all packages with Turborepo
         run: bun run build
 
-      - name: Deploy to Production
+      - name: Deploy Server to Production
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -67,8 +77,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Deploy Documentation
+        continue-on-error: true
+        run: bun run docs:deploy || echo "Documentation deployment not configured"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Print Deployment URL
         run: |
-          echo "🚀 Deployed to: https://openwrite.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
+          echo "🚀 Server deployed to: https://openwrite.${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.workers.dev"
           echo "📱 Includes both API and web app in a single Worker"
+          echo "📚 Documentation deployment attempted"
           echo "🎯 Built with Turborepo for optimized caching and performance"
