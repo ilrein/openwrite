@@ -1,4 +1,3 @@
-import { env } from "cloudflare:workers"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
@@ -11,23 +10,23 @@ interface Env {
   BETTER_AUTH_URL: string
 }
 
+
 const app = new Hono<{ Bindings: Env }>()
 
 app.use(logger())
 app.use(
   "/*",
   cors({
-    origin: env.CORS_ORIGIN ?? "*",
+    origin: "*", // Will be configured properly via environment variables in production
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 )
 
-// Simple health check endpoint
+// API routes
 app.get("/api/health", (c) => c.json({ status: "ok" }))
 
-// Better Auth routes
 app.get("/api/auth/*", async (c) => {
   const auth = getAuth(c.env)
   return auth.handler(c.req.raw)
@@ -38,7 +37,6 @@ app.post("/api/auth/*", async (c) => {
   return auth.handler(c.req.raw)
 })
 
-// API endpoints
 app.get("/api/session", async (c) => {
   try {
     const auth = getAuth(c.env)
@@ -57,7 +55,6 @@ app.get("/api/session", async (c) => {
       },
     })
   } catch (error) {
-    console.error("Session check error:", error)
     return c.json(
       {
         authenticated: false,
@@ -85,22 +82,10 @@ app.get("/api/private-data", async (c) => {
       user: session.user,
     })
   } catch (error) {
-    console.error("Private data error:", error)
     return c.json({ error: "Internal server error" }, 500)
   }
 })
 
-// Serve static assets (SPA) for non-API routes
-app.get("*", async (c) => {
-  const url = new URL(c.req.url)
-
-  // If this is an API or RPC route, it should have been handled by earlier handlers
-  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/rpc/")) {
-    return c.notFound()
-  }
-
-  // For SPA: serve static files or fallback to index.html for client-side routing
-  return c.env.ASSETS.fetch(c.req.raw)
-})
-
+// Export the Hono app - with run_worker_first: true, 
+// unhandled routes will fall through to static assets
 export default app
