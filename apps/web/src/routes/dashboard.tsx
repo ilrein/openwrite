@@ -1,5 +1,31 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
-import { BookOpen } from "lucide-react"
+import { Bell, BookOpen, Brain, Search, Settings, Users } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/dashboard")({
@@ -18,31 +44,135 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardLayout() {
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="w-64 shadow-lg">
-        <div className="p-6">
-          <h1 className="font-bold text-2xl">OpenWrite</h1>
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        {/* Management Sidebar */}
+        <Sidebar>
+          <SidebarHeader>
+            <div className="flex items-center px-4 py-2">
+              <h1 className="font-bold text-xl">OpenWrite</h1>
+            </div>
+          </SidebarHeader>
+
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Writing</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/dashboard/novels">
+                        <BookOpen />
+                        <span>My Novels</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Organization</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/dashboard/team">
+                        <Users />
+                        <span>Team</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/dashboard/settings">
+                        <Settings />
+                        <span>Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>AI & Tools</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/dashboard/ai">
+                        <Brain />
+                        <span>AI Models</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          <SidebarFooter>
+            <div className="p-4">
+              <div className="text-muted-foreground text-xs">© 2024 OpenWrite</div>
+            </div>
+          </SidebarFooter>
+        </Sidebar>
+
+        {/* Main Content Area */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Header */}
+          <header className="flex h-16 items-center justify-between border-b px-6">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <div className="relative">
+                <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="w-96 pl-10"
+                  placeholder="Search novels, characters, locations..."
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Button className="relative" size="icon" variant="ghost">
+                <Bell className="h-4 w-4" />
+                <Badge
+                  className="-right-1 -top-1 absolute h-5 w-5 rounded-full p-0 text-xs"
+                  variant="destructive"
+                >
+                  2
+                </Badge>
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="relative h-8 w-8 rounded-full" variant="ghost">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage alt="User" src="/avatars/01.png" />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Billing</DropdownMenuItem>
+                  <DropdownMenuItem>Keyboard shortcuts</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+
+          {/* Page Content */}
+          <main className="flex-1 overflow-auto">
+            <Outlet />
+          </main>
         </div>
-
-        <nav className="mt-8">
-          <div className="px-6">
-            <Link
-              activeProps={{ className: "text-blue-600" }}
-              className="flex items-center rounded-lg px-4 py-2 [&.active]:text-blue-600"
-              to="/dashboard/novels"
-            >
-              <BookOpen className="mr-3 h-5 w-5" />
-              Novels
-            </Link>
-          </div>
-        </nav>
       </div>
-
-      {/* Main content */}
-      <div className="flex-1 overflow-hidden">
-        <Outlet />
-      </div>
-    </div>
+    </SidebarProvider>
   )
 }
