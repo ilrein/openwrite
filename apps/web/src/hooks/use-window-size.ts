@@ -48,10 +48,14 @@ export function useWindowSize(): WindowSizeState {
 
   React.useEffect(() => {
     function handleViewportChange() {
-      if (typeof window === "undefined") return
+      if (typeof window === "undefined") {
+        return
+      }
 
       const vp = window.visualViewport
-      if (!vp) return
+      if (!vp) {
+        return
+      }
 
       const { width = 0, height = 0, offsetTop = 0, offsetLeft = 0, scale = 0 } = vp
 

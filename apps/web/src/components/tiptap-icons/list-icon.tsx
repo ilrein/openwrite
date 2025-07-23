@@ -11,6 +11,7 @@ export const ListIcon = React.memo(({ className, ...props }: React.SVGProps<SVGS
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Unordered List</title>
       <path
         clipRule="evenodd"
         d="M7 6C7 5.44772 7.44772 5 8 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H8C7.44772 7 7 6.55228 7 6Z"

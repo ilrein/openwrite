@@ -7,7 +7,7 @@ export const Route = createFileRoute("/write/$novelId/write")({
 
 function WriteInterface() {
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full bg-muted p-4">
       <TiptapEditor
         content=""
         onUpdate={(_content) => {

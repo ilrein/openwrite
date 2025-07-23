@@ -69,7 +69,6 @@ export const LinkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={className}
         data-style="ghost"
         ref={ref}
-        role="button"
         tabIndex={-1}
         tooltip="Link"
         type="button"
@@ -228,7 +227,9 @@ export const LinkPopover = React.forwardRef<HTMLButtonElement, LinkPopoverProps>
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         setIsOpen(!isOpen)
       },
       [onClick, isOpen]

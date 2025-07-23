@@ -60,7 +60,9 @@ export const HeadingDropdownMenu = React.forwardRef<HTMLButtonElement, HeadingDr
 
     const handleOpenChange = React.useCallback(
       (open: boolean) => {
-        if (!(editor && canToggle)) return
+        if (!(editor && canToggle)) {
+          return
+        }
         setIsOpen(open)
         onOpenChange?.(open)
       },
@@ -81,7 +83,6 @@ export const HeadingDropdownMenu = React.forwardRef<HTMLButtonElement, HeadingDr
             data-disabled={!canToggle}
             data-style="ghost"
             disabled={!canToggle}
-            role="button"
             tabIndex={-1}
             tooltip="Heading"
             type="button"

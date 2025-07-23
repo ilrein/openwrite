@@ -41,6 +41,10 @@ export const Route = createFileRoute("/write/$novelId")({
 function WriteLayout() {
   const { novelId } = Route.useParams()
   const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
+  const [codexModalConfig, setCodexModalConfig] = useState<{
+    initialType?: string | null
+    initialEntry?: string | null
+  }>({})
   const [expandedCodexSections, setExpandedCodexSections] = useState<Record<string, boolean>>({
     characters: false,
     locations: false,
@@ -88,6 +92,19 @@ function WriteLayout() {
       ...prev,
       [section]: !prev[section],
     }))
+  }
+
+  const openCodexModal = (type?: string, entry?: string) => {
+    setCodexModalConfig({
+      initialType: type || null,
+      initialEntry: entry || null,
+    })
+    setIsCodexModalOpen(true)
+  }
+
+  const closeCodexModal = () => {
+    setIsCodexModalOpen(false)
+    setCodexModalConfig({})
   }
 
   const codexData = {
@@ -192,7 +209,7 @@ function WriteLayout() {
                             <Button
                               className="w-full justify-start"
                               key={character.name}
-                              onClick={() => setIsCodexModalOpen(true)}
+                              onClick={() => openCodexModal("characters", character.name)}
                               size="sm"
                               variant="ghost"
                             >
@@ -233,7 +250,7 @@ function WriteLayout() {
                             <Button
                               className="w-full justify-start"
                               key={location.name}
-                              onClick={() => setIsCodexModalOpen(true)}
+                              onClick={() => openCodexModal("locations", location.name)}
                               size="sm"
                               variant="ghost"
                             >
@@ -274,7 +291,7 @@ function WriteLayout() {
                             <Button
                               className="w-full justify-start"
                               key={loreItem.name}
-                              onClick={() => setIsCodexModalOpen(true)}
+                              onClick={() => openCodexModal("lore", loreItem.name)}
                               size="sm"
                               variant="ghost"
                             >
@@ -315,7 +332,7 @@ function WriteLayout() {
                             <Button
                               className="w-full justify-start"
                               key={plotItem.name}
-                              onClick={() => setIsCodexModalOpen(true)}
+                              onClick={() => openCodexModal("plot", plotItem.name)}
                               size="sm"
                               variant="ghost"
                             >
@@ -457,9 +474,11 @@ function WriteLayout() {
 
       {/* Codex Modal */}
       <CodexModal
+        initialEntry={codexModalConfig.initialEntry}
+        initialType={codexModalConfig.initialType}
         isOpen={isCodexModalOpen}
         novelId={novelId}
-        onClose={() => setIsCodexModalOpen(false)}
+        onClose={closeCodexModal}
       />
     </SidebarProvider>
   )

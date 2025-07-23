@@ -98,22 +98,32 @@ export function pickHighlightColorsByValue(values: string[]) {
 }
 
 export function canColorHighlight(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) return false
-  if (!isMarkInSchema("highlight", editor) || isNodeTypeSelected(editor, ["image"])) return false
+  if (!editor?.isEditable) {
+    return false
+  }
+  if (!isMarkInSchema("highlight", editor) || isNodeTypeSelected(editor, ["image"])) {
+    return false
+  }
 
   return editor.can().setMark("highlight")
 }
 
 export function isColorHighlightActive(editor: Editor | null, highlightColor?: string): boolean {
-  if (!(editor && editor.isEditable)) return false
+  if (!editor?.isEditable) {
+    return false
+  }
   return highlightColor
     ? editor.isActive("highlight", { color: highlightColor })
     : editor.isActive("highlight")
 }
 
 export function removeHighlight(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) return false
-  if (!canColorHighlight(editor)) return false
+  if (!editor?.isEditable) {
+    return false
+  }
+  if (!canColorHighlight(editor)) {
+    return false
+  }
 
   return editor.chain().focus().unsetMark("highlight").run()
 }
@@ -124,8 +134,12 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props
 
-  if (!(editor && editor.isEditable)) return false
-  if (!isMarkInSchema("highlight", editor)) return false
+  if (!editor?.isEditable) {
+    return false
+  }
+  if (!isMarkInSchema("highlight", editor)) {
+    return false
+  }
 
   if (hideWhenUnavailable && !editor.isActive("code")) {
     return canColorHighlight(editor)
@@ -149,7 +163,9 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
   const isActive = isColorHighlightActive(editor, highlightColor)
 
   React.useEffect(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
 
     const handleSelectionUpdate = () => {
       setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
@@ -165,7 +181,9 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
   }, [editor, hideWhenUnavailable])
 
   const handleColorHighlight = React.useCallback(() => {
-    if (!(editor && canColorHighlightState && highlightColor && label)) return false
+    if (!(editor && canColorHighlightState && highlightColor && label)) {
+      return false
+    }
 
     const success = editor.chain().focus().toggleMark("highlight", { color: highlightColor }).run()
     if (success) {

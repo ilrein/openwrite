@@ -1,5 +1,5 @@
 import { FileText, MapPin, Plus, Scroll, Users } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
@@ -15,13 +15,20 @@ interface CodexModalProps {
   isOpen: boolean
   onClose: () => void
   novelId: string
+  initialType?: string | null
+  initialEntry?: string | null
 }
 
-export default function CodexModal({ isOpen, onClose }: CodexModalProps) {
-  const [selectedType, setSelectedType] = useState<string | null>(null)
+export default function CodexModal({
+  isOpen,
+  onClose,
+  initialType = null,
+  initialEntry = null,
+}: CodexModalProps) {
+  const [selectedType, setSelectedType] = useState<string | null>(initialType)
   const [selectedEntry, setSelectedEntry] = useState<CodexEntry | null>(null)
 
-  const getTypeConfig = (typeParam: string) => {
+  const getTypeConfig = useCallback((typeParam: string) => {
     switch (typeParam) {
       case "characters":
         return {
@@ -135,7 +142,7 @@ export default function CodexModal({ isOpen, onClose }: CodexModalProps) {
           entries: [],
         }
     }
-  }
+  }, [])
 
   const codexTypes = [
     { key: "characters", title: "Characters", icon: Users },
@@ -143,6 +150,24 @@ export default function CodexModal({ isOpen, onClose }: CodexModalProps) {
     { key: "lore", title: "Lore", icon: Scroll },
     { key: "plot", title: "Plot Threads", icon: FileText },
   ]
+
+  // Handle initial navigation when modal opens
+  useEffect(() => {
+    if (isOpen && initialType && initialEntry) {
+      setSelectedType(initialType)
+      const typeConfig = getTypeConfig(initialType)
+      const entry = typeConfig.entries.find((e) => e.name === initialEntry)
+      if (entry) {
+        setSelectedEntry(entry)
+      }
+    } else if (isOpen && initialType) {
+      setSelectedType(initialType)
+      setSelectedEntry(null)
+    } else if (isOpen) {
+      setSelectedType(null)
+      setSelectedEntry(null)
+    }
+  }, [isOpen, initialType, initialEntry, getTypeConfig])
 
   const handleEntryClick = (entry: CodexEntry) => {
     setSelectedEntry(entry)

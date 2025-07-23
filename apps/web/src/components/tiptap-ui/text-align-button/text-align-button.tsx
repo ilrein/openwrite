@@ -65,7 +65,9 @@ export const TextAlignButton = React.forwardRef<HTMLButtonElement, TextAlignButt
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleTextAlign()
       },
       [handleTextAlign, onClick]
@@ -84,7 +86,6 @@ export const TextAlignButton = React.forwardRef<HTMLButtonElement, TextAlignButt
         data-style="ghost"
         disabled={!canAlign}
         onClick={handleClick}
-        role="button"
         tabIndex={-1}
         tooltip={label}
         type="button"

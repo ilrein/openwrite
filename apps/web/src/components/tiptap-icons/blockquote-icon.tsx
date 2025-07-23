@@ -12,6 +12,7 @@ export const BlockquoteIcon = React.memo(
         xmlns="http://www.w3.org/2000/svg"
         {...props}
       >
+        <title>Blockquote</title>
         <path
           clipRule="evenodd"
           d="M8 6C8 5.44772 8.44772 5 9 5H16C16.5523 5 17 5.44772 17 6C17 6.55228 16.5523 7 16 7H9C8.44772 7 8 6.55228 8 6Z"

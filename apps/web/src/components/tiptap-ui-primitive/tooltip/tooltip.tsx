@@ -139,16 +139,26 @@ export function Tooltip({ children, ...props }: TooltipProviderProps) {
   )
 }
 
+function getChildrenRef(children: React.ReactNode): React.Ref<HTMLElement> | undefined {
+  if (!React.isValidElement(children)) {
+    return
+  }
+
+  const reactVersion = Number.parseInt(React.version, 10)
+  if (reactVersion >= 19) {
+    // React 19+ stores ref in props.ref
+    const element = children as React.ReactElement<{ ref?: React.Ref<HTMLElement> }>
+    return element.props.ref
+  }
+  // React 18 and below store ref directly on the element
+  const element = children as React.ReactElement & { ref?: React.Ref<HTMLElement> }
+  return element.ref
+}
+
 export const TooltipTrigger = React.forwardRef<HTMLElement, TooltipTriggerProps>(
-  function TooltipTrigger({ children, asChild = false, ...props }, propRef) {
+  function TooltipTriggerComponent({ children, asChild = false, ...props }, propRef) {
     const context = useTooltipContext()
-    const childrenRef = React.isValidElement(children)
-      ? Number.parseInt(React.version, 10) >= 19
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (children as { props: { ref?: React.Ref<any> } }).props.ref
-        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (children as any).ref
-      : undefined
+    const childrenRef = getChildrenRef(children)
     const ref = useMergeRefs([context.refs.setReference, propRef, childrenRef])
 
     if (asChild && React.isValidElement(children)) {
@@ -180,11 +190,16 @@ export const TooltipTrigger = React.forwardRef<HTMLElement, TooltipTriggerProps>
 )
 
 export const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
-  function TooltipContent({ style, children, portal = true, portalProps = {}, ...props }, propRef) {
+  function TooltipContentComponent(
+    { style, children, portal = true, portalProps = {}, ...props },
+    propRef
+  ) {
     const context = useTooltipContext()
     const ref = useMergeRefs([context.refs.setFloating, propRef])
 
-    if (!context.open) return null
+    if (!context.open) {
+      return null
+    }
 
     const content = (
       <div

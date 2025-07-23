@@ -23,12 +23,12 @@ export function isMac(): boolean {
 /**
  * Formats a shortcut key based on the platform (Mac or non-Mac)
  * @param key - The key to format (e.g., "ctrl", "alt", "shift")
- * @param isMac - Boolean indicating if the platform is Mac
+ * @param isOnMac - Boolean indicating if the platform is Mac
  * @param capitalize - Whether to capitalize the key (default: true)
  * @returns Formatted shortcut key symbol
  */
-export const formatShortcutKey = (key: string, isMac: boolean, capitalize = true) => {
-  if (isMac) {
+export const formatShortcutKey = (key: string, isOnMac: boolean, capitalize = true) => {
+  if (isOnMac) {
     const lowerKey = key.toLowerCase()
     return MAC_SYMBOLS[lowerKey] || (capitalize ? key.toUpperCase() : key)
   }
@@ -50,7 +50,9 @@ export const parseShortcutKeys = (props: {
 }) => {
   const { shortcutKeys, delimiter = "+", capitalize = true } = props
 
-  if (!shortcutKeys) return []
+  if (!shortcutKeys) {
+    return []
+  }
 
   return shortcutKeys
     .split(delimiter)
@@ -65,7 +67,9 @@ export const parseShortcutKeys = (props: {
  * @returns boolean indicating if the mark exists in the schema
  */
 export const isMarkInSchema = (markName: string, editor: Editor | null): boolean => {
-  if (!editor?.schema) return false
+  if (!editor?.schema) {
+    return false
+  }
   return editor.schema.spec.marks.get(markName) !== undefined
 }
 
@@ -76,7 +80,9 @@ export const isMarkInSchema = (markName: string, editor: Editor | null): boolean
  * @returns boolean indicating if the node exists in the schema
  */
 export const isNodeInSchema = (nodeName: string, editor: Editor | null): boolean => {
-  if (!editor?.schema) return false
+  if (!editor?.schema) {
+    return false
+  }
   return editor.schema.spec.nodes.get(nodeName) !== undefined
 }
 
@@ -110,19 +116,15 @@ export function isExtensionAvailable(
   editor: Editor | null,
   extensionNames: string | string[]
 ): boolean {
-  if (!editor) return false
+  if (!editor) {
+    return false
+  }
 
   const names = Array.isArray(extensionNames) ? extensionNames : [extensionNames]
 
   const found = names.some((name) =>
     editor.extensionManager.extensions.some((ext) => ext.name === name)
   )
-
-  if (!found) {
-    console.warn(
-      `None of the extensions [${names.join(", ")}] were found in the editor schema. Ensure they are included in the editor configuration.`
-    )
-  }
 
   return found
 }
@@ -137,12 +139,10 @@ export function findNodeAtPosition(editor: Editor, position: number) {
   try {
     const node = editor.state.doc.nodeAt(position)
     if (!node) {
-      console.warn(`No node found at position ${position}`)
       return null
     }
     return node
-  } catch (error) {
-    console.error(`Error getting node at position ${position}:`, error)
+  } catch (_error) {
     return null
   }
 }
@@ -162,7 +162,9 @@ export function findNodePosition(props: {
 }): { pos: number; node: TiptapNode } | null {
   const { editor, node, nodePos } = props
 
-  if (!(editor && editor.state?.doc)) return null
+  if (!editor?.state?.doc) {
+    return null
+  }
 
   // Zero is valid position
   const hasValidNode = node !== undefined && node !== null
@@ -194,10 +196,10 @@ export function findNodePosition(props: {
   }
 
   // If we have a valid position, use findNodeAtPosition
-  if (hasValidPos) {
-    const nodeAtPos = findNodeAtPosition(editor, nodePos!)
+  if (hasValidPos && nodePos !== null && nodePos !== undefined) {
+    const nodeAtPos = findNodeAtPosition(editor, nodePos)
     if (nodeAtPos) {
-      return { pos: nodePos!, node: nodeAtPos }
+      return { pos: nodePos, node: nodeAtPos }
     }
   }
 
@@ -211,12 +213,16 @@ export function findNodePosition(props: {
  * @returns boolean indicating if the selected node matches any of the specified types
  */
 export function isNodeTypeSelected(editor: Editor, types: string[] = []): boolean {
-  if (!(editor && editor.state.selection)) return false
+  if (!editor?.state.selection) {
+    return false
+  }
 
   const { state } = editor
   const { doc, selection } = state
 
-  if (selection.empty) return false
+  if (selection.empty) {
+    return false
+  }
 
   if (selection instanceof NodeSelection) {
     const node = doc.nodeAt(selection.from)
@@ -248,10 +254,13 @@ export const handleImageUpload = async (
   }
 
   // For demo/testing: Simulate upload progress
+  // Note: Sequential await in loop is intentional to simulate realistic upload progress timing
   for (let progress = 0; progress <= 100; progress += 10) {
     if (abortSignal?.aborted) {
       throw new Error("Upload cancelled")
     }
+    // Intentionally await each timeout to create sequential delay for progress simulation
+    // biome-ignore lint/nursery/noAwaitInLoop: Sequential await is intentional for realistic upload progress simulation
     await new Promise((resolve) => setTimeout(resolve, 500))
     onProgress?.({ progress })
   }
@@ -321,9 +330,16 @@ type ProtocolOptions = {
 
 type ProtocolConfig = Array<ProtocolOptions | string>
 
-const ATTR_WHITESPACE =
-  // eslint-disable-next-line no-control-regex
-  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g
+/**
+ * Regular expression to match various Unicode whitespace and control characters
+ * that should be removed from URIs for security and validation purposes.
+ * Includes: control chars (U+0000-U+0020), non-breaking space (U+00A0),
+ * Ogham space (U+1680), Mongolian vowel separator (U+180E),
+ * various Unicode spaces (U+2000-U+2029), medium mathematical space (U+205F),
+ * and ideographic space (U+3000)
+ */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: Unicode control chars are intentionally included for URI sanitization
+const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g
 
 export function isAllowedUri(uri: string | undefined, protocols?: ProtocolConfig) {
   const allowedProtocols: string[] = [
@@ -340,13 +356,13 @@ export function isAllowedUri(uri: string | undefined, protocols?: ProtocolConfig
   ]
 
   if (protocols) {
-    protocols.forEach((protocol) => {
+    for (const protocol of protocols) {
       const nextProtocol = typeof protocol === "string" ? protocol : protocol.scheme
 
       if (nextProtocol) {
         allowedProtocols.push(nextProtocol)
       }
-    })
+    }
   }
 
   return (

@@ -12,6 +12,7 @@ export const HeadingThreeIcon = React.memo(
         xmlns="http://www.w3.org/2000/svg"
         {...props}
       >
+        <title>Heading 3</title>
         <path
           d="M4 5C4.55228 5 5 5.44772 5 6V11H11V6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6V18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18V13H5V18C5 18.5523 4.55228 19 4 19C3.44772 19 3 18.5523 3 18V6C3 5.44772 3.44772 5 4 5Z"
           fill="currentColor"

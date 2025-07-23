@@ -201,7 +201,10 @@ export function SimpleEditor() {
         maxSize: MAX_FILE_SIZE,
         limit: 3,
         upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
+        onError: (_error) => {
+          // Handle image upload error - in production this could be reported to an error service
+          // For now, the error is handled by the upload component itself
+        },
       }),
     ],
     content,
