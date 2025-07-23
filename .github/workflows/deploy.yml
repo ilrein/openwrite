@@ -75,7 +75,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "./apps/server"
-          command: d1 migrations list DB --remote
+          command: d1 migrations list openwrite-dev --remote
 
       - name: Run Database Migrations
         continue-on-error: true
@@ -84,7 +84,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "./apps/server"
-          command: d1 migrations apply DB --remote --yes
+          command: d1 migrations apply openwrite-dev --remote --yes
 
       - name: Deploy Documentation
         continue-on-error: true
