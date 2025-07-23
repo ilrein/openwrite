@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { Eye, EyeOff, PenTool } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import z from "zod"
@@ -121,15 +121,11 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           {/* Header */}
           <div className="flex flex-col items-center text-center">
-            <div className="mb-6 flex items-center gap-3">
-              <PenTool className="h-8 w-8" />
-              <span className="font-bold text-2xl">OpenWrite</span>
-            </div>
             <h1 className="font-semibold text-xl tracking-tight">
               {mode === "signin" ? "Welcome back" : "Create an account"}
             </h1>

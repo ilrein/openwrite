@@ -7,7 +7,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
-import Header from "@/components/header"
+import AppHeader from "@/components/app-header"
 import Loader from "@/components/loader"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
@@ -63,9 +63,11 @@ function RootComponent() {
           <div className="h-svh">{isFetching ? <Loader /> : <Outlet />}</div>
         ) : (
           // Other pages use header layout
-          <div className="grid h-svh grid-rows-[auto_1fr]">
-            <Header />
-            {isFetching ? <Loader /> : <Outlet />}
+          <div className="min-h-svh">
+            <AppHeader />
+            <main className="flex-1">
+              {isFetching ? <Loader /> : <Outlet />}
+            </main>
           </div>
         )}
         <Toaster richColors />
