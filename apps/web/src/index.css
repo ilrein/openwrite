@@ -139,6 +139,11 @@ body {
 /* Tiptap Editor Styles */
 .ProseMirror {
   @apply focus:outline-none;
+  @apply transition-all duration-200;
+}
+
+.ProseMirror:focus {
+  @apply ring-2 ring-ring/20 ring-offset-2 ring-offset-background;
 }
 
 .ProseMirror h1 {

@@ -32,7 +32,8 @@ export default function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: "mx-auto focus:outline-none min-h-[400px] p-4 text-foreground",
+        class:
+          "mx-auto focus:outline-none min-h-[400px] p-6 text-foreground bg-background/60 rounded-lg border border-border/40 shadow-sm",
       },
     },
   })
@@ -93,7 +94,7 @@ export default function TiptapEditor({
         </div>
       </CardHeader>
       <Separator />
-      <CardContent className="p-0">
+      <CardContent className="bg-muted/20 p-4">
         <EditorContent editor={editor} />
       </CardContent>
     </Card>
