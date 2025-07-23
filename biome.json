@@ -36,6 +36,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/routes/**/$*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "jsxQuoteStyle": "double",
