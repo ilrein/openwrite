@@ -50,7 +50,7 @@ export const novelApi: ApiClient<Novel, CreateNovelData, UpdateNovelData> = {
     return response.novel
   },
 
-  async create(data: CreateNovelData): Promise<{ success: boolean; id: string }> {
+  async create(data: CreateNovelData): Promise<Novel | { success: boolean; id: string }> {
     return await apiCall("/api/novels", {
       method: "POST",
       body: JSON.stringify(data),
