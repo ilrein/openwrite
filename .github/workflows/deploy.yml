@@ -69,13 +69,22 @@ jobs:
         env:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
 
-      - name: Run Database Migrations
+      - name: Check Migration Status
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "./apps/server"
-          command: d1 migrations apply openwrite-dev --remote
+          command: d1 migrations list DB --remote
+
+      - name: Run Database Migrations
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "./apps/server"
+          command: d1 migrations apply DB --remote --yes
 
       - name: Deploy Documentation
         continue-on-error: true

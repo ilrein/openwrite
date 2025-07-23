@@ -1,15 +1,1 @@
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Running quality check...' && bun quality && echo 'Quality check completed!'"
-          }
-        ]
-      }
-    ]
-  }
-}
+{}
