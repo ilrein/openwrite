@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
-import { BookOpen, Settings, Users } from "lucide-react"
+import { BookOpen } from "lucide-react"
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
