@@ -5,20 +5,34 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".vitepress/dist/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".vitepress/dist/**", "worker.js"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "outputs": []
     },
     "format": {
-      "dependsOn": ["^format"]
+      "dependsOn": ["^format"],
+      "outputs": []
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^check-types"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "clean": {
+      "cache": false
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "cache": false
     },
     "docs:dev": {
       "cache": false,
@@ -29,23 +43,25 @@
       "outputs": [".vitepress/dist/**"]
     },
     "docs:preview": {
+      "cache": false,
+      "persistent": true
+    },
+    "docs:deploy": {
+      "dependsOn": ["docs:build"],
       "cache": false
     },
     "db:push": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:studio": {
       "cache": false,
       "persistent": true
     },
     "db:migrate": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:generate": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     }
   }
 }
