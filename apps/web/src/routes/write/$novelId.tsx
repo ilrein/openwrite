@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
 import {
-  Bell,
-  BookOpen,
+  ChevronDown,
   ChevronRight,
   FileEdit,
   FileText,
@@ -11,28 +10,13 @@ import {
   Scroll,
   Users,
 } from "lucide-react"
+import { useState } from "react"
+import CodexModal from "@/components/codex-modal"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import {
   Sidebar,
   SidebarContent,
@@ -45,11 +29,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import UserMenu from "@/components/user-menu"
+import WriteHeader from "@/components/write-header"
 import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/write/$novelId")({
@@ -58,6 +40,13 @@ export const Route = createFileRoute("/write/$novelId")({
 
 function WriteLayout() {
   const { novelId } = Route.useParams()
+  const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
+  const [expandedCodexSections, setExpandedCodexSections] = useState<Record<string, boolean>>({
+    characters: false,
+    locations: false,
+    lore: false,
+    plot: false,
+  })
 
   // Fetch novel details
   const { data: novel, isLoading } = useQuery({
@@ -93,6 +82,36 @@ function WriteLayout() {
   const progressPercentage = targetWordCount
     ? Math.min((novel.currentWordCount / targetWordCount) * 100, 100)
     : 0
+
+  const toggleCodexSection = (section: string) => {
+    setExpandedCodexSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+  }
+
+  const codexData = {
+    characters: [
+      { name: "Aria", role: "Protagonist" },
+      { name: "Kellan", role: "Mentor" },
+      { name: "The Guardian", role: "Antagonist" },
+    ],
+    locations: [
+      { name: "The Dark Forest", role: "Setting" },
+      { name: "Crystal Cave", role: "Key Location" },
+      { name: "Village of Elderbrook", role: "Starting Point" },
+    ],
+    lore: [
+      { name: "Magic System", role: "Core Rule" },
+      { name: "The Ancient Prophecy", role: "Plot Device" },
+      { name: "The Great War", role: "History" },
+    ],
+    plot: [
+      { name: "Quest for the Crystal", role: "Main Plot" },
+      { name: "Kellan's Secret Past", role: "Subplot" },
+      { name: "The Prophecy Unfolds", role: "Subplot" },
+    ],
+  }
 
   return (
     <SidebarProvider>
@@ -138,6 +157,177 @@ function WriteLayout() {
                         <span>Write</span>
                       </Link>
                     </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Codex</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {/* Characters */}
+                  <SidebarMenuItem>
+                    <Collapsible
+                      onOpenChange={() => toggleCodexSection("characters")}
+                      open={expandedCodexSections.characters}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton>
+                          {expandedCodexSections.characters ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <Users className="h-4 w-4" />
+                          <span>Characters</span>
+                          <Badge className="ml-auto" variant="secondary">
+                            {codexData.characters.length}
+                          </Badge>
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="ml-6 space-y-1">
+                          {codexData.characters.map((character) => (
+                            <Button
+                              className="w-full justify-start"
+                              key={character.name}
+                              onClick={() => setIsCodexModalOpen(true)}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              <span className="truncate">{character.name}</span>
+                              <span className="ml-auto text-muted-foreground text-xs">
+                                {character.role}
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </SidebarMenuItem>
+
+                  {/* Locations */}
+                  <SidebarMenuItem>
+                    <Collapsible
+                      onOpenChange={() => toggleCodexSection("locations")}
+                      open={expandedCodexSections.locations}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton>
+                          {expandedCodexSections.locations ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <MapPin className="h-4 w-4" />
+                          <span>Locations</span>
+                          <Badge className="ml-auto" variant="secondary">
+                            {codexData.locations.length}
+                          </Badge>
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="ml-6 space-y-1">
+                          {codexData.locations.map((location) => (
+                            <Button
+                              className="w-full justify-start"
+                              key={location.name}
+                              onClick={() => setIsCodexModalOpen(true)}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              <span className="truncate">{location.name}</span>
+                              <span className="ml-auto text-muted-foreground text-xs">
+                                {location.role}
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </SidebarMenuItem>
+
+                  {/* Lore */}
+                  <SidebarMenuItem>
+                    <Collapsible
+                      onOpenChange={() => toggleCodexSection("lore")}
+                      open={expandedCodexSections.lore}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton>
+                          {expandedCodexSections.lore ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <Scroll className="h-4 w-4" />
+                          <span>Lore</span>
+                          <Badge className="ml-auto" variant="secondary">
+                            {codexData.lore.length}
+                          </Badge>
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="ml-6 space-y-1">
+                          {codexData.lore.map((loreItem) => (
+                            <Button
+                              className="w-full justify-start"
+                              key={loreItem.name}
+                              onClick={() => setIsCodexModalOpen(true)}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              <span className="truncate">{loreItem.name}</span>
+                              <span className="ml-auto text-muted-foreground text-xs">
+                                {loreItem.role}
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </SidebarMenuItem>
+
+                  {/* Plot Threads */}
+                  <SidebarMenuItem>
+                    <Collapsible
+                      onOpenChange={() => toggleCodexSection("plot")}
+                      open={expandedCodexSections.plot}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton>
+                          {expandedCodexSections.plot ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <FileText className="h-4 w-4" />
+                          <span>Plot Threads</span>
+                          <Badge className="ml-auto" variant="secondary">
+                            {codexData.plot.length}
+                          </Badge>
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="ml-6 space-y-1">
+                          {codexData.plot.map((plotItem) => (
+                            <Button
+                              className="w-full justify-start"
+                              key={plotItem.name}
+                              onClick={() => setIsCodexModalOpen(true)}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              <span className="truncate">{plotItem.name}</span>
+                              <span className="ml-auto text-muted-foreground text-xs">
+                                {plotItem.role}
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -235,185 +425,13 @@ function WriteLayout() {
 
         {/* Main Content Area */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Header */}
-          <header className="flex h-16 items-center justify-between border-b px-6">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link to="/dashboard">Dashboard</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link to="/dashboard/novels">Novels</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="max-w-32 truncate sm:max-w-48">
-                      {novel.title}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-              <Badge variant="outline">{novel.status}</Badge>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {/* Codex Drawer */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Codex
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="w-full sm:w-96" side="right">
-                  <SheetHeader>
-                    <SheetTitle>Novel Codex</SheetTitle>
-                  </SheetHeader>
-
-                  <Tabs className="mt-4" defaultValue="characters">
-                    <TabsList className="grid w-full grid-cols-4">
-                      <TabsTrigger value="characters">
-                        <Users className="h-4 w-4" />
-                      </TabsTrigger>
-                      <TabsTrigger value="locations">
-                        <MapPin className="h-4 w-4" />
-                      </TabsTrigger>
-                      <TabsTrigger value="lore">
-                        <Scroll className="h-4 w-4" />
-                      </TabsTrigger>
-                      <TabsTrigger value="plot">
-                        <FileText className="h-4 w-4" />
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent className="mt-4" value="characters">
-                      <div className="space-y-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Aria</CardTitle>
-                            <CardDescription>Protagonist</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm">A young mage discovering her powers...</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Kellan</CardTitle>
-                            <CardDescription>Mentor</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm">
-                              An experienced warrior with a mysterious past...
-                            </p>
-                          </CardContent>
-                        </Card>
-                        <Button className="w-full" size="sm" variant="outline">
-                          <Link
-                            params={{ novelId, type: "characters" }}
-                            to="/write/$novelId/codex/$type"
-                          >
-                            View All Characters
-                          </Link>
-                        </Button>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent className="mt-4" value="locations">
-                      <div className="space-y-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">The Dark Forest</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm">
-                              An ancient forest filled with magical creatures...
-                            </p>
-                          </CardContent>
-                        </Card>
-                        <Button className="w-full" size="sm" variant="outline">
-                          <Link
-                            params={{ novelId, type: "locations" }}
-                            to="/write/$novelId/codex/$type"
-                          >
-                            View All Locations
-                          </Link>
-                        </Button>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent className="mt-4" value="lore">
-                      <div className="space-y-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Magic System</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm">Elemental magic drawn from nature...</p>
-                          </CardContent>
-                        </Card>
-                        <Button className="w-full" size="sm" variant="outline">
-                          <Link params={{ novelId, type: "lore" }} to="/write/$novelId/codex/$type">
-                            View All Lore
-                          </Link>
-                        </Button>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent className="mt-4" value="plot">
-                      <div className="space-y-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Quest for the Crystal</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm">
-                              Main plot thread following the ancient prophecy...
-                            </p>
-                          </CardContent>
-                        </Card>
-                        <Button className="w-full" size="sm" variant="outline">
-                          <Link params={{ novelId, type: "plot" }} to="/write/$novelId/codex/$type">
-                            View All Plot Threads
-                          </Link>
-                        </Button>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </SheetContent>
-              </Sheet>
-
-              <Button size="sm" variant="ghost">
-                Word Count: {novel.currentWordCount.toLocaleString()}
-              </Button>
-
-              {/* Notifications Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <Bell className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <div className="p-4 text-center text-muted-foreground text-sm">
-                    No notifications yet
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* User Menu */}
-              <UserMenu />
-            </div>
-          </header>
+          <WriteHeader
+            breadcrumbs={[
+              { label: "Dashboard", to: "/dashboard" },
+              { label: "Novels", to: "/dashboard/novels" },
+              { label: novel.title },
+            ]}
+          />
 
           {/* Page Content */}
           <main className="flex-1 overflow-auto">
@@ -436,6 +454,13 @@ function WriteLayout() {
           </footer>
         </div>
       </div>
+
+      {/* Codex Modal */}
+      <CodexModal
+        isOpen={isCodexModalOpen}
+        novelId={novelId}
+        onClose={() => setIsCodexModalOpen(false)}
+      />
     </SidebarProvider>
   )
 }

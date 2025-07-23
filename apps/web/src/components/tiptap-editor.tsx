@@ -1,11 +1,42 @@
+import { Highlight } from "@tiptap/extension-highlight"
+import { HorizontalRule } from "@tiptap/extension-horizontal-rule"
+import { Image } from "@tiptap/extension-image"
+import { TaskItem, TaskList } from "@tiptap/extension-list"
 import Placeholder from "@tiptap/extension-placeholder"
-import Typography from "@tiptap/extension-typography"
-import { EditorContent, useEditor } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
-import { Button } from "./ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { Separator } from "./ui/separator"
+import { Subscript } from "@tiptap/extension-subscript"
+import { Superscript } from "@tiptap/extension-superscript"
+import { TextAlign } from "@tiptap/extension-text-align"
+import { Typography } from "@tiptap/extension-typography"
+import { Selection } from "@tiptap/extensions"
+import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+// --- Tiptap Core Extensions ---
+import { StarterKit } from "@tiptap/starter-kit"
+// --- Tiptap Node ---
+import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
+import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
+import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
+import {
+  ColorHighlightPopover,
+  ColorHighlightPopoverButton,
+  ColorHighlightPopoverContent,
+} from "@/components/tiptap-ui/color-highlight-popover"
 
+// --- Tiptap UI ---
+import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
+import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
+import { LinkButton, LinkContent, LinkPopover } from "@/components/tiptap-ui/link-popover"
+import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
+import { MarkButton } from "@/components/tiptap-ui/mark-button"
+import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
+import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
+// --- UI Primitives ---
+import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
+import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar"
+
+// --- Styles ---
+import "@/components/tiptap-templates/simple/simple-editor.scss"
+
+// --- Types ---
 interface TiptapEditorProps {
   content?: string
   onUpdate?: (content: string) => void
@@ -19,11 +50,24 @@ export default function TiptapEditor({
 }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        horizontalRule: false,
+        dropcursor: { color: "var(--tiptap-color-primary)" },
+      }),
+      Selection,
+      Image.configure({ allowBase64: true }),
+      ImageUploadNode,
+      HorizontalRule,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Typography,
+      Highlight.configure({ multicolor: true }),
+      Subscript,
+      Superscript,
+      TaskList,
+      TaskItem.configure({ nested: true }),
       Placeholder.configure({
         placeholder,
       }),
-      Typography,
     ],
     content,
     onUpdate: ({ editor: editorInstance }) => {
@@ -32,71 +76,89 @@ export default function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class:
-          "mx-auto focus:outline-none min-h-[400px] p-6 text-foreground bg-background/60 rounded-lg border border-border/40 shadow-sm",
+        class: "focus:outline-none min-h-full p-6",
       },
     },
   })
 
   if (!editor) {
-    return null
+    return <div className="animate-pulse">Loading editor...</div>
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Write</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              className={editor.isActive("bold") ? "bg-secondary" : ""}
-              disabled={!editor.can().chain().focus().toggleBold().run()}
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              size="sm"
-              variant="outline"
-            >
-              Bold
-            </Button>
-            <Button
-              className={editor.isActive("italic") ? "bg-secondary" : ""}
-              disabled={!editor.can().chain().focus().toggleItalic().run()}
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              size="sm"
-              variant="outline"
-            >
-              Italic
-            </Button>
-            <Button
-              className={editor.isActive("heading", { level: 1 }) ? "bg-secondary" : ""}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              size="sm"
-              variant="outline"
-            >
-              H1
-            </Button>
-            <Button
-              className={editor.isActive("heading", { level: 2 }) ? "bg-secondary" : ""}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              size="sm"
-              variant="outline"
-            >
-              H2
-            </Button>
-            <Button
-              className={editor.isActive("bulletList") ? "bg-secondary" : ""}
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              size="sm"
-              variant="outline"
-            >
-              List
-            </Button>
-          </div>
+    <EditorContext.Provider value={{ editor }}>
+      <div className="tiptap-editor-container flex h-full w-full flex-col bg-background">
+        <Toolbar>
+          <ToolbarGroup>
+            <UndoRedoButton action="undo" />
+            <UndoRedoButton action="redo" />
+          </ToolbarGroup>
+
+          <ToolbarSeparator />
+
+          <ToolbarGroup>
+            <HeadingDropdownMenu />
+          </ToolbarGroup>
+
+          <ToolbarSeparator />
+
+          <ToolbarGroup>
+            <MarkButton type="bold" />
+            <MarkButton type="italic" />
+            <MarkButton type="underline" />
+            <MarkButton type="strike" />
+          </ToolbarGroup>
+
+          <ToolbarSeparator />
+
+          <ToolbarGroup>
+            <ColorHighlightPopover>
+              <ColorHighlightPopoverButton />
+              <ColorHighlightPopoverContent />
+            </ColorHighlightPopover>
+          </ToolbarGroup>
+
+          <ToolbarSeparator />
+
+          <ToolbarGroup>
+            <TextAlignButton align="left" />
+            <TextAlignButton align="center" />
+            <TextAlignButton align="right" />
+            <TextAlignButton align="justify" />
+          </ToolbarGroup>
+
+          <ToolbarSeparator />
+
+          <ToolbarGroup>
+            <ListDropdownMenu />
+            <BlockquoteButton />
+            <CodeBlockButton />
+          </ToolbarGroup>
+
+          <ToolbarSeparator />
+
+          <ToolbarGroup>
+            <LinkPopover>
+              <LinkButton />
+              <LinkContent />
+            </LinkPopover>
+            <ImageUploadButton />
+          </ToolbarGroup>
+
+          <Spacer />
+        </Toolbar>
+
+        <div
+          className="tiptap-editor-content h-full flex-1 cursor-text overflow-auto"
+          onClick={() => {
+            if (editor && !editor.isFocused) {
+              editor.commands.focus("end")
+            }
+          }}
+        >
+          <EditorContent className="h-full" editor={editor} />
         </div>
-      </CardHeader>
-      <Separator />
-      <CardContent className="bg-muted/20 p-4">
-        <EditorContent editor={editor} />
-      </CardContent>
-    </Card>
+      </div>
+    </EditorContext.Provider>
   )
 }

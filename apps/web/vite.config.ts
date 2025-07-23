@@ -7,11 +7,11 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [
-    tailwindcss(), 
-    tanstackRouter({}), 
-    react(), 
+    tailwindcss(),
+    tanstackRouter({}),
+    react(),
     // Disable cloudflare plugin in development to prevent EPIPE errors
-    ...(process.env.NODE_ENV === "production" ? [cloudflare()] : [])
+    ...(process.env.NODE_ENV === "production" ? [cloudflare()] : []),
   ],
   resolve: {
     alias: {

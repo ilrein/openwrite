@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useRouterState } from "@tanstack/react-router"
 import { Menu, PenTool } from "lucide-react"
 import { useState } from "react"
 
@@ -23,10 +23,16 @@ import UserMenu from "./user-menu"
 export default function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  const location = useRouterState({
+    select: (s) => s.location.pathname,
+  })
+
+  const isIndexPage = location === "/"
+
   const navigationItems = [
     { to: "/", label: "Home" },
     { to: "/dashboard", label: "Dashboard" },
-  ]
+  ].filter((item) => !isIndexPage || (item.to !== "/" && item.to !== "/dashboard"))
 
   return (
     <header className="sticky top-0 z-50 w-full border-border/40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

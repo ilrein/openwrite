@@ -140,10 +140,20 @@ body {
 .ProseMirror {
   @apply focus:outline-none;
   @apply transition-all duration-200;
+  @apply min-h-full;
 }
 
 .ProseMirror:focus {
   @apply ring-2 ring-ring/20 ring-offset-2 ring-offset-background;
+}
+
+/* Ensure EditorContent wrapper takes full height */
+.tiptap-editor-content .tiptap {
+  @apply h-full;
+}
+
+.tiptap-editor-content .tiptap .ProseMirror {
+  @apply h-full;
 }
 
 .ProseMirror h1 {
