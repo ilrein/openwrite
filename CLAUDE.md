@@ -41,6 +41,9 @@ OpenWrite is a full-stack TypeScript application built with the Better-T-Stack, 
 bun dev              # Start both web and server in development
 bun build            # Build all applications
 bun check-types      # TypeScript type checking across all apps
+bun lint             # Code formatting, linting, and import sorting
+bun quality          # Run both type checking and linting (recommended for CI/hooks)
+bun quality:fix      # Auto-fix formatting/linting issues, then run type checking
 ```
 
 ### Targeted Commands
@@ -75,6 +78,27 @@ The web application runs on http://localhost:3001 and the API on http://localhos
 ## Testing
 
 Type checking is the primary validation method. Run `bun check-types` before committing changes to ensure type safety across the full-stack application.
+
+## Claude Code Integration
+
+This project includes Claude Code hooks configured in `.claude/settings.json`:
+
+- **user-prompt-submit hook**: Runs quality checks before processing user requests
+- **Stop hook**: Runs quality checks automatically when Claude finishes a task
+- **PreToolUse hooks**: Logs commands, edits, and writes for development tracking
+
+The quality check script (`.claude/quality-check.sh`) intelligently runs:
+- Full type checking + linting if TypeScript/JavaScript files are modified
+- Just linting if only other files are modified
+
+Manual commands available:
+```bash
+bun quality          # Full quality check (type checking + linting)
+bun quality:fix      # Auto-fix issues then run quality check
+./.claude/quality-check.sh  # Smart quality check based on git status
+```
+
+To bypass hooks temporarily (not recommended), you can modify `.claude/settings.json`.
 
 ## Documentation Strategy
 

@@ -27,19 +27,19 @@ app.use(
         "http://localhost:3001", // Web app dev server
         "https://localhost:3001", // Web app dev server (HTTPS)
       ]
-      
+
       // Allow same-origin requests (no origin header) by returning the origin
       if (!origin) {
-        return origin || "*"
+        return origin || undefined
       }
-      
+
       // Check if origin is in allowed list and return the origin if allowed
       if (allowedOrigins.includes(origin)) {
         return origin
       }
-      
+
       // Reject other origins
-      return false
+      return
     },
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

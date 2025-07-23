@@ -105,12 +105,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -196,9 +192,7 @@
       "indexes": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         }
       },
@@ -207,12 +201,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -277,9 +267,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -406,12 +394,8 @@
           "name": "invitation_inviter_id_user_id_fk",
           "tableFrom": "invitation",
           "tableTo": "user",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -419,12 +403,8 @@
           "name": "invitation_organization_id_organization_id_fk",
           "tableFrom": "invitation",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -478,12 +458,8 @@
           "name": "member_user_id_user_id_fk",
           "tableFrom": "member",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -491,12 +467,8 @@
           "name": "member_organization_id_organization_id_fk",
           "tableFrom": "member",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -561,9 +533,7 @@
       "indexes": {
         "organization_slug_unique": {
           "name": "organization_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         }
       },
@@ -617,12 +587,8 @@
           "name": "team_organization_id_organization_id_fk",
           "tableFrom": "team",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -669,12 +635,8 @@
           "name": "team_member_team_id_team_id_fk",
           "tableFrom": "team_member",
           "tableTo": "team",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -682,12 +644,8 @@
           "name": "team_member_user_id_user_id_fk",
           "tableFrom": "team_member",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -785,12 +743,8 @@
           "name": "chapter_novel_id_novel_id_fk",
           "tableFrom": "chapter",
           "tableTo": "novel",
-          "columnsFrom": [
-            "novel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["novel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -900,12 +854,8 @@
           "name": "character_novel_id_novel_id_fk",
           "tableFrom": "character",
           "tableTo": "novel",
-          "columnsFrom": [
-            "novel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["novel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -994,12 +944,8 @@
           "name": "location_novel_id_novel_id_fk",
           "tableFrom": "location",
           "tableTo": "novel",
-          "columnsFrom": [
-            "novel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["novel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1007,12 +953,8 @@
           "name": "location_parent_location_id_location_id_fk",
           "tableFrom": "location",
           "tableTo": "location",
-          "columnsFrom": [
-            "parent_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1146,12 +1088,8 @@
           "name": "novel_owner_id_user_id_fk",
           "tableFrom": "novel",
           "tableTo": "user",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1159,12 +1097,8 @@
           "name": "novel_organization_id_organization_id_fk",
           "tableFrom": "novel",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1239,12 +1173,8 @@
           "name": "novel_collaborator_novel_id_novel_id_fk",
           "tableFrom": "novel_collaborator",
           "tableTo": "novel",
-          "columnsFrom": [
-            "novel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["novel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1252,12 +1182,8 @@
           "name": "novel_collaborator_user_id_user_id_fk",
           "tableFrom": "novel_collaborator",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1347,12 +1273,8 @@
           "name": "plot_point_novel_id_novel_id_fk",
           "tableFrom": "plot_point",
           "tableTo": "novel",
-          "columnsFrom": [
-            "novel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["novel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1360,12 +1282,8 @@
           "name": "plot_point_chapter_id_chapter_id_fk",
           "tableFrom": "plot_point",
           "tableTo": "chapter",
-          "columnsFrom": [
-            "chapter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chapter_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1464,12 +1382,8 @@
           "name": "writing_session_novel_id_novel_id_fk",
           "tableFrom": "writing_session",
           "tableTo": "novel",
-          "columnsFrom": [
-            "novel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["novel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1477,12 +1391,8 @@
           "name": "writing_session_user_id_user_id_fk",
           "tableFrom": "writing_session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1490,12 +1400,8 @@
           "name": "writing_session_chapter_id_chapter_id_fk",
           "tableFrom": "writing_session",
           "tableTo": "chapter",
-          "columnsFrom": [
-            "chapter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chapter_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

@@ -1,5 +1,5 @@
-import { createAuthClient } from "better-auth/react"
 import { organizationClient } from "better-auth/client/plugins"
+import { createAuthClient } from "better-auth/react"
 
 // Session data types
 export interface SessionUser {
@@ -30,10 +30,10 @@ function getAuthClient() {
       plugins: [
         organizationClient({
           teams: {
-            enabled: true
-          }
-        })
-      ]
+            enabled: true,
+          },
+        }),
+      ],
     })
   }
   return authClientInstance

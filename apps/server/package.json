@@ -5,7 +5,7 @@
   "scripts": {
     "build": "wrangler deploy --dry-run",
     "check-types": "tsc --noEmit",
-    "lint": "biome lint src",
+    "lint": "biome check src",
     "format": "biome format --write .",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "bunx wrangler types --env-interface CloudflareBindings && wrangler dev --port=3000",

@@ -9,7 +9,7 @@ export const organization = sqliteTable("organization", {
   logo: text("logo"),
   metadata: text("metadata"), // JSON string for additional org data
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
 })
 
 // Member table (links users to organizations with roles)
@@ -22,7 +22,7 @@ export const member = sqliteTable("member", {
     .notNull()
     .references(() => organization.id),
   role: text("role").notNull(), // "owner", "admin", "member"
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull()
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
 // Invitation table
@@ -38,7 +38,7 @@ export const invitation = sqliteTable("invitation", {
   role: text("role").notNull(),
   status: text("status").notNull(), // "pending", "accepted", "rejected", "expired"
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull()
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
 // Team table (sub-organizations for better project organization)
@@ -49,7 +49,7 @@ export const team = sqliteTable("team", {
     .notNull()
     .references(() => organization.id),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
 })
 
 // Team member table (links members to teams)
@@ -61,5 +61,5 @@ export const teamMember = sqliteTable("team_member", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull()
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })

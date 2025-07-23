@@ -1,17 +1,17 @@
 import { betterAuth } from "better-auth"
-import { organization } from "better-auth/plugins"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { organization } from "better-auth/plugins"
 import { db } from "../db"
-import { 
-  account, 
-  session, 
-  user, 
-  verification,
-  organization as organizationTable,
-  member,
+import {
+  account,
   invitation,
+  member,
+  organization as organizationTable,
+  session,
   team,
-  teamMember
+  teamMember,
+  user,
+  verification,
 } from "../db/schema"
 
 interface AuthEnv {
@@ -69,9 +69,9 @@ export function createAuthInstance(env: AuthEnv) {
               await db.insert(organizationTable).values({
                 id: orgId,
                 name: `${createdUser.name}'s Workspace`,
-                slug: `${createdUser.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+                slug: `${createdUser.name.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
                 createdAt: now,
-                updatedAt: now
+                updatedAt: now,
               })
 
               // Add user as owner
@@ -80,11 +80,11 @@ export function createAuthInstance(env: AuthEnv) {
                 userId: createdUser.id,
                 organizationId: orgId,
                 role: "owner",
-                createdAt: now
+                createdAt: now,
               })
-            }
-          }
-        }
+            },
+          },
+        },
       },
       plugins: [
         organization({
@@ -97,12 +97,12 @@ export function createAuthInstance(env: AuthEnv) {
           // Organization creation settings
           organizationCreation: {
             disabled: false,
-            afterCreate: ({ organization: _createdOrg, user: _orgUser }) => {
+            afterCreate: async ({ organization: _createdOrg, user: _orgUser }) => {
               // Set up default resources for manually created organizations
               // Could add default resources, notifications, etc. here in the future
-            }
-          }
-        })
+            },
+          },
+        }),
       ],
       trustedOrigins: [env.CORS_ORIGIN],
       emailAndPassword: {
