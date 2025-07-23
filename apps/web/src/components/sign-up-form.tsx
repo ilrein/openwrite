@@ -65,7 +65,6 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
 
             // Fetch fresh session data and immediately update the query cache
             const sessionData = await fetchSessionData()
-            console.log("Fresh session data after sign-up:", sessionData)
 
             // Set the session data in the query cache to immediately update all components
             queryClient.setQueryData(["session"], sessionData)
@@ -77,16 +76,14 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             navigate({
               to: "/dashboard",
             })
-          } catch (error) {
-            console.error("Failed to refresh session data:", error)
+          } catch (_error) {
             // Still navigate, dashboard will handle the session check
             navigate({
               to: "/dashboard",
             })
           }
         }
-      } catch (error) {
-        console.error("Sign up error:", error)
+      } catch (_error) {
         toast.error("Sign up failed")
       }
     },

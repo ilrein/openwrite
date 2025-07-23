@@ -87,7 +87,7 @@ export default {
             message: "This is private data",
             user: session.user,
           })
-        } catch (error) {
+        } catch (_error) {
           return c.json({ error: "Internal server error" }, 500)
         }
       })

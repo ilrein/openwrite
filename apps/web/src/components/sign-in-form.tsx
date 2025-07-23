@@ -35,10 +35,6 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           }
         )
 
-        console.log("Better Auth sign-in result:", result)
-        console.log("Result type:", typeof result)
-        console.log("Result keys:", result ? Object.keys(result) : "null")
-
         // Check if sign-in was successful - look for either user data or successful response
         const isSuccess =
           result &&
@@ -74,7 +70,6 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
 
             // Fetch fresh session data and immediately update the query cache
             const sessionData = await fetchSessionData()
-            console.log("Fresh session data after sign-in:", sessionData)
 
             // Only navigate if session was actually established
             if (sessionData?.authenticated) {
@@ -98,15 +93,13 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             } else {
               toast.error("Sign in successful but session not established. Please try again.")
             }
-          } catch (error) {
-            console.error("Failed to refresh session data:", error)
+          } catch (_error) {
             toast.error("Sign in failed. Please try again.")
           }
         } else {
           toast.error("Sign in failed - invalid credentials")
         }
-      } catch (error) {
-        console.error("Sign in error:", error)
+      } catch (_error) {
         toast.error("Sign in failed")
       }
     },

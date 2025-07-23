@@ -87,7 +87,7 @@ app.get("/api/private-data", async (c) => {
       message: "This is private data",
       user: session.user,
     })
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: "Internal server error" }, 500)
   }
 })
@@ -106,8 +106,7 @@ app.get("*", async (c) => {
   try {
     const assetResponse = await c.env.ASSETS.fetch(c.req.raw)
     return assetResponse
-  } catch (error) {
-    console.error("Assets fetch error:", error)
+  } catch (_error) {
     return c.notFound()
   }
 })

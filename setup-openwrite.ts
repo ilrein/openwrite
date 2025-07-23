@@ -38,9 +38,6 @@ const dbOutput = execSync("npx wrangler d1 create openwrite-app", {
 // Extract database ID from output
 const dbMatch = dbOutput.match(/"database_id":\s*"([^"]+)"/)
 if (!dbMatch) {
-  console.error("Failed to extract database ID from Wrangler output:")
-  console.error(dbOutput)
-  console.error("Please check the Wrangler command output format")
   process.exit(1)
 }
 
@@ -48,7 +45,6 @@ const databaseId = dbMatch[1]
 
 // Validate the extracted database ID
 if (!databaseId || databaseId.length < 10) {
-  console.error(`Invalid database ID extracted: "${databaseId}"`)
   process.exit(1)
 }
 
@@ -79,21 +75,14 @@ devVarsContent = devVarsContent
 
 writeFileSync(devVarsPath, devVarsContent)
 try {
-  console.log("Generating database schema...")
   execSync("bun run db:generate", {
     stdio: "inherit",
     cwd: "./apps/server",
   })
-
-  console.log("Applying local migrations...")
   execSync("npx wrangler d1 migrations apply openwrite-app --local", {
     stdio: "inherit",
     cwd: "./apps/server",
   })
-
-  console.log("✅ OpenWrite setup completed successfully!")
-} catch (error) {
-  console.error("❌ Setup failed during database operations:")
-  console.error(error.message)
+} catch (_error) {
   process.exit(1)
 }

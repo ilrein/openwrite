@@ -61,9 +61,7 @@ export default function UserMenu() {
       // Invalidate session query to refresh UI
       queryClient.invalidateQueries({ queryKey: ["session"] })
       navigate({ to: "/" })
-    } catch (error) {
-      console.error("Sign out error:", error)
-    }
+    } catch (_error) {}
   }
 
   if (sessionQuery.isLoading) {

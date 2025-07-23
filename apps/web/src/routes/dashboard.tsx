@@ -71,13 +71,9 @@ function RouteComponent() {
 
   const handleContentUpdate = (newContent: string) => {
     setContent(newContent)
-    // Here you would typically save to your backend
-    console.log("Content updated:", newContent)
   }
 
   const handleSave = () => {
-    // Implement save functionality
-    console.log("Saving content:", content)
     // You could show a toast notification here
   }
 
@@ -96,9 +92,7 @@ function RouteComponent() {
       // Invalidate session query to refresh UI
       queryClient.invalidateQueries({ queryKey: ["session"] })
       navigate({ to: "/" })
-    } catch (error) {
-      console.error("Sign out error:", error)
-    }
+    } catch (_error) {}
   }
 
   if (sessionQuery.isLoading) {
@@ -122,24 +116,24 @@ function RouteComponent() {
       title: "Documents",
       items: [
         { title: "New Document", icon: Plus, action: () => setContent("<p>New document...</p>") },
-        { title: "Recent Files", icon: FileText, action: () => console.log("Recent files") },
-        { title: "All Documents", icon: FolderOpen, action: () => console.log("All documents") },
+        { title: "Recent Files", icon: FileText, action: () => {} },
+        { title: "All Documents", icon: FolderOpen, action: () => {} },
       ],
     },
     {
       title: "Actions",
       items: [
         { title: "Save", icon: Save, action: handleSave },
-        { title: "Export", icon: Download, action: () => console.log("Export") },
-        { title: "Share", icon: Share, action: () => console.log("Share") },
+        { title: "Export", icon: Download, action: () => {} },
+        { title: "Share", icon: Share, action: () => {} },
       ],
     },
     {
       title: "Tools",
       items: [
-        { title: "Writing Stats", icon: BarChart3, action: () => console.log("Stats") },
-        { title: "Writing Tools", icon: PenTool, action: () => console.log("Tools") },
-        { title: "Calendar", icon: Calendar, action: () => console.log("Calendar") },
+        { title: "Writing Stats", icon: BarChart3, action: () => {} },
+        { title: "Writing Tools", icon: PenTool, action: () => {} },
+        { title: "Calendar", icon: Calendar, action: () => {} },
       ],
     },
   ]

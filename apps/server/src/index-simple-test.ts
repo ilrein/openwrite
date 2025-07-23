@@ -10,9 +10,7 @@ export default {
     // Handle API routes first
     if (url.pathname.startsWith("/api/")) {
       if (url.pathname === "/api/health") {
-        return new Response(JSON.stringify({ status: "ok" }), {
-          headers: { "Content-Type": "application/json" },
-        })
+        return Response.json({ status: "ok" })
       }
       return new Response("API route not found", { status: 404 })
     }

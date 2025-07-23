@@ -80,7 +80,7 @@ openApiApp.openapi(userInfoRoute, async (c) => {
       },
       200
     )
-  } catch (error) {
+  } catch (_error) {
     return c.json(
       {
         authenticated: false,
