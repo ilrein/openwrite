@@ -10,7 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { rpc } from "@/utils/orpc"
+import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/novel/$novelId")({
   component: NovelLayout,
@@ -23,7 +23,7 @@ function NovelLayout() {
   const { data: novel, isLoading } = useQuery({
     queryKey: ["novel", id],
     queryFn: async () => {
-      const result = await rpc.novel.get.query({ id })
+      const result = await api.novels.get(id)
       return result
     },
   })

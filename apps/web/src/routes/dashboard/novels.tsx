@@ -31,31 +31,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { rpc } from "@/utils/orpc"
+import { api, type Novel } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/novels")({
   component: NovelsPage,
 })
-
-interface Novel {
-  id: string
-  title: string
-  description: string | null
-  genre: string | null
-  status: string
-  visibility: string
-  targetWordCount: number | null
-  currentWordCount: number
-  createdAt: string
-  updatedAt: string
-}
 
 interface CreateNovelForm {
   title: string
   description: string
   genre: string
   targetWordCount: string
-  visibility: string
+  visibility: "private" | "team" | "organization" | "public"
 }
 
 function NovelsPage() {
@@ -73,7 +60,7 @@ function NovelsPage() {
   const { data: novels, isLoading } = useQuery({
     queryKey: ["novels"],
     queryFn: async () => {
-      const result = await rpc.novel.list.query()
+      const result = await api.novels.list()
       return result
     },
   })
@@ -81,7 +68,7 @@ function NovelsPage() {
   // Create novel mutation
   const createNovelMutation = useMutation({
     mutationFn: async (data: CreateNovelForm) => {
-      const result = await rpc.novel.create.mutate({
+      const result = await api.novels.create({
         title: data.title,
         description: data.description || null,
         genre: data.genre || null,
@@ -220,7 +207,7 @@ function NovelsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="visibility">Visibility</Label>
                     <Select
-                      onValueChange={(value) =>
+                      onValueChange={(value: "private" | "team" | "organization" | "public") =>
                         setCreateForm((prev) => ({ ...prev, visibility: value }))
                       }
                       value={createForm.visibility}

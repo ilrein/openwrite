@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import TiptapEditor from "@/components/tiptap-editor"
-import { rpc } from "@/utils/orpc"
+import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/novel/$novelId/write")({
   component: NovelWritePage,
@@ -14,7 +14,7 @@ function NovelWritePage() {
   const { data: novel, isLoading } = useQuery({
     queryKey: ["novel", id],
     queryFn: async () => {
-      const result = await rpc.novel.get.query({ id })
+      const result = await api.novels.get(id)
       return result
     },
   })
