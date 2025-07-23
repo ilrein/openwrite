@@ -5,6 +5,7 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
+import { Underline } from "@tiptap/extension-underline"
 import { Selection } from "@tiptap/extensions"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 // --- Tiptap Core Extensions ---
@@ -185,6 +186,27 @@ export function SimpleEditor() {
           openOnClick: false,
           enableClickSelection: true,
         },
+        // Ensure mark extensions are properly configured with built-in shortcuts
+        bold: {
+          HTMLAttributes: {
+            class: "font-bold",
+          },
+        },
+        italic: {
+          HTMLAttributes: {
+            class: "italic",
+          },
+        },
+        strike: {
+          HTMLAttributes: {
+            class: "line-through",
+          },
+        },
+        code: {
+          HTMLAttributes: {
+            class: "rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm",
+          },
+        },
       }),
       HorizontalRule,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -193,6 +215,11 @@ export function SimpleEditor() {
       Highlight.configure({ multicolor: true }),
       Image,
       Typography,
+      Underline.configure({
+        HTMLAttributes: {
+          class: "underline",
+        },
+      }), // Add underline support
       Superscript,
       Subscript,
       Selection,

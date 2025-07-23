@@ -40,5 +40,6 @@ export function useTiptapEditor(providedEditor?: Editor | null): {
     },
   })
 
-  return editorState || { editor: null }
+  // Ensure we always return the editor instance even if editorState fails
+  return editorState || { editor: mainEditor }
 }

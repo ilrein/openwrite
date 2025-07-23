@@ -23,7 +23,7 @@ const SIDEBAR_STORAGE_KEY = "sidebar_state"
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
-const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+const SIDEBAR_KEYBOARD_SHORTCUT = "\\"
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed"
@@ -86,6 +86,19 @@ function SidebarProvider({
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
+        // Don't intercept if focus is in an editable element
+        const activeElement = document.activeElement as HTMLElement | null
+        if (
+          activeElement &&
+          (activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            activeElement.isContentEditable ||
+            activeElement.closest('[contenteditable="true"]') ||
+            activeElement.closest(".tiptap-editor-content"))
+        ) {
+          return
+        }
+
         event.preventDefault()
         toggleSidebar()
       }

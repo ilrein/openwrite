@@ -2,7 +2,6 @@
 
 import type { Editor } from "@tiptap/react"
 import * as React from "react"
-import { useHotkeys } from "react-hotkeys-hook"
 // --- Icons ---
 import { BoldIcon } from "@/components/tiptap-icons/bold-icon"
 import { Code2Icon } from "@/components/tiptap-icons/code2-icon"
@@ -79,10 +78,16 @@ export function canToggleMark(editor: Editor | null, type: Mark): boolean {
  * Checks if a mark is currently active
  */
 export function isMarkActive(editor: Editor | null, type: Mark): boolean {
-  if (!editor?.isEditable) {
+  if (!(editor?.isEditable && editor.state)) {
     return false
   }
-  return editor.isActive(type)
+
+  try {
+    return editor.isActive(type)
+  } catch (_error) {
+    // Silently handle errors when checking mark active state
+    return false
+  }
 }
 
 /**
@@ -172,24 +177,43 @@ export function useMark(config: UseMarkConfig) {
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
-  const canToggle = canToggleMark(editor, type)
-  const isActive = isMarkActive(editor, type)
 
+  // Use React state for reactive updates
+  const [canToggle, setCanToggle] = React.useState<boolean>(false)
+  const [isActive, setIsActive] = React.useState<boolean>(false)
+
+  // Update states when editor or selection changes
   React.useEffect(() => {
     if (!editor) {
+      setCanToggle(false)
+      setIsActive(false)
+      setIsVisible(false)
       return
     }
 
-    const handleSelectionUpdate = () => {
-      setIsVisible(shouldShowButton({ editor, type, hideWhenUnavailable }))
+    const updateStates = () => {
+      const newCanToggle = canToggleMark(editor, type)
+      const newIsActive = isMarkActive(editor, type)
+      const newIsVisible = shouldShowButton({ editor, type, hideWhenUnavailable })
+
+      setCanToggle(newCanToggle)
+      setIsActive(newIsActive)
+      setIsVisible(newIsVisible)
     }
 
-    handleSelectionUpdate()
+    // Initial update
+    updateStates()
 
-    editor.on("selectionUpdate", handleSelectionUpdate)
+    // Listen to all relevant editor events
+    const events = ["selectionUpdate", "transaction", "update", "focus", "blur"] as const
+    for (const event of events) {
+      editor.on(event, updateStates)
+    }
 
     return () => {
-      editor.off("selectionUpdate", handleSelectionUpdate)
+      for (const event of events) {
+        editor.off(event, updateStates)
+      }
     }
   }, [editor, type, hideWhenUnavailable])
 
@@ -205,18 +229,32 @@ export function useMark(config: UseMarkConfig) {
     return success
   }, [editor, type, onToggled])
 
-  useHotkeys(
-    MARK_SHORTCUT_KEYS[type],
-    (event) => {
-      event.preventDefault()
-      handleMark()
-    },
-    {
-      enabled: isVisible && canToggle,
-      enableOnContentEditable: true,
-      enableOnFormTags: true,
-    }
-  )
+  // Don't use custom hotkeys - let Tiptap handle them natively
+  // The keyboard shortcuts are handled by Tiptap's built-in extensions
+  // useHotkeys(
+  //   MARK_SHORTCUT_KEYS[type],
+  //   (event) => {
+  //     // Improved focus detection
+  //     const isEditorFocused = editor?.isFocused
+  //     const isInEditor = document.activeElement?.closest(".tiptap-editor-container, .tiptap-editor-content, .simple-editor-wrapper")
+  //     const hasEditor = !!editor?.isEditable
+  //
+  //     if (!hasEditor || !(isEditorFocused || isInEditor)) {
+  //       return
+  //     }
+
+  //     event.preventDefault()
+  //     event.stopPropagation()
+  //     handleMark()
+  //   },
+  //   {
+  //     enabled: !!editor && isVisible && canToggle,
+  //     enableOnContentEditable: true,
+  //     enableOnFormTags: true,
+  //     preventDefault: false, // Let the handler control preventDefault
+  //   },
+  //   [editor, isVisible, canToggle, handleMark] // Add dependencies
+  // )
 
   return {
     isVisible,
