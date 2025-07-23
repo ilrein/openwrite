@@ -9,7 +9,7 @@
     "serve": "vite preview",
     "start": "vite",
     "check-types": "tsc --noEmit",
-    "lint": "biome lint src",
+    "lint": "biome check src",
     "format": "biome format --write .",
     "wrangler:dev": "wrangler dev --port=3001",
     "deploy": "bun run build && wrangler deploy"

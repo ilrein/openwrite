@@ -1,7 +1,18 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { organization } from "better-auth/plugins"
 import { db } from "../db"
-import { account, session, user, verification } from "../db/schema/auth"
+import {
+  account,
+  invitation,
+  member,
+  organization as organizationTable,
+  session,
+  team,
+  teamMember,
+  user,
+  verification,
+} from "../db/schema"
 
 interface AuthEnv {
   CORS_ORIGIN: string
@@ -38,8 +49,61 @@ export function createAuthInstance(env: AuthEnv) {
           session,
           account,
           verification,
+          organization: organizationTable,
+          member,
+          invitation,
+          team,
+          teamMember,
         },
       }),
+      databaseHooks: {
+        user: {
+          create: {
+            after: async (createdUser) => {
+              // Automatically create a personal organization for new users
+              const orgId = crypto.randomUUID()
+              const memberId = crypto.randomUUID()
+              const now = new Date()
+
+              // Create personal organization
+              await db.insert(organizationTable).values({
+                id: orgId,
+                name: `${createdUser.name}'s Workspace`,
+                slug: `${createdUser.name.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
+                createdAt: now,
+                updatedAt: now,
+              })
+
+              // Add user as owner
+              await db.insert(member).values({
+                id: memberId,
+                userId: createdUser.id,
+                organizationId: orgId,
+                role: "owner",
+                createdAt: now,
+              })
+            },
+          },
+        },
+      },
+      plugins: [
+        organization({
+          // Enable teams/sub-organizations
+          teams: {
+            enabled: true,
+            maximumTeams: 10, // Limit teams per organization
+            allowRemovingAllTeams: false, // Prevent removing the last team
+          },
+          // Organization creation settings
+          organizationCreation: {
+            disabled: false,
+            afterCreate: async ({ organization: _createdOrg, user: _orgUser }) => {
+              // Set up default resources for manually created organizations
+              // Could add default resources, notifications, etc. here in the future
+            },
+          },
+        }),
+      ],
       trustedOrigins: [env.CORS_ORIGIN],
       emailAndPassword: {
         enabled: true,

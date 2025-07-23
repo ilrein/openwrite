@@ -14,6 +14,8 @@
     "check-types": "turbo check-types",
     "lint": "turbo lint",
     "format": "turbo format",
+    "quality": "turbo check-types lint",
+    "quality:fix": "biome check --write . && turbo check-types",
     "test": "turbo test",
     "clean": "turbo clean",
     "dev:native": "turbo -F native dev",
@@ -34,5 +36,5 @@
     "turbo": "^2.5.5",
     "ultracite": "5.0.47"
   },
-  "packageManager": "bun@1.2.19"
+  "packageManager": "bun@1.2.24"
 }
