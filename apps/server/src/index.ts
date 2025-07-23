@@ -45,20 +45,27 @@ app.get("/api/session", async (c) => {
     const session = await auth.api.getSession({
       headers: c.req.raw.headers,
     })
-    
+
     if (!session) {
       return c.json({ authenticated: false, session: null })
     }
-    
-    return c.json({ 
-      authenticated: true, 
+
+    return c.json({
+      authenticated: true,
       session: {
-        user: session.user
-      }
+        user: session.user,
+      },
     })
   } catch (error) {
     console.error("Session check error:", error)
-    return c.json({ authenticated: false, session: null, error: error instanceof Error ? error.message : 'Unknown error' }, 500)
+    return c.json(
+      {
+        authenticated: false,
+        session: null,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      500
+    )
   }
 })
 
@@ -68,14 +75,14 @@ app.get("/api/private-data", async (c) => {
     const session = await auth.api.getSession({
       headers: c.req.raw.headers,
     })
-    
+
     if (!session?.user) {
       return c.json({ error: "Unauthorized" }, 401)
     }
-    
+
     return c.json({
       message: "This is private data",
-      user: session.user
+      user: session.user,
     })
   } catch (error) {
     console.error("Private data error:", error)
@@ -86,12 +93,12 @@ app.get("/api/private-data", async (c) => {
 // Serve static assets (SPA) for non-API routes
 app.get("*", async (c) => {
   const url = new URL(c.req.url)
-  
+
   // If this is an API or RPC route, it should have been handled by earlier handlers
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/rpc/")) {
     return c.notFound()
   }
-  
+
   // For SPA: serve static files or fallback to index.html for client-side routing
   return c.env.ASSETS.fetch(c.req.raw)
 })

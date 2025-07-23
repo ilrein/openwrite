@@ -1,10 +1,10 @@
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import Typography from '@tiptap/extension-typography'
-import { Button } from './ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import { Separator } from './ui/separator'
+import Placeholder from "@tiptap/extension-placeholder"
+import Typography from "@tiptap/extension-typography"
+import { EditorContent, useEditor } from "@tiptap/react"
+import StarterKit from "@tiptap/starter-kit"
+import { Button } from "./ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Separator } from "./ui/separator"
 
 interface TiptapEditorProps {
   content?: string
@@ -12,10 +12,10 @@ interface TiptapEditorProps {
   placeholder?: string
 }
 
-export default function TiptapEditor({ 
-  content = '', 
+export default function TiptapEditor({
+  content = "",
   onUpdate,
-  placeholder = "Start writing..." 
+  placeholder = "Start writing...",
 }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -32,7 +32,7 @@ export default function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'mx-auto focus:outline-none min-h-[400px] p-4 text-foreground',
+        class: "mx-auto focus:outline-none min-h-[400px] p-4 text-foreground",
       },
     },
   })
@@ -48,44 +48,44 @@ export default function TiptapEditor({
           <CardTitle>Write</CardTitle>
           <div className="flex gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={editor.isActive("bold") ? "bg-secondary" : ""}
               disabled={!editor.can().chain().focus().toggleBold().run()}
-              className={editor.isActive('bold') ? 'bg-secondary' : ''}
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              size="sm"
+              variant="outline"
             >
               Bold
             </Button>
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={editor.isActive("italic") ? "bg-secondary" : ""}
               disabled={!editor.can().chain().focus().toggleItalic().run()}
-              className={editor.isActive('italic') ? 'bg-secondary' : ''}
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              size="sm"
+              variant="outline"
             >
               Italic
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              className={editor.isActive("heading", { level: 1 }) ? "bg-secondary" : ""}
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              className={editor.isActive('heading', { level: 1 }) ? 'bg-secondary' : ''}
+              size="sm"
+              variant="outline"
             >
               H1
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              className={editor.isActive("heading", { level: 2 }) ? "bg-secondary" : ""}
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className={editor.isActive('heading', { level: 2 }) ? 'bg-secondary' : ''}
+              size="sm"
+              variant="outline"
             >
               H2
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              className={editor.isActive("bulletList") ? "bg-secondary" : ""}
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={editor.isActive('bulletList') ? 'bg-secondary' : ''}
+              size="sm"
+              variant="outline"
             >
               List
             </Button>

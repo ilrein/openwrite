@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft } from "lucide-react"
 
 export const Route = createFileRoute("/privacy")({
   component: RouteComponent,
@@ -13,16 +13,14 @@ function RouteComponent() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <Button variant="ghost" asChild className="mb-4">
-          <Link to="/" className="flex items-center gap-2">
+        <Button asChild className="mb-4" variant="ghost">
+          <Link className="flex items-center gap-2" to="/">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-muted-foreground">
-          Last updated: {new Date().toLocaleDateString()}
-        </p>
+        <h1 className="mb-2 font-bold text-3xl">Privacy Policy</h1>
+        <p className="text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
       </div>
 
       <div className="space-y-8">
@@ -33,9 +31,9 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
             <p>
-              OpenWrite ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy 
-              explains how we collect, use, disclose, and safeguard your information when you use our 
-              AI-powered writing platform.
+              OpenWrite ("we," "our," or "us") is committed to protecting your privacy. This Privacy
+              Policy explains how we collect, use, disclose, and safeguard your information when you
+              use our AI-powered writing platform.
             </p>
           </CardContent>
         </Card>
@@ -52,7 +50,7 @@ function RouteComponent() {
               <li>Name (optional, for personalization)</li>
               <li>Writing content and documents you create</li>
             </ul>
-            
+
             <h3>Automatically Collected Information</h3>
             <ul>
               <li>Usage data and analytics</li>
@@ -88,13 +86,14 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
             <p>
-              Your data is stored securely using industry-standard encryption. We use Cloudflare D1 
-              for data storage, which provides enterprise-grade security and compliance. Your writing 
-              content is encrypted both in transit and at rest.
+              Your data is stored securely using industry-standard encryption. We use Cloudflare D1
+              for data storage, which provides enterprise-grade security and compliance. Your
+              writing content is encrypted both in transit and at rest.
             </p>
             <p>
-              We implement appropriate technical and organizational measures to protect your personal 
-              information against unauthorized access, alteration, disclosure, or destruction.
+              We implement appropriate technical and organizational measures to protect your
+              personal information against unauthorized access, alteration, disclosure, or
+              destruction.
             </p>
           </CardContent>
         </Card>
@@ -105,7 +104,10 @@ function RouteComponent() {
             <CardTitle>Data Sharing and Disclosure</CardTitle>
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
-            <p>We do not sell, trade, or otherwise transfer your personal information to third parties, except:</p>
+            <p>
+              We do not sell, trade, or otherwise transfer your personal information to third
+              parties, except:
+            </p>
             <ul>
               <li>With your explicit consent</li>
               <li>To comply with legal obligations</li>
@@ -113,8 +115,8 @@ function RouteComponent() {
               <li>In connection with a business transfer or merger</li>
             </ul>
             <p>
-              We may use anonymized and aggregated data for research and analytics purposes that cannot 
-              be used to identify individual users.
+              We may use anonymized and aggregated data for research and analytics purposes that
+              cannot be used to identify individual users.
             </p>
           </CardContent>
         </Card>
@@ -135,7 +137,7 @@ function RouteComponent() {
               <li>Withdraw consent where applicable</li>
             </ul>
             <p>
-              To exercise these rights, please contact us using the information provided in the 
+              To exercise these rights, please contact us using the information provided in the
               "Contact Us" section below.
             </p>
           </CardContent>
@@ -148,13 +150,14 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
             <p>
-              We use cookies and similar technologies to enhance your experience, remember your 
-              preferences, and analyze usage patterns. You can control cookie preferences through 
+              We use cookies and similar technologies to enhance your experience, remember your
+              preferences, and analyze usage patterns. You can control cookie preferences through
               your browser settings.
             </p>
             <p>
-              Essential cookies are necessary for the platform to function properly and cannot be 
-              disabled. Optional cookies help us improve our services and can be disabled at any time.
+              Essential cookies are necessary for the platform to function properly and cannot be
+              disabled. Optional cookies help us improve our services and can be disabled at any
+              time.
             </p>
           </CardContent>
         </Card>
@@ -166,18 +169,18 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
             <p>
-              OpenWrite is an open-source project licensed under AGPL-3.0. Our source code is 
-              publicly available on GitHub, allowing for transparency and community review of our 
+              OpenWrite is an open-source project licensed under AGPL-3.0. Our source code is
+              publicly available on GitHub, allowing for transparency and community review of our
               privacy and security practices.
             </p>
             <p>
-              You can review our data handling practices, security implementations, and privacy 
+              You can review our data handling practices, security implementations, and privacy
               measures by examining our source code at{" "}
-              <a 
-                href="https://github.com/ilrein/openwrite" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <a
                 className="text-primary hover:underline"
+                href="https://github.com/ilrein/openwrite"
+                rel="noopener noreferrer"
+                target="_blank"
               >
                 github.com/ilrein/openwrite
               </a>
@@ -193,13 +196,13 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
             <p>
-              We may update this Privacy Policy from time to time. We will notify you of any 
-              significant changes by posting the new Privacy Policy on this page and updating 
-              the "Last updated" date.
+              We may update this Privacy Policy from time to time. We will notify you of any
+              significant changes by posting the new Privacy Policy on this page and updating the
+              "Last updated" date.
             </p>
             <p>
-              Your continued use of OpenWrite after any changes indicates your acceptance of 
-              the updated Privacy Policy.
+              Your continued use of OpenWrite after any changes indicates your acceptance of the
+              updated Privacy Policy.
             </p>
           </CardContent>
         </Card>
@@ -211,24 +214,22 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
             <p>
-              If you have any questions about this Privacy Policy or our privacy practices, 
-              please contact us:
+              If you have any questions about this Privacy Policy or our privacy practices, please
+              contact us:
             </p>
             <ul>
               <li>
                 GitHub Issues:{" "}
-                <a 
-                  href="https://github.com/ilrein/openwrite/issues" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                <a
                   className="text-primary hover:underline"
+                  href="https://github.com/ilrein/openwrite/issues"
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   github.com/ilrein/openwrite/issues
                 </a>
               </li>
-              <li>
-                Email: Available through our GitHub profile
-              </li>
+              <li>Email: Available through our GitHub profile</li>
             </ul>
           </CardContent>
         </Card>

@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form"
-import { useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
 import z from "zod"
 import { authClient } from "@/lib/auth-client"
@@ -36,42 +36,43 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             },
           }
         )
-        
+
         // Check if sign-up was successful (user object exists)
         if (result && (result as any)?.user) {
           toast.success("Sign up successful")
-          
+
           // Function to fetch fresh session data
           const fetchSessionData = async () => {
-            const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
-              import.meta.env.VITE_SERVER_URL : 
-              window.location.origin
-            
+            const baseUrl =
+              import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+                ? import.meta.env.VITE_SERVER_URL
+                : window.location.origin
+
             const response = await fetch(`${baseUrl}/api/session`, {
-              credentials: 'include'
+              credentials: "include",
             })
-            
+
             if (!response.ok) {
-              throw new Error('Failed to fetch session')
+              throw new Error("Failed to fetch session")
             }
-            
+
             return response.json()
           }
-          
+
           try {
             // Wait a moment for cookies to be set
-            await new Promise(resolve => setTimeout(resolve, 200))
-            
+            await new Promise((resolve) => setTimeout(resolve, 200))
+
             // Fetch fresh session data and immediately update the query cache
             const sessionData = await fetchSessionData()
             console.log("Fresh session data after sign-up:", sessionData)
-            
+
             // Set the session data in the query cache to immediately update all components
-            queryClient.setQueryData(['session'], sessionData)
-            
+            queryClient.setQueryData(["session"], sessionData)
+
             // Also trigger a refetch to ensure all instances are updated
-            queryClient.invalidateQueries({ queryKey: ['session'] })
-            
+            queryClient.invalidateQueries({ queryKey: ["session"] })
+
             // Navigate to dashboard
             navigate({
               to: "/dashboard",

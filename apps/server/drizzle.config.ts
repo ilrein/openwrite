@@ -7,16 +7,20 @@ function getLocalD1Path(): string {
   const wranglerDir = ".wrangler/state/v3/d1/miniflare-D1DatabaseObject"
   try {
     const files = readdirSync(wranglerDir)
-    const sqliteFile = files.find(file => file.endsWith('.sqlite'))
+    const sqliteFile = files.find((file) => file.endsWith(".sqlite"))
     if (!sqliteFile) {
-      throw new Error(`No SQLite file found in ${wranglerDir}. Run 'wrangler dev' first to initialize the local database.`)
+      throw new Error(
+        `No SQLite file found in ${wranglerDir}. Run 'wrangler dev' first to initialize the local database.`
+      )
     }
     return join(wranglerDir, sqliteFile)
   } catch (error) {
-    if (error instanceof Error && error.message.includes('No SQLite file found')) {
+    if (error instanceof Error && error.message.includes("No SQLite file found")) {
       throw error
     }
-    throw new Error(`Unable to access local D1 database directory: ${wranglerDir}. Run 'wrangler dev' first to initialize the local database.`)
+    throw new Error(
+      `Unable to access local D1 database directory: ${wranglerDir}. Run 'wrangler dev' first to initialize the local database.`
+    )
   }
 }
 
@@ -26,19 +30,21 @@ function validateRemoteCredentials(): void {
   const databaseId = process.env.CLOUDFLARE_DATABASE_ID
   const token = process.env.CLOUDFLARE_D1_TOKEN
 
-  if (!accountId || !databaseId || !token) {
+  if (!(accountId && databaseId && token)) {
     const missing: string[] = []
     if (!accountId) {
-      missing.push('CLOUDFLARE_ACCOUNT_ID')
+      missing.push("CLOUDFLARE_ACCOUNT_ID")
     }
     if (!databaseId) {
-      missing.push('CLOUDFLARE_DATABASE_ID')
+      missing.push("CLOUDFLARE_DATABASE_ID")
     }
     if (!token) {
-      missing.push('CLOUDFLARE_D1_TOKEN')
+      missing.push("CLOUDFLARE_D1_TOKEN")
     }
-    
-    throw new Error(`Missing required environment variables for remote D1 configuration: ${missing.join(', ')}`)
+
+    throw new Error(
+      `Missing required environment variables for remote D1 configuration: ${missing.join(", ")}`
+    )
   }
 }
 
@@ -61,7 +67,7 @@ try {
   if (process.env.NODE_ENV !== "production" && !process.env.CLOUDFLARE_D1_TOKEN) {
     throw error
   }
-  
+
   // If we're trying to use remote but validation failed, this is also an error
   validateRemoteCredentials()
 }

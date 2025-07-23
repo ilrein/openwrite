@@ -9,12 +9,12 @@ function RouteComponent() {
   const navigate = Route.useNavigate()
 
   return (
-    <LoginBlock 
-      mode="signup" 
+    <LoginBlock
+      mode="signup"
       onModeChange={() => {
         // Navigate to login page when switching to signin
         navigate({ to: "/login" })
-      }} 
+      }}
     />
   )
 }

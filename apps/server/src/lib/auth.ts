@@ -37,7 +37,7 @@ export function createAuthInstance(env: any) {
       baseURL: env.BETTER_AUTH_URL,
     })
   }
-  
+
   return authInstance
 }
 

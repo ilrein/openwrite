@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form"
-import { useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
 import z from "zod"
 import { authClient } from "@/lib/auth-client"
@@ -34,63 +34,63 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             },
           }
         )
-        
-        
+
         console.log("Better Auth sign-in result:", result)
         console.log("Result type:", typeof result)
-        console.log("Result keys:", result ? Object.keys(result) : 'null')
-        
+        console.log("Result keys:", result ? Object.keys(result) : "null")
+
         // Check if sign-in was successful - look for either user data or successful response
-        const isSuccess = result && (
-          (result as any)?.user || 
-          (result as any)?.data?.user ||
-          // If no errors and we got a response, consider it successful
-          (result && typeof result === 'object' && !(result as any)?.error)
-        )
-        
+        const isSuccess =
+          result &&
+          ((result as any)?.user ||
+            (result as any)?.data?.user ||
+            // If no errors and we got a response, consider it successful
+            (result && typeof result === "object" && !(result as any)?.error))
+
         if (isSuccess) {
           toast.success("Sign in successful")
-          
+
           // Function to fetch fresh session data
           const fetchSessionData = async () => {
-            const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
-              import.meta.env.VITE_SERVER_URL : 
-              window.location.origin
-            
+            const baseUrl =
+              import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+                ? import.meta.env.VITE_SERVER_URL
+                : window.location.origin
+
             const response = await fetch(`${baseUrl}/api/session`, {
-              credentials: 'include'
+              credentials: "include",
             })
-            
+
             if (!response.ok) {
-              throw new Error('Failed to fetch session')
+              throw new Error("Failed to fetch session")
             }
-            
+
             return response.json()
           }
-          
+
           try {
             // Wait a moment for cookies to be set
-            await new Promise(resolve => setTimeout(resolve, 200))
-            
+            await new Promise((resolve) => setTimeout(resolve, 200))
+
             // Fetch fresh session data and immediately update the query cache
             const sessionData = await fetchSessionData()
             console.log("Fresh session data after sign-in:", sessionData)
-            
+
             // Only navigate if session was actually established
             if (sessionData?.authenticated) {
               // Set the session data in the query cache to immediately update all components
-              queryClient.setQueryData(['session'], sessionData)
-              
+              queryClient.setQueryData(["session"], sessionData)
+
               // Force all components to re-render by invalidating and refetching
-              await queryClient.invalidateQueries({ queryKey: ['session'] })
-              await queryClient.refetchQueries({ 
-                queryKey: ['session'],
-                type: 'all'
+              await queryClient.invalidateQueries({ queryKey: ["session"] })
+              await queryClient.refetchQueries({
+                queryKey: ["session"],
+                type: "all",
               })
-              
+
               // Wait a moment for all components to re-render with new data
-              await new Promise(resolve => setTimeout(resolve, 100))
-              
+              await new Promise((resolve) => setTimeout(resolve, 100))
+
               // Navigate to dashboard
               navigate({
                 to: "/dashboard",

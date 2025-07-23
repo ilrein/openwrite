@@ -1,15 +1,14 @@
-import { useState } from "react"
-import { Link } from "@tanstack/react-router"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { PenTool, Eye, EyeOff } from "lucide-react"
 import { useForm } from "@tanstack/react-form"
-import { useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { Eye, EyeOff, PenTool } from "lucide-react"
+import { useState } from "react"
 import { toast } from "sonner"
 import z from "zod"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/auth-client"
 
 interface LoginBlockProps {
@@ -31,65 +30,69 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
     },
     onSubmit: async ({ value }) => {
       try {
-        const result = mode === "signin" 
-          ? await authClient.signIn.email({
-              email: value.email,
-              password: value.password,
-            })
-          : await authClient.signUp.email({
-              email: value.email,
-              password: value.password,
-              name: value.name!,
-            })
+        const result =
+          mode === "signin"
+            ? await authClient.signIn.email({
+                email: value.email,
+                password: value.password,
+              })
+            : await authClient.signUp.email({
+                email: value.email,
+                password: value.password,
+                name: value.name!,
+              })
 
         console.log("Auth result:", result)
 
         // Check if authentication was successful
         if (result && (result as any)?.user) {
           toast.success(`${mode === "signin" ? "Sign in" : "Sign up"} successful`)
-          
+
           // Function to fetch fresh session data
           const fetchSessionData = async () => {
-            const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
-              import.meta.env.VITE_SERVER_URL : 
-              window.location.origin
-            
+            const baseUrl =
+              import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+                ? import.meta.env.VITE_SERVER_URL
+                : window.location.origin
+
             const response = await fetch(`${baseUrl}/api/session`, {
-              credentials: 'include'
+              credentials: "include",
             })
-            
+
             if (!response.ok) {
-              throw new Error('Failed to fetch session')
+              throw new Error("Failed to fetch session")
             }
-            
+
             return response.json()
           }
-          
+
           try {
             // Wait a moment for cookies to be set
-            await new Promise(resolve => setTimeout(resolve, 200))
-            
+            await new Promise((resolve) => setTimeout(resolve, 200))
+
             // Fetch fresh session data and immediately update the query cache
             const sessionData = await fetchSessionData()
-            
+
             // Only navigate if session was actually established
             if (sessionData?.authenticated) {
               // Set the session data in the query cache to immediately update all components
-              queryClient.setQueryData(['session'], sessionData)
-              
+              queryClient.setQueryData(["session"], sessionData)
+
               // Force all components to re-render by invalidating and refetching
-              await queryClient.invalidateQueries({ queryKey: ['session'] })
-              await queryClient.refetchQueries({ 
-                queryKey: ['session'],
-                type: 'all'
+              await queryClient.invalidateQueries({ queryKey: ["session"] })
+              await queryClient.refetchQueries({
+                queryKey: ["session"],
+                type: "all",
               })
-              
+
               // Navigate to dashboard
               navigate({
                 to: "/dashboard",
               })
             } else {
-              toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} successful but session not established. Please try again.`)
+              toast.error(
+                `${mode === "signin" ? "Sign in" : "Sign up"} successful but session not established. Please try again.`
+              )
             }
           } catch (error) {
             console.error("Failed to refresh session data:", error)
@@ -143,32 +146,28 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
         <div className="flex flex-col gap-6">
           {/* Header */}
           <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="mb-6 flex items-center gap-3">
               <PenTool className="h-8 w-8" />
-              <span className="text-2xl font-bold">OpenWrite</span>
+              <span className="font-bold text-2xl">OpenWrite</span>
             </div>
-            <h1 className="text-xl font-semibold tracking-tight">
+            <h1 className="font-semibold text-xl tracking-tight">
               {mode === "signin" ? "Welcome back" : "Create an account"}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {mode === "signin" 
-                ? "Enter your credentials to sign in to your account" 
-                : "Enter your information to create your account"
-              }
+            <p className="text-muted-foreground text-sm">
+              {mode === "signin"
+                ? "Enter your credentials to sign in to your account"
+                : "Enter your information to create your account"}
             </p>
           </div>
 
           {/* Form */}
           <Card>
             <CardHeader className="space-y-1">
-              <CardTitle className="text-lg">
-                {mode === "signin" ? "Sign in" : "Sign up"}
-              </CardTitle>
+              <CardTitle className="text-lg">{mode === "signin" ? "Sign in" : "Sign up"}</CardTitle>
               <CardDescription>
-                {mode === "signin" 
-                  ? "Enter your email and password below" 
-                  : "Create your account to get started"
-                }
+                {mode === "signin"
+                  ? "Enter your email and password below"
+                  : "Create your account to get started"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -189,13 +188,13 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                           <Input
                             id={field.name}
                             name={field.name}
-                            placeholder="John Doe"
-                            value={field.state.value || ""}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="John Doe"
+                            value={field.state.value || ""}
                           />
                           {field.state.meta.errors.map((error, index) => (
-                            <p className="text-sm text-destructive" key={index}>
+                            <p className="text-destructive text-sm" key={index}>
                               {String(error)}
                             </p>
                           ))}
@@ -213,14 +212,14 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                         <Input
                           id={field.name}
                           name={field.name}
-                          type="email"
-                          placeholder="you@example.com"
-                          value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="you@example.com"
+                          type="email"
+                          value={field.state.value}
                         />
                         {field.state.meta.errors.map((error, index) => (
-                          <p className="text-sm text-destructive" key={index}>
+                          <p className="text-destructive text-sm" key={index}>
                             {String(error)}
                           </p>
                         ))}
@@ -238,18 +237,18 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                           <Input
                             id={field.name}
                             name={field.name}
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
-                            value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="Enter your password"
+                            type={showPassword ? "text" : "password"}
+                            value={field.state.value}
                           />
                           <Button
+                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                            size="sm"
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
                           >
                             {showPassword ? (
                               <EyeOff className="h-4 w-4" />
@@ -259,7 +258,7 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                           </Button>
                         </div>
                         {field.state.meta.errors.map((error, index) => (
-                          <p className="text-sm text-destructive" key={index}>
+                          <p className="text-destructive text-sm" key={index}>
                             {String(error)}
                           </p>
                         ))}
@@ -271,16 +270,15 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                 <form.Subscribe>
                   {(state) => (
                     <Button
-                      type="submit"
                       className="w-full"
                       disabled={!state.canSubmit || state.isSubmitting}
+                      type="submit"
                     >
-                      {state.isSubmitting 
-                        ? "Processing..." 
-                        : mode === "signin" 
-                          ? "Sign in" 
-                          : "Create account"
-                      }
+                      {state.isSubmitting
+                        ? "Processing..."
+                        : mode === "signin"
+                          ? "Sign in"
+                          : "Create account"}
                     </Button>
                   )}
                 </form.Subscribe>
@@ -294,9 +292,9 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
               <>
                 Don't have an account?{" "}
                 <Button
-                  variant="link"
-                  className="p-0 h-auto font-semibold"
+                  className="h-auto p-0 font-semibold"
                   onClick={() => onModeChange("signup")}
+                  variant="link"
                 >
                   Sign up
                 </Button>
@@ -305,9 +303,9 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
               <>
                 Already have an account?{" "}
                 <Button
-                  variant="link"
-                  className="p-0 h-auto font-semibold"
+                  className="h-auto p-0 font-semibold"
                   onClick={() => onModeChange("signin")}
+                  variant="link"
                 >
                   Sign in
                 </Button>
@@ -315,13 +313,13 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
             )}
           </div>
 
-          <p className="px-8 text-center text-sm text-muted-foreground">
+          <p className="px-8 text-center text-muted-foreground text-sm">
             By clicking continue, you agree to our{" "}
-            <Link to="/terms" className="underline underline-offset-4 hover:text-primary">
+            <Link className="underline underline-offset-4 hover:text-primary" to="/terms">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link to="/privacy" className="underline underline-offset-4 hover:text-primary">
+            <Link className="underline underline-offset-4 hover:text-primary" to="/privacy">
               Privacy Policy
             </Link>
             .

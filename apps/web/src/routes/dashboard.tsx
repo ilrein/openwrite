@@ -1,7 +1,30 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import {
+  BarChart3,
+  Calendar,
+  ChevronUp,
+  Download,
+  FileText,
+  FolderOpen,
+  LogOut,
+  PenTool,
+  Plus,
+  Save,
+  Settings,
+  Share,
+  User,
+} from "lucide-react"
 import { useEffect, useState } from "react"
 import TiptapEditor from "@/components/tiptap-editor"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -17,65 +40,40 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { 
-  FileText, 
-  FolderOpen, 
-  Plus, 
-  Settings, 
-  User,
-  BarChart3,
-  PenTool,
-  Save,
-  Download,
-  Share,
-  Calendar,
-  LogOut,
-  ChevronUp
-} from "lucide-react"
-import { useQueryClient } from "@tanstack/react-query"
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 })
 
 async function fetchSession() {
-  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
-    import.meta.env.VITE_SERVER_URL : 
-    window.location.origin
-  
+  const baseUrl =
+    import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+      ? import.meta.env.VITE_SERVER_URL
+      : window.location.origin
+
   const response = await fetch(`${baseUrl}/api/session`, {
-    credentials: 'include'
+    credentials: "include",
   })
-  
+
   if (!response.ok) {
-    throw new Error('Failed to fetch session')
+    throw new Error("Failed to fetch session")
   }
-  
+
   return response.json()
 }
-
 
 function RouteComponent() {
   const navigate = Route.useNavigate()
   const queryClient = useQueryClient()
-  const [content, setContent] = useState('<p>Welcome to your writing space! Start typing...</p>')
+  const [content, setContent] = useState("<p>Welcome to your writing space! Start typing...</p>")
 
   const sessionQuery = useQuery({
-    queryKey: ['session'],
+    queryKey: ["session"],
     queryFn: fetchSession,
     retry: 2,
     staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache
+    gcTime: 0, // Don't cache
   })
-
 
   useEffect(() => {
     // Only redirect if query is not loading and definitely not authenticated
@@ -89,31 +87,32 @@ function RouteComponent() {
   const handleContentUpdate = (newContent: string) => {
     setContent(newContent)
     // Here you would typically save to your backend
-    console.log('Content updated:', newContent)
+    console.log("Content updated:", newContent)
   }
 
   const handleSave = () => {
     // Implement save functionality
-    console.log('Saving content:', content)
+    console.log("Saving content:", content)
     // You could show a toast notification here
   }
 
   const handleSignOut = async () => {
     try {
-      const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
-        import.meta.env.VITE_SERVER_URL : 
-        window.location.origin
-      
+      const baseUrl =
+        import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+          ? import.meta.env.VITE_SERVER_URL
+          : window.location.origin
+
       await fetch(`${baseUrl}/api/auth/sign-out`, {
-        method: 'POST',
-        credentials: 'include'
+        method: "POST",
+        credentials: "include",
       })
-      
+
       // Invalidate session query to refresh UI
-      queryClient.invalidateQueries({ queryKey: ['session'] })
+      queryClient.invalidateQueries({ queryKey: ["session"] })
       navigate({ to: "/" })
     } catch (error) {
-      console.error('Sign out error:', error)
+      console.error("Sign out error:", error)
     }
   }
 
@@ -137,27 +136,27 @@ function RouteComponent() {
     {
       title: "Documents",
       items: [
-        { title: "New Document", icon: Plus, action: () => setContent('<p>New document...</p>') },
-        { title: "Recent Files", icon: FileText, action: () => console.log('Recent files') },
-        { title: "All Documents", icon: FolderOpen, action: () => console.log('All documents') },
-      ]
+        { title: "New Document", icon: Plus, action: () => setContent("<p>New document...</p>") },
+        { title: "Recent Files", icon: FileText, action: () => console.log("Recent files") },
+        { title: "All Documents", icon: FolderOpen, action: () => console.log("All documents") },
+      ],
     },
     {
       title: "Actions",
       items: [
         { title: "Save", icon: Save, action: handleSave },
-        { title: "Export", icon: Download, action: () => console.log('Export') },
-        { title: "Share", icon: Share, action: () => console.log('Share') },
-      ]
+        { title: "Export", icon: Download, action: () => console.log("Export") },
+        { title: "Share", icon: Share, action: () => console.log("Share") },
+      ],
     },
     {
       title: "Tools",
       items: [
-        { title: "Writing Stats", icon: BarChart3, action: () => console.log('Stats') },
-        { title: "Writing Tools", icon: PenTool, action: () => console.log('Tools') },
-        { title: "Calendar", icon: Calendar, action: () => console.log('Calendar') },
-      ]
-    }
+        { title: "Writing Stats", icon: BarChart3, action: () => console.log("Stats") },
+        { title: "Writing Tools", icon: PenTool, action: () => console.log("Tools") },
+        { title: "Calendar", icon: Calendar, action: () => console.log("Calendar") },
+      ],
+    },
   ]
 
   return (
@@ -170,7 +169,7 @@ function RouteComponent() {
               <span className="font-bold">OpenWrite</span>
             </div>
           </SidebarHeader>
-          
+
           <SidebarContent>
             {menuItems.map((group) => (
               <SidebarGroup key={group.title}>
@@ -179,7 +178,7 @@ function RouteComponent() {
                   <SidebarMenu>
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton onClick={item.action} className="w-full">
+                        <SidebarMenuButton className="w-full" onClick={item.action}>
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
                         </SidebarMenuButton>
@@ -190,7 +189,7 @@ function RouteComponent() {
               </SidebarGroup>
             ))}
           </SidebarContent>
-          
+
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -198,24 +197,24 @@ function RouteComponent() {
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton className="w-full">
                       <User className="h-4 w-4" />
-                      <span>{sessionQuery.data?.session?.user?.name || 'User'}</span>
+                      <span>{sessionQuery.data?.session?.user?.name || "User"}</span>
                       <ChevronUp className="ml-auto h-4 w-4" />
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    side="top" 
+                  <DropdownMenuContent
                     align="start"
-                    className="w-56 mb-2"
+                    className="mb-2 w-56"
+                    side="top"
                     sideOffset={8}
                   >
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Settings className="h-4 w-4 mr-2" />
+                      <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="h-4 w-4 mr-2" />
+                      <LogOut className="mr-2 h-4 w-4" />
                       <span>Sign Out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -230,15 +229,21 @@ function RouteComponent() {
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger />
             <div className="flex-1">
-              <h1 className="text-lg font-semibold">
-                Welcome back, {sessionQuery.data?.session?.user?.name || 'Writer'}!
+              <h1 className="font-semibold text-lg">
+                Welcome back, {sessionQuery.data?.session?.user?.name || "Writer"}!
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              <div className="text-sm text-muted-foreground">
-                {content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length} words
+              <div className="text-muted-foreground text-sm">
+                {
+                  content
+                    .replace(/<[^>]*>/g, "")
+                    .split(/\s+/)
+                    .filter((word) => word.length > 0).length
+                }{" "}
+                words
               </div>
-              <div className="text-sm text-green-600">Auto-saving</div>
+              <div className="text-green-600 text-sm">Auto-saving</div>
             </div>
           </header>
 

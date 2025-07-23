@@ -42,12 +42,12 @@ function RootComponent() {
   const isFetching = useRouterState({
     select: (s) => s.isLoading,
   })
-  
+
   const location = useRouterState({
     select: (s) => s.location.pathname,
   })
-  
-  const isDashboard = location === '/dashboard'
+
+  const isDashboard = location === "/dashboard"
 
   return (
     <>
@@ -60,9 +60,7 @@ function RootComponent() {
       >
         {isDashboard ? (
           // Dashboard uses its own layout with sidebar
-          <div className="h-svh">
-            {isFetching ? <Loader /> : <Outlet />}
-          </div>
+          <div className="h-svh">{isFetching ? <Loader /> : <Outlet />}</div>
         ) : (
           // Other pages use header layout
           <div className="grid h-svh grid-rows-[auto_1fr]">
