@@ -159,12 +159,12 @@ function CodexTypeInterface() {
             <IconComponent className="mx-auto mb-4 h-16 w-16 opacity-50" />
             <h3 className="mb-2 font-medium text-xl">No {config.title.toLowerCase()} yet</h3>
             <p className="mb-6 text-muted-foreground">
-              Create your first {type === "lore" ? "entry" : type.slice(0, -1)} to start building
+              Create your first {getSingularForm(type)} to start building
               your story world.
             </p>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add {type === "lore" ? "Entry" : type.slice(0, -1)}
+              Add {getSingularForm(type)}
             </Button>
           </div>
         )}
