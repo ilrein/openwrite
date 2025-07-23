@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { BookOpen, Clock, Plus, TrendingUp, Users } from "lucide-react"
+import { useEffect } from "react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,18 +15,52 @@ export const Route = createFileRoute("/dashboard/")({
 
 function DashboardHome() {
   // Fetch novels for overview
-  const { data: novels } = useQuery({
+  const {
+    data: novels,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["novels"],
     queryFn: async () => {
       const result = await api.novels.list()
       return result
     },
+    retry: 2,
+    retryDelay: 1000,
   })
+
+  // Handle error with toast notification
+  useEffect(() => {
+    if (isError && error) {
+      toast.error("Failed to load novels. Please try refreshing the page.")
+    }
+  }, [isError, error])
 
   const totalWords = novels?.reduce((sum, novel) => sum + novel.currentWordCount, 0) || 0
   const activeNovels =
     novels?.filter((novel) => novel.status === "in_progress" || novel.status === "draft") || []
   const recentNovels = novels?.slice(0, 3) || []
+
+  // Handle error state
+  if (isError) {
+    return (
+      <div className="p-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <h2 className="mb-2 font-semibold text-2xl text-destructive">
+                Unable to load dashboard
+              </h2>
+              <p className="mb-4 text-muted-foreground">
+                There was a problem loading your writing data. Please try refreshing the page.
+              </p>
+              <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-8">
