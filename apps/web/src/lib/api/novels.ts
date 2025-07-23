@@ -42,7 +42,10 @@ export interface UpdateNovelData {
 export const novelApi: ApiClient<Novel, CreateNovelData, UpdateNovelData> = {
   async list(): Promise<Novel[]> {
     const response = await apiCall("/api/novels")
-    return response.novels || []
+    if (!response || typeof response !== 'object') {
+      throw new Error('Invalid response format from novels API')
+    }
+    return Array.isArray(response.novels) ? response.novels : []
   },
 
   async get(id: string): Promise<Novel> {
