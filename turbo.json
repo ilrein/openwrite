@@ -7,6 +7,11 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".vitepress/dist/**", "worker.js"]
     },
+    "@openwrite/server#build": {
+      "dependsOn": ["@openwrite/web#build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*", "../web/dist/**"],
+      "outputs": []
+    },
     "lint": {
       "dependsOn": ["^lint"],
       "outputs": []
