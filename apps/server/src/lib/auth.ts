@@ -1,11 +1,17 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { db } from "../db"
-import * as schema from "../db/schema/auth"
+import { account, session, user, verification } from "../db/schema/auth"
+
+interface AuthEnv {
+  CORS_ORIGIN: string
+  BETTER_AUTH_SECRET: string
+  BETTER_AUTH_URL: string
+}
 
 let authInstance: ReturnType<typeof betterAuth> | null = null
 
-export function createAuthInstance(env: any) {
+export function createAuthInstance(env: AuthEnv) {
   if (!authInstance) {
     // Validate required environment variables
     const requiredVars = [
@@ -27,7 +33,12 @@ export function createAuthInstance(env: any) {
     authInstance = betterAuth({
       database: drizzleAdapter(db, {
         provider: "sqlite",
-        schema,
+        schema: {
+          user,
+          session,
+          account,
+          verification,
+        },
       }),
       trustedOrigins: [env.CORS_ORIGIN],
       emailAndPassword: {
@@ -42,4 +53,4 @@ export function createAuthInstance(env: any) {
 }
 
 // For backward compatibility, export a function that gets the auth instance
-export const getAuth = (env: any) => createAuthInstance(env)
+export const getAuth = (env: AuthEnv) => createAuthInstance(env)

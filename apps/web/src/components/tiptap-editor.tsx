@@ -26,8 +26,8 @@ export default function TiptapEditor({
       Typography,
     ],
     content,
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML()
+    onUpdate: ({ editor: editorInstance }) => {
+      const html = editorInstance.getHTML()
       onUpdate?.(html)
     },
     editorProps: {

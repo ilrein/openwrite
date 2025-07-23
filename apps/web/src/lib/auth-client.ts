@@ -19,9 +19,9 @@ function getAuthClient() {
 export const authClient = getAuthClient()
 
 // Singleton session fetcher to prevent multiple simultaneous calls
-let sessionPromise: Promise<any> | null = null
+let sessionPromise: Promise<unknown> | null = null
 
-export async function fetchSessionData() {
+export function fetchSessionData() {
   if (sessionPromise) {
     return sessionPromise
   }

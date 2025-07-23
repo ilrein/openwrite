@@ -1,4 +1,7 @@
 {
+  "files": {
+    "ignoreUnknown": true
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
@@ -12,11 +15,24 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": {
-        "noConsole": "warn"
-      },
       "correctness": {
         "noUnusedVariables": "warn"
+      },
+      "performance": {
+        "noNamespaceImport": "off",
+        "useTopLevelRegex": "warn"
+      },
+      "nursery": {
+        "noUnknownAtRule": "off",
+        "noShadow": "warn"
+      },
+      "suspicious": {
+        "noConsole": "warn",
+        "noEmptyBlockStatements": "warn",
+        "noDocumentCookie": "warn"
+      },
+      "style": {
+        "noNestedTernary": "warn"
       }
     }
   },

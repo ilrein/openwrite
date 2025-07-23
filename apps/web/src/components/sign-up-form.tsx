@@ -38,7 +38,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         )
 
         // Check if sign-up was successful (user object exists)
-        if (result && (result as any)?.user) {
+        if (result && typeof result === 'object' && 'user' in result && result.user) {
           toast.success("Sign up successful")
 
           // Function to fetch fresh session data
@@ -109,7 +109,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          void form.handleSubmit()
+          form.handleSubmit()
         }}
       >
         <div>

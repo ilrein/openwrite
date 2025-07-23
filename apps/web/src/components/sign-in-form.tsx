@@ -38,10 +38,11 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         // Check if sign-in was successful - look for either user data or successful response
         const isSuccess =
           result &&
-          ((result as any)?.user ||
-            (result as any)?.data?.user ||
+          ((typeof result === 'object' && 'user' in result && result.user) ||
+            (typeof result === 'object' && 'data' in result && 
+             typeof result.data === 'object' && result.data && 'user' in result.data && result.data.user) ||
             // If no errors and we got a response, consider it successful
-            (result && typeof result === "object" && !(result as any)?.error))
+            (result && typeof result === "object" && !('error' in result)))
 
         if (isSuccess) {
           toast.success("Sign in successful")
@@ -124,7 +125,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          void form.handleSubmit()
+          form.handleSubmit()
         }}
       >
         <div>
