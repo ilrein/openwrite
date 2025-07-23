@@ -29,6 +29,26 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
       name: mode === "signup" ? "" : undefined,
     },
     onSubmit: async ({ value }) => {
+      // Function to fetch fresh session data
+      const fetchSessionData = async () => {
+        const baseUrl =
+          import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+            ? import.meta.env.VITE_SERVER_URL
+            : window.location.origin
+
+        const response = await fetch(`${baseUrl}/api/session`, {
+          credentials: "include",
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch session")
+        }
+
+        return response.json()
+      }
+
+      // Attempt authentication with Better Auth (ignoring any thrown errors)
+      let authAttempted = false
       try {
         const result =
           mode === "signin"
@@ -42,68 +62,52 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                 name: value.name!,
               })
 
+        authAttempted = true
         console.log("Auth result:", result)
+      } catch (error) {
+        authAttempted = true
+        console.log("Better Auth threw error (ignoring):", error)
+        // Continue execution - we'll check session status directly
+      }
 
-        // Check if authentication was successful
-        if (result && (result as any)?.user) {
+      if (!authAttempted) {
+        toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed`)
+        return
+      }
+
+      try {
+        // Wait a moment for cookies to be set
+        await new Promise((resolve) => setTimeout(resolve, 300))
+
+        // Check if authentication actually succeeded by fetching session
+        const sessionData = await fetchSessionData()
+
+        if (sessionData?.authenticated && sessionData?.session?.user) {
+          // Authentication was successful
           toast.success(`${mode === "signin" ? "Sign in" : "Sign up"} successful`)
 
-          // Function to fetch fresh session data
-          const fetchSessionData = async () => {
-            const baseUrl =
-              import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
-                ? import.meta.env.VITE_SERVER_URL
-                : window.location.origin
+          // Set the session data in the query cache to immediately update all components
+          queryClient.setQueryData(["session"], sessionData)
 
-            const response = await fetch(`${baseUrl}/api/session`, {
-              credentials: "include",
-            })
+          // Force all components to re-render by invalidating and refetching
+          await queryClient.invalidateQueries({ queryKey: ["session"] })
+          await queryClient.refetchQueries({
+            queryKey: ["session"],
+            type: "all",
+          })
 
-            if (!response.ok) {
-              throw new Error("Failed to fetch session")
-            }
-
-            return response.json()
-          }
-
-          try {
-            // Wait a moment for cookies to be set
-            await new Promise((resolve) => setTimeout(resolve, 200))
-
-            // Fetch fresh session data and immediately update the query cache
-            const sessionData = await fetchSessionData()
-
-            // Only navigate if session was actually established
-            if (sessionData?.authenticated) {
-              // Set the session data in the query cache to immediately update all components
-              queryClient.setQueryData(["session"], sessionData)
-
-              // Force all components to re-render by invalidating and refetching
-              await queryClient.invalidateQueries({ queryKey: ["session"] })
-              await queryClient.refetchQueries({
-                queryKey: ["session"],
-                type: "all",
-              })
-
-              // Navigate to dashboard
-              navigate({
-                to: "/dashboard",
-              })
-            } else {
-              toast.error(
-                `${mode === "signin" ? "Sign in" : "Sign up"} successful but session not established. Please try again.`
-              )
-            }
-          } catch (error) {
-            console.error("Failed to refresh session data:", error)
-            toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed. Please try again.`)
-          }
+          // Navigate to dashboard
+          navigate({
+            to: "/dashboard",
+          })
         } else {
-          toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed - invalid credentials`)
+          // Authentication failed
+          console.error("Session check failed after auth attempt:", sessionData)
+          toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed - please check your credentials`)
         }
-      } catch (error) {
-        console.error(`${mode === "signin" ? "Sign in" : "Sign up"} error:`, error)
-        toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed`)
+      } catch (sessionError) {
+        console.error("Failed to verify session after auth attempt:", sessionError)
+        toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed - please try again`)
       }
     },
     validators: {
