@@ -1,19 +1,19 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
 import { BookOpen } from "lucide-react"
+import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
-  // Temporarily disabled for testing routing structure
-  // beforeLoad: async () => {
-  //   try {
-  //     const session = await authClient.getSession()
-  //     if (!session) {
-  //       throw new Error("Not authenticated")
-  //     }
-  //   } catch (_error) {
-  //     throw new Error("Not authenticated")
-  //   }
-  // },
+  beforeLoad: async () => {
+    try {
+      const session = await authClient.getSession()
+      if (!session) {
+        throw new Error("Not authenticated")
+      }
+    } catch (_error) {
+      throw new Error("Not authenticated")
+    }
+  },
 })
 
 function DashboardLayout() {
