@@ -3,6 +3,7 @@ import { cors } from "hono/cors"
 import { logger } from "hono/logger"
 import { getAuth } from "./lib/auth"
 import { openApiApp } from "./lib/openapi"
+import { apiRouter } from "./routers"
 // Import route definitions to register them
 import "./routes/health"
 import "./routes/user"
@@ -20,12 +21,32 @@ app.use(logger())
 app.use(
   "/*",
   cors({
-    origin: "*", // Will be configured properly via environment variables in production
-    allowMethods: ["GET", "POST", "OPTIONS"],
+    origin: (origin) => {
+      // Allow requests from the web app during development
+      const allowedOrigins = [
+        "http://localhost:3001", // Web app dev server
+        "https://localhost:3001", // Web app dev server (HTTPS)
+      ]
+      
+      // Allow same-origin requests (no origin header) by returning the origin
+      if (!origin) return origin || "*"
+      
+      // Check if origin is in allowed list and return the origin if allowed
+      if (allowedOrigins.includes(origin)) {
+        return origin
+      }
+      
+      // Reject other origins
+      return false
+    },
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 )
+
+// Mount API routes
+app.route("/api", apiRouter)
 
 // Mount OpenAPI routes
 app.route("/api", openApiApp)

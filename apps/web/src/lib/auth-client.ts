@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react"
+import { organizationClient } from "better-auth/client/plugins"
 
 // Session data types
 export interface SessionUser {
@@ -26,6 +27,13 @@ function getAuthClient() {
           ? import.meta.env.VITE_SERVER_URL
           : window.location.origin,
       basePath: "/api/auth",
+      plugins: [
+        organizationClient({
+          teams: {
+            enabled: true
+          }
+        })
+      ]
     })
   }
   return authClientInstance

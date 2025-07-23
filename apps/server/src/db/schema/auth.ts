@@ -21,6 +21,9 @@ export const session = sqliteTable("session", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
+  // Organization and team tracking
+  activeOrganizationId: text("active_organization_id"),
+  activeTeamId: text("active_team_id"),
 })
 
 export const account = sqliteTable("account", {
