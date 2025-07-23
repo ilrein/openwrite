@@ -202,7 +202,12 @@ function RouteComponent() {
                       <ChevronUp className="ml-auto h-4 w-4" />
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+                  <DropdownMenuContent 
+                    side="top" 
+                    align="start"
+                    className="w-56 mb-2"
+                    sideOffset={8}
+                  >
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>

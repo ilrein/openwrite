@@ -8,7 +8,7 @@
     "lint": "biome lint src",
     "format": "biome format --write .",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "wrangler dev --port=3000",
+    "dev": "bunx wrangler types --env-interface CloudflareBindings && wrangler dev --port=3000",
     "start": "wrangler dev",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
