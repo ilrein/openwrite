@@ -22,10 +22,23 @@ export async function apiCall(endpoint: string, options: ApiRequestOptions = {})
   })
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status} - ${response.statusText}`)
+    let errorMessage = `API Error: ${response.status} - ${response.statusText}`
+    try {
+      const errorBody = await response.json()
+      if (errorBody.message) {
+        errorMessage += ` - ${errorBody.message}`
+      }
+    } catch {
+      // Ignore JSON parse errors for error responses
+    }
+    throw new Error(errorMessage)
   }
 
-  return response.json()
+  try {
+    return await response.json()
+  } catch (error) {
+    throw new Error(`Invalid JSON response from ${endpoint}: ${error}`)
+  }
 }
 
 /**
