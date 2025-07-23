@@ -30,7 +30,7 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
     },
     onSubmit: async ({ value }) => {
       const actionType = mode === "signin" ? "Sign in" : "Sign up"
-      
+
       // Attempt authentication with Better Auth (ignoring any thrown errors)
       let authAttempted = false
       try {
@@ -96,14 +96,15 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
           email: z.string().email("Invalid email address"),
           password: z.string().min(8, "Password must be at least 8 characters"),
         }
-        
-        const schema = mode === "signin" 
-          ? z.object(baseSchema)
-          : z.object({
-              ...baseSchema,
-              name: z.string().min(2, "Name must be at least 2 characters"),
-            })
-            
+
+        const schema =
+          mode === "signin"
+            ? z.object(baseSchema)
+            : z.object({
+                ...baseSchema,
+                name: z.string().min(2, "Name must be at least 2 characters"),
+              })
+
         const result = schema.safeParse(value)
         if (!result.success) {
           return result.error.flatten()
@@ -250,7 +251,7 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                       disabled={!state.canSubmit || state.isSubmitting}
                       type="submit"
                     >
-{(() => {
+                      {(() => {
                         if (state.isSubmitting) {
                           return "Processing..."
                         }

@@ -1,10 +1,10 @@
 import { createRoute, z } from "@hono/zod-openapi"
-import { openApiApp } from "../lib/openapi"
 import { getAuth } from "../lib/auth"
+import { openApiApp } from "../lib/openapi"
 
 // Define the user info route schema
 const userInfoRoute = createRoute({
-  method: "get", 
+  method: "get",
   path: "/user/me",
   tags: ["User"],
   summary: "Get Current User",
@@ -20,7 +20,7 @@ const userInfoRoute = createRoute({
             }),
             user: z.object({
               id: z.string().openapi({
-                example: "user_123",  
+                example: "user_123",
                 description: "Unique user identifier",
               }),
               email: z.string().email().openapi({

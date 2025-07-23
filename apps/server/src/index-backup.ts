@@ -10,7 +10,6 @@ interface Env {
   BETTER_AUTH_URL: string
 }
 
-
 // Export the fetch handler following Cloudflare docs pattern
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -19,7 +18,7 @@ export default {
     // Handle API routes first - this ensures they take priority over static assets
     if (url.pathname.startsWith("/api/")) {
       const honoApp = new Hono<{ Bindings: Env }>()
-      
+
       honoApp.use(logger())
       honoApp.use(
         "/*",

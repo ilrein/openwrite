@@ -28,8 +28,11 @@ openApiApp.doc("/openapi.json", {
 })
 
 // Add Scalar API reference UI
-openApiApp.get("/docs", Scalar({
-  url: "/api/openapi.json",
-}))
+openApiApp.get(
+  "/docs",
+  Scalar({
+    url: "/api/openapi.json",
+  })
+)
 
 export { openApiApp }

@@ -5,7 +5,13 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".vitepress/dist/**", "worker.js"]
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        ".vitepress/dist/**",
+        "worker.js"
+      ]
     },
     "@openwrite/server#build": {
       "dependsOn": ["@openwrite/web#build"],

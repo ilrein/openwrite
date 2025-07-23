@@ -65,9 +65,7 @@ function RootComponent() {
           // Other pages use header layout
           <div className="min-h-svh">
             <AppHeader />
-            <main className="flex-1">
-              {isFetching ? <Loader /> : <Outlet />}
-            </main>
+            <main className="flex-1">{isFetching ? <Loader /> : <Outlet />}</main>
           </div>
         )}
         <Toaster richColors />
