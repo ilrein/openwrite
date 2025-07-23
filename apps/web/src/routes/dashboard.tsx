@@ -41,26 +41,11 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { fetchSessionData } from "@/lib/auth-client"
+
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 })
-
-async function fetchSession() {
-  const baseUrl =
-    import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
-      ? import.meta.env.VITE_SERVER_URL
-      : window.location.origin
-
-  const response = await fetch(`${baseUrl}/api/session`, {
-    credentials: "include",
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch session")
-  }
-
-  return response.json()
-}
 
 function RouteComponent() {
   const navigate = Route.useNavigate()
@@ -69,7 +54,7 @@ function RouteComponent() {
 
   const sessionQuery = useQuery({
     queryKey: ["session"],
-    queryFn: fetchSession,
+    queryFn: fetchSessionData,
     retry: 2,
     staleTime: 0, // Always consider stale
     gcTime: 0, // Don't cache

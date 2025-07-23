@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { authClient } from "@/lib/auth-client"
+import { authClient, fetchSessionData } from "@/lib/auth-client"
 
 interface LoginBlockProps {
   mode: "signin" | "signup"
@@ -29,49 +29,31 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
       name: mode === "signup" ? "" : undefined,
     },
     onSubmit: async ({ value }) => {
-      // Function to fetch fresh session data
-      const fetchSessionData = async () => {
-        const baseUrl =
-          import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
-            ? import.meta.env.VITE_SERVER_URL
-            : window.location.origin
-
-        const response = await fetch(`${baseUrl}/api/session`, {
-          credentials: "include",
-        })
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch session")
-        }
-
-        return response.json()
-      }
-
+      const actionType = mode === "signin" ? "Sign in" : "Sign up"
+      
       // Attempt authentication with Better Auth (ignoring any thrown errors)
       let authAttempted = false
       try {
-        const result =
-          mode === "signin"
-            ? await authClient.signIn.email({
-                email: value.email,
-                password: value.password,
-              })
-            : await authClient.signUp.email({
-                email: value.email,
-                password: value.password,
-                name: value.name!,
-              })
-
+        if (mode === "signin") {
+          await authClient.signIn.email({
+            email: value.email,
+            password: value.password,
+          })
+        } else {
+          await authClient.signUp.email({
+            email: value.email,
+            password: value.password,
+            name: value.name ?? "",
+          })
+        }
         authAttempted = true
-        console.log("Auth result:", result)
-      } catch (error) {
+      } catch {
         authAttempted = true
-        console.log("Better Auth threw error (ignoring):", error)
         // Continue execution - we'll check session status directly
       }
 
       if (!authAttempted) {
-        toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed`)
+        toast.error(`${actionType} failed`)
         return
       }
 
@@ -84,7 +66,7 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
 
         if (sessionData?.authenticated && sessionData?.session?.user) {
           // Authentication was successful
-          toast.success(`${mode === "signin" ? "Sign in" : "Sign up"} successful`)
+          toast.success(`${actionType} successful`)
 
           // Set the session data in the query cache to immediately update all components
           queryClient.setQueryData(["session"], sessionData)
@@ -102,35 +84,29 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
           })
         } else {
           // Authentication failed
-          console.error("Session check failed after auth attempt:", sessionData)
-          toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed - please check your credentials`)
+          toast.error(`${actionType} failed - please check your credentials`)
         }
-      } catch (sessionError) {
-        console.error("Failed to verify session after auth attempt:", sessionError)
-        toast.error(`${mode === "signin" ? "Sign in" : "Sign up"} failed - please try again`)
+      } catch {
+        toast.error(`${actionType} failed - please try again`)
       }
     },
     validators: {
       onSubmit: ({ value }) => {
-        if (mode === "signin") {
-          const schema = z.object({
-            email: z.string().email("Invalid email address"),
-            password: z.string().min(8, "Password must be at least 8 characters"),
-          })
-          const result = schema.safeParse(value)
-          if (!result.success) {
-            return result.error.format()
-          }
-        } else {
-          const schema = z.object({
-            name: z.string().min(2, "Name must be at least 2 characters"),
-            email: z.string().email("Invalid email address"),
-            password: z.string().min(8, "Password must be at least 8 characters"),
-          })
-          const result = schema.safeParse(value)
-          if (!result.success) {
-            return result.error.format()
-          }
+        const baseSchema = {
+          email: z.string().email("Invalid email address"),
+          password: z.string().min(8, "Password must be at least 8 characters"),
+        }
+        
+        const schema = mode === "signin" 
+          ? z.object(baseSchema)
+          : z.object({
+              ...baseSchema,
+              name: z.string().min(2, "Name must be at least 2 characters"),
+            })
+            
+        const result = schema.safeParse(value)
+        if (!result.success) {
+          return result.error.flatten()
         }
       },
     },
@@ -180,7 +156,7 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                 onSubmit={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  void form.handleSubmit()
+                  form.handleSubmit()
                 }}
               >
                 {mode === "signup" && (
@@ -197,8 +173,8 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                             placeholder="John Doe"
                             value={field.state.value || ""}
                           />
-                          {field.state.meta.errors.map((error, index) => (
-                            <p className="text-destructive text-sm" key={index}>
+                          {field.state.meta.errors.map((error) => (
+                            <p className="text-destructive text-sm" key={String(error)}>
                               {String(error)}
                             </p>
                           ))}
@@ -222,8 +198,8 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                           type="email"
                           value={field.state.value}
                         />
-                        {field.state.meta.errors.map((error, index) => (
-                          <p className="text-destructive text-sm" key={index}>
+                        {field.state.meta.errors.map((error) => (
+                          <p className="text-destructive text-sm" key={String(error)}>
                             {String(error)}
                           </p>
                         ))}
@@ -261,8 +237,8 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                             )}
                           </Button>
                         </div>
-                        {field.state.meta.errors.map((error, index) => (
-                          <p className="text-destructive text-sm" key={index}>
+                        {field.state.meta.errors.map((error) => (
+                          <p className="text-destructive text-sm" key={String(error)}>
                             {String(error)}
                           </p>
                         ))}
@@ -278,11 +254,12 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
                       disabled={!state.canSubmit || state.isSubmitting}
                       type="submit"
                     >
-                      {state.isSubmitting
-                        ? "Processing..."
-                        : mode === "signin"
-                          ? "Sign in"
-                          : "Create account"}
+{(() => {
+                        if (state.isSubmitting) {
+                          return "Processing..."
+                        }
+                        return mode === "signin" ? "Sign in" : "Create account"
+                      })()}
                     </Button>
                   )}
                 </form.Subscribe>
