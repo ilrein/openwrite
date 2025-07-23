@@ -32,29 +32,17 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
     onSubmit: async ({ value }) => {
       try {
         const result = mode === "signin" 
-          ? await authClient.signIn.email(
-              {
-                email: value.email,
-                password: value.password,
-              },
-              {
-                onError: (error) => {
-                  toast.error(error.error.message)
-                },
-              }
-            )
-          : await authClient.signUp.email(
-              {
-                email: value.email,
-                password: value.password,
-                name: value.name!,
-              },
-              {
-                onError: (error) => {
-                  toast.error(error.error.message)
-                },
-              }
-            )
+          ? await authClient.signIn.email({
+              email: value.email,
+              password: value.password,
+            })
+          : await authClient.signUp.email({
+              email: value.email,
+              password: value.password,
+              name: value.name!,
+            })
+
+        console.log("Auth result:", result)
 
         // Check if authentication was successful
         if (result && (result as any)?.user) {
