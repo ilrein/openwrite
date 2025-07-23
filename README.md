@@ -71,4 +71,4 @@ openwrite/
 - `bun db:studio`: Open database studio UI
 - `cd apps/server && bun db:local`: Start the local SQLite database
 
-### Ilia was here
+### Ilia was here!
