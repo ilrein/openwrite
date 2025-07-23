@@ -61,7 +61,9 @@ export default function UserMenu() {
       // Invalidate session query to refresh UI
       queryClient.invalidateQueries({ queryKey: ["session"] })
       navigate({ to: "/" })
-    } catch (_error) {}
+    } catch (_error) {
+      // Ignore logout errors - user will be redirected anyway
+    }
   }
 
   if (sessionQuery.isLoading) {

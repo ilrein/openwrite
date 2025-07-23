@@ -43,6 +43,10 @@ import {
 
 import { fetchSessionData } from "@/lib/auth-client"
 
+// Constants for regex performance optimization
+const HTML_TAG_REGEX = /<[^>]*>/g
+const WHITESPACE_REGEX = /\s+/
+
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 })
@@ -92,7 +96,9 @@ function RouteComponent() {
       // Invalidate session query to refresh UI
       queryClient.invalidateQueries({ queryKey: ["session"] })
       navigate({ to: "/" })
-    } catch (_error) {}
+    } catch (_error) {
+      // Ignore logout errors - user will be redirected anyway
+    }
   }
 
   if (sessionQuery.isLoading) {
@@ -116,24 +122,24 @@ function RouteComponent() {
       title: "Documents",
       items: [
         { title: "New Document", icon: Plus, action: () => setContent("<p>New document...</p>") },
-        { title: "Recent Files", icon: FileText, action: () => {} },
-        { title: "All Documents", icon: FolderOpen, action: () => {} },
+        { title: "Recent Files", icon: FileText, action: () => { /* TODO: Implement recent files */ } },
+        { title: "All Documents", icon: FolderOpen, action: () => { /* TODO: Implement all documents */ } },
       ],
     },
     {
       title: "Actions",
       items: [
         { title: "Save", icon: Save, action: handleSave },
-        { title: "Export", icon: Download, action: () => {} },
-        { title: "Share", icon: Share, action: () => {} },
+        { title: "Export", icon: Download, action: () => { /* TODO: Implement export */ } },
+        { title: "Share", icon: Share, action: () => { /* TODO: Implement share */ } },
       ],
     },
     {
       title: "Tools",
       items: [
-        { title: "Writing Stats", icon: BarChart3, action: () => {} },
-        { title: "Writing Tools", icon: PenTool, action: () => {} },
-        { title: "Calendar", icon: Calendar, action: () => {} },
+        { title: "Writing Stats", icon: BarChart3, action: () => { /* TODO: Implement writing stats */ } },
+        { title: "Writing Tools", icon: PenTool, action: () => { /* TODO: Implement writing tools */ } },
+        { title: "Calendar", icon: Calendar, action: () => { /* TODO: Implement calendar */ } },
       ],
     },
   ]
@@ -216,8 +222,8 @@ function RouteComponent() {
               <div className="text-muted-foreground text-sm">
                 {
                   content
-                    .replace(/<[^>]*>/g, "")
-                    .split(/\s+/)
+                    .replace(HTML_TAG_REGEX, "")
+                    .split(WHITESPACE_REGEX)
                     .filter((word) => word.length > 0).length
                 }{" "}
                 words

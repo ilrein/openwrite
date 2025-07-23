@@ -1,5 +1,20 @@
 import { createAuthClient } from "better-auth/react"
 
+// Session data types
+export interface SessionUser {
+  id: string
+  email: string
+  name: string | null
+}
+
+export interface SessionData {
+  authenticated: boolean
+  session?: {
+    user: SessionUser
+  } | null
+  error?: string
+}
+
 // Singleton pattern for Better Auth client
 let authClientInstance: ReturnType<typeof createAuthClient> | null = null
 
@@ -19,9 +34,9 @@ function getAuthClient() {
 export const authClient = getAuthClient()
 
 // Singleton session fetcher to prevent multiple simultaneous calls
-let sessionPromise: Promise<unknown> | null = null
+let sessionPromise: Promise<SessionData> | null = null
 
-export function fetchSessionData() {
+export function fetchSessionData(): Promise<SessionData> {
   if (sessionPromise) {
     return sessionPromise
   }

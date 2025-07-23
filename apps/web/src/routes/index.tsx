@@ -241,11 +241,10 @@ function HomeComponent() {
             />
             <span className="text-sm">
               API:{" "}
-              {healthCheck.isLoading
-                ? "Checking..."
-                : healthCheck.data
-                  ? "Connected"
-                  : "Disconnected"}
+              {(() => {
+                if (healthCheck.isLoading) { return "Checking..." }
+                return healthCheck.data ? "Connected" : "Disconnected"
+              })()}
             </span>
           </div>
         </CardContent>
