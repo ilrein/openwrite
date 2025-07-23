@@ -70,12 +70,12 @@ jobs:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
 
       - name: Run Database Migrations
-        continue-on-error: true
-        working-directory: ./apps/server
-        run: bunx wrangler d1 migrations apply openwrite-dev --remote
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "./apps/server"
+          command: d1 migrations apply openwrite-dev --remote
 
       - name: Deploy Documentation
         continue-on-error: true
