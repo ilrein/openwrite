@@ -62,7 +62,9 @@ export const BlockquoteButton = React.forwardRef<HTMLButtonElement, BlockquoteBu
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleToggle()
       },
       [handleToggle, onClick]
@@ -81,7 +83,6 @@ export const BlockquoteButton = React.forwardRef<HTMLButtonElement, BlockquoteBu
         data-style="ghost"
         disabled={!canToggle}
         onClick={handleClick}
-        role="button"
         tabIndex={-1}
         tooltip="Blockquote"
         type="button"

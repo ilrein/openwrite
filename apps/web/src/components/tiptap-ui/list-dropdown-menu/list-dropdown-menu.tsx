@@ -81,7 +81,6 @@ export function ListDropdownMenu({
           data-disabled={!canToggle}
           data-style="ghost"
           disabled={!canToggle}
-          role="button"
           tabIndex={-1}
           tooltip="List"
           type="button"

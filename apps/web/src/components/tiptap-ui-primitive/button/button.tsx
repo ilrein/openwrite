@@ -18,12 +18,14 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 export const ShortcutDisplay: React.FC<{ shortcuts: string[] }> = ({ shortcuts }) => {
-  if (shortcuts.length === 0) return null
+  if (shortcuts.length === 0) {
+    return null
+  }
 
   return (
     <div>
       {shortcuts.map((key, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={`shortcut-${key}`}>
           {index > 0 && <kbd>+</kbd>}
           <kbd>{key}</kbd>
         </React.Fragment>
@@ -82,21 +84,20 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button"
 
 export const ButtonGroup = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div"> & {
+  HTMLFieldSetElement,
+  React.ComponentProps<"fieldset"> & {
     orientation?: "horizontal" | "vertical"
   }
 >(({ className, children, orientation = "vertical", ...props }, ref) => {
   return (
-    <div
+    <fieldset
       className={cn("tiptap-button-group", className)}
       data-orientation={orientation}
       ref={ref}
-      role="group"
       {...props}
     >
       {children}
-    </div>
+    </fieldset>
   )
 })
 ButtonGroup.displayName = "ButtonGroup"

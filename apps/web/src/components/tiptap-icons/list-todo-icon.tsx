@@ -11,6 +11,7 @@ export const ListTodoIcon = React.memo(({ className, ...props }: React.SVGProps<
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Task List</title>
       <path
         clipRule="evenodd"
         d="M2 6C2 4.89543 2.89543 4 4 4H8C9.10457 4 10 4.89543 10 6V10C10 11.1046 9.10457 12 8 12H4C2.89543 12 2 11.1046 2 10V6ZM8 6H4V10H8V6Z"

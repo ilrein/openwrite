@@ -6,6 +6,7 @@ import "@/components/tiptap-ui-primitive/toolbar/toolbar.scss"
 import { cn } from "@/lib/tiptap-utils"
 
 type BaseProps = React.HTMLAttributes<HTMLDivElement>
+type ToolbarGroupProps = React.HTMLAttributes<HTMLFieldSetElement>
 
 interface ToolbarProps extends BaseProps {
   variant?: "floating" | "fixed"
@@ -13,13 +14,13 @@ interface ToolbarProps extends BaseProps {
 
 const mergeRefs = <T,>(refs: Array<React.Ref<T> | null | undefined>): React.RefCallback<T> => {
   return (value) => {
-    refs.forEach((ref) => {
+    for (const ref of refs) {
       if (typeof ref === "function") {
         ref(value)
       } else if (ref && typeof ref === "object" && "current" in ref) {
         ;(ref as { current: T | null }).current = value
       }
-    })
+    }
   }
 }
 
@@ -29,7 +30,9 @@ const useObserveVisibility = (
 ): void => {
   React.useEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     let isMounted = true
 
@@ -59,7 +62,9 @@ const useObserveVisibility = (
 const useToolbarKeyboardNav = (toolbarRef: React.RefObject<HTMLDivElement | null>): void => {
   React.useEffect(() => {
     const toolbar = toolbarRef.current
-    if (!toolbar) return
+    if (!toolbar) {
+      return
+    }
 
     const getFocusableElements = () =>
       Array.from(
@@ -83,12 +88,16 @@ const useToolbarKeyboardNav = (toolbarRef: React.RefObject<HTMLDivElement | null
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const focusableElements = getFocusableElements()
-      if (!focusableElements.length) return
+      if (!focusableElements.length) {
+        return
+      }
 
       const currentElement = document.activeElement as HTMLElement
       const currentIndex = focusableElements.indexOf(currentElement)
 
-      if (!toolbar.contains(currentElement)) return
+      if (!toolbar.contains(currentElement)) {
+        return
+      }
 
       const keyActions: Record<string, () => void> = {
         ArrowRight: () => navigateToIndex(e, currentIndex + 1, focusableElements),
@@ -124,21 +133,21 @@ const useToolbarKeyboardNav = (toolbarRef: React.RefObject<HTMLDivElement | null
     toolbar.addEventListener("blur", handleBlur, true)
 
     const focusableElements = getFocusableElements()
-    focusableElements.forEach((element) => {
+    for (const element of focusableElements) {
       element.addEventListener("focus", handleFocus)
       element.addEventListener("blur", handleBlur)
-    })
+    }
 
     return () => {
       toolbar.removeEventListener("keydown", handleKeyDown)
       toolbar.removeEventListener("focus", handleFocus, true)
       toolbar.removeEventListener("blur", handleBlur, true)
 
-      const focusableElements = getFocusableElements()
-      focusableElements.forEach((element) => {
+      const cleanupFocusableElements = getFocusableElements()
+      for (const element of cleanupFocusableElements) {
         element.removeEventListener("focus", handleFocus)
         element.removeEventListener("blur", handleBlur)
-      })
+      }
     }
   }, [toolbarRef])
 }
@@ -155,15 +164,21 @@ const useToolbarVisibility = (ref: React.RefObject<HTMLDivElement | null>): bool
   }, [])
 
   const checkVisibility = React.useCallback(() => {
-    if (!isMountedRef.current) return
+    if (!isMountedRef.current) {
+      return
+    }
 
     const toolbar = ref.current
-    if (!toolbar) return
+    if (!toolbar) {
+      return
+    }
 
     // Check if any group has visible children
     const hasVisibleChildren = Array.from(toolbar.children).some((child) => {
-      if (!(child instanceof HTMLElement)) return false
-      if (child.getAttribute("role") === "group") {
+      if (!(child instanceof HTMLElement)) {
+        return false
+      }
+      if (child.tagName.toLowerCase() === "fieldset") {
         return child.children.length > 0
       }
       return false
@@ -176,7 +191,7 @@ const useToolbarVisibility = (ref: React.RefObject<HTMLDivElement | null>): bool
   return isVisible
 }
 
-const useGroupVisibility = (ref: React.RefObject<HTMLDivElement | null>): boolean => {
+const useGroupVisibility = (ref: React.RefObject<HTMLFieldSetElement | null>): boolean => {
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const isMountedRef = React.useRef(false)
 
@@ -188,13 +203,19 @@ const useGroupVisibility = (ref: React.RefObject<HTMLDivElement | null>): boolea
   }, [])
 
   const checkVisibility = React.useCallback(() => {
-    if (!isMountedRef.current) return
+    if (!isMountedRef.current) {
+      return
+    }
 
     const group = ref.current
-    if (!group) return
+    if (!group) {
+      return
+    }
 
     const hasVisibleChildren = Array.from(group.children).some((child) => {
-      if (!(child instanceof HTMLElement)) return false
+      if (!(child instanceof HTMLElement)) {
+        return false
+      }
       return true
     })
 
@@ -217,10 +238,14 @@ const useSeparatorVisibility = (ref: React.RefObject<HTMLDivElement | null>): bo
   }, [])
 
   const checkVisibility = React.useCallback(() => {
-    if (!isMountedRef.current) return
+    if (!isMountedRef.current) {
+      return
+    }
 
     const separator = ref.current
-    if (!separator) return
+    if (!separator) {
+      return
+    }
 
     const prevSibling = separator.previousElementSibling as HTMLElement
     const nextSibling = separator.nextElementSibling as HTMLElement
@@ -231,7 +256,8 @@ const useSeparatorVisibility = (ref: React.RefObject<HTMLDivElement | null>): bo
     }
 
     const areBothGroups =
-      prevSibling.getAttribute("role") === "group" && nextSibling.getAttribute("role") === "group"
+      prevSibling.tagName.toLowerCase() === "fieldset" &&
+      nextSibling.tagName.toLowerCase() === "fieldset"
 
     const haveBothChildren = prevSibling.children.length > 0 && nextSibling.children.length > 0
 
@@ -249,7 +275,9 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
 
     useToolbarKeyboardNav(toolbarRef)
 
-    if (!isVisible) return null
+    if (!isVisible) {
+      return null
+    }
 
     return (
       <div
@@ -268,22 +296,23 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
 
 Toolbar.displayName = "Toolbar"
 
-export const ToolbarGroup = React.forwardRef<HTMLDivElement, BaseProps>(
+export const ToolbarGroup = React.forwardRef<HTMLFieldSetElement, ToolbarGroupProps>(
   ({ children, className, ...props }, ref) => {
-    const groupRef = React.useRef<HTMLDivElement>(null)
+    const groupRef = React.useRef<HTMLFieldSetElement>(null)
     const isVisible = useGroupVisibility(groupRef)
 
-    if (!isVisible) return null
+    if (!isVisible) {
+      return null
+    }
 
     return (
-      <div
+      <fieldset
         className={cn("tiptap-toolbar-group", className)}
         ref={mergeRefs([groupRef, ref])}
-        role="group"
         {...props}
       >
         {children}
-      </div>
+      </fieldset>
     )
   }
 )
@@ -299,7 +328,9 @@ export const ToolbarSeparator = React.forwardRef<
   const separatorRef = React.useRef<HTMLDivElement>(null)
   const isVisible = useSeparatorVisibility(separatorRef)
 
-  if (!(isVisible || fixed)) return null
+  if (!(isVisible || fixed)) {
+    return null
+  }
 
   return (
     <Separator decorative orientation="vertical" ref={mergeRefs([separatorRef, ref])} {...props} />

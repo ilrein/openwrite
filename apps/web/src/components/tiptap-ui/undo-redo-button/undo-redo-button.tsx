@@ -64,7 +64,9 @@ export const UndoRedoButton = React.forwardRef<HTMLButtonElement, UndoRedoButton
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleAction()
       },
       [handleAction, onClick]
@@ -81,7 +83,6 @@ export const UndoRedoButton = React.forwardRef<HTMLButtonElement, UndoRedoButton
         data-style="ghost"
         disabled={!canExecute}
         onClick={handleClick}
-        role="button"
         tabIndex={-1}
         tooltip={label}
         type="button"

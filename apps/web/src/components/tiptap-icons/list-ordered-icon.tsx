@@ -12,6 +12,7 @@ export const ListOrderedIcon = React.memo(
         xmlns="http://www.w3.org/2000/svg"
         {...props}
       >
+        <title>Ordered List</title>
         <path
           clipRule="evenodd"
           d="M9 6C9 5.44772 9.44772 5 10 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H10C9.44772 7 9 6.55228 9 6Z"

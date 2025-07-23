@@ -47,7 +47,9 @@ export interface LinkHandlerProps {
  * Checks if a link can be set in the current editor state
  */
 export function canSetLink(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) return false
+  if (!editor?.isEditable) {
+    return false
+  }
   return editor.can().setMark("link")
 }
 
@@ -55,7 +57,9 @@ export function canSetLink(editor: Editor | null): boolean {
  * Checks if a link is currently active in the editor
  */
 export function isLinkActive(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) return false
+  if (!editor?.isEditable) {
+    return false
+  }
   return editor.isActive("link")
 }
 
@@ -89,7 +93,9 @@ export function useLinkHandler(props: LinkHandlerProps) {
   const [url, setUrl] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
 
     // Get URL immediately on mount
     const { href } = editor.getAttributes("link")
@@ -100,7 +106,9 @@ export function useLinkHandler(props: LinkHandlerProps) {
   }, [editor, url])
 
   React.useEffect(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
 
     const updateLinkState = () => {
       const { href } = editor.getAttributes("link")
@@ -114,7 +122,9 @@ export function useLinkHandler(props: LinkHandlerProps) {
   }, [editor])
 
   const setLink = React.useCallback(() => {
-    if (!(url && editor)) return
+    if (!(url && editor)) {
+      return
+    }
 
     const { selection } = editor.state
     const isEmpty = selection.empty
@@ -135,7 +145,9 @@ export function useLinkHandler(props: LinkHandlerProps) {
   }, [editor, onSetLink, url])
 
   const removeLink = React.useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor
       .chain()
       .focus()
@@ -148,7 +160,9 @@ export function useLinkHandler(props: LinkHandlerProps) {
 
   const openLink = React.useCallback(
     (target = "_blank", features = "noopener,noreferrer") => {
-      if (!url) return
+      if (!url) {
+        return
+      }
 
       const safeUrl = sanitizeUrl(url, window.location.href)
       if (safeUrl !== "#") {
@@ -179,7 +193,9 @@ export function useLinkState(props: { editor: Editor | null; hideWhenUnavailable
   const [isVisible, setIsVisible] = React.useState(false)
 
   React.useEffect(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
 
     const handleSelectionUpdate = () => {
       setIsVisible(

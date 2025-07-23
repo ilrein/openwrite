@@ -75,7 +75,9 @@ export const ColorHighlightButton = React.forwardRef<HTMLButtonElement, ColorHig
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleColorHighlight()
       },
       [handleColorHighlight, onClick]
@@ -103,7 +105,6 @@ export const ColorHighlightButton = React.forwardRef<HTMLButtonElement, ColorHig
         data-style="ghost"
         disabled={!canColorHighlight}
         onClick={handleClick}
-        role="button"
         style={buttonStyle}
         tabIndex={-1}
         tooltip={label}

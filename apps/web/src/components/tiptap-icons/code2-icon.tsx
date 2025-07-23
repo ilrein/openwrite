@@ -11,6 +11,7 @@ export const Code2Icon = React.memo(({ className, ...props }: React.SVGProps<SVG
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Code</title>
       <path
         d="M15.4545 4.2983C15.6192 3.77115 15.3254 3.21028 14.7983 3.04554C14.2712 2.88081 13.7103 3.1746 13.5455 3.70175L8.54554 19.7017C8.38081 20.2289 8.6746 20.7898 9.20175 20.9545C9.72889 21.1192 10.2898 20.8254 10.4545 20.2983L15.4545 4.2983Z"
         fill="currentColor"

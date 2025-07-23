@@ -9,13 +9,13 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import UserMenu from "@/components/user-menu"
 
-interface BreadcrumbItem {
+interface BreadcrumbItemData {
   label: string
   to?: string
 }
 
 interface WriteHeaderProps {
-  breadcrumbs: BreadcrumbItem[]
+  breadcrumbs: BreadcrumbItemData[]
 }
 
 export default function WriteHeader({ breadcrumbs }: WriteHeaderProps) {
@@ -26,7 +26,7 @@ export default function WriteHeader({ breadcrumbs }: WriteHeaderProps) {
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((crumb, index) => (
-              <div className="flex items-center" key={index}>
+              <div className="flex items-center" key={`${crumb.label}-${index}`}>
                 <BreadcrumbItem>
                   {crumb.to ? (
                     <BreadcrumbLink asChild>

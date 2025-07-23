@@ -64,7 +64,9 @@ export const ImageUploadButton = React.forwardRef<HTMLButtonElement, ImageUpload
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleImage()
       },
       [handleImage, onClick]
@@ -83,7 +85,6 @@ export const ImageUploadButton = React.forwardRef<HTMLButtonElement, ImageUpload
         data-style="ghost"
         disabled={!canInsert}
         onClick={handleClick}
-        role="button"
         tabIndex={-1}
         tooltip={label}
         type="button"

@@ -42,7 +42,9 @@ export function getActiveHeadingLevel(
   editor: Editor | null,
   levels: Level[] = [1, 2, 3, 4, 5, 6]
 ): Level | undefined {
-  if (!(editor && editor.isEditable)) return
+  if (!editor?.isEditable) {
+    return
+  }
   return levels.find((level) => isHeadingActive(editor, level))
 }
 
@@ -100,7 +102,9 @@ export function useHeadingDropdownMenu(config?: UseHeadingDropdownMenuConfig) {
   const canToggleState = canToggle(editor)
 
   React.useEffect(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
 
     const handleSelectionUpdate = () => {
       setIsVisible(shouldShowButton({ editor, hideWhenUnavailable, level: levels }))

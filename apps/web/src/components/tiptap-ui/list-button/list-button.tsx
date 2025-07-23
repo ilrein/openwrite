@@ -64,7 +64,9 @@ export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleToggle()
       },
       [handleToggle, onClick]
@@ -83,7 +85,6 @@ export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
         data-style="ghost"
         disabled={!canToggle}
         onClick={handleClick}
-        role="button"
         tabIndex={-1}
         tooltip={label}
         type="button"

@@ -148,16 +148,18 @@ export default function TiptapEditor({
           <Spacer />
         </Toolbar>
 
-        <div
-          className="tiptap-editor-content h-full flex-1 cursor-text overflow-auto"
+        <button
+          aria-label="Text editor content area"
+          className="tiptap-editor-content h-full flex-1 cursor-text overflow-auto text-left"
           onClick={() => {
             if (editor && !editor.isFocused) {
               editor.commands.focus("end")
             }
           }}
+          type="button"
         >
           <EditorContent className="h-full" editor={editor} />
-        </div>
+        </button>
       </div>
     </EditorContext.Provider>
   )
