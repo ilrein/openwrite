@@ -131,7 +131,7 @@ function CodexTypeInterface() {
           </div>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add {type === "lore" ? "Entry" : type.slice(0, -1)}
+            Add {typeToSingular[type] || type}
           </Button>
         </div>
 
