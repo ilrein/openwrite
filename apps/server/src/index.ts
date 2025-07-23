@@ -58,7 +58,7 @@ app.get("/api/session", async (c) => {
     })
   } catch (error) {
     console.error("Session check error:", error)
-    return c.json({ authenticated: false, session: null, error: error.message }, 500)
+    return c.json({ authenticated: false, session: null, error: error instanceof Error ? error.message : 'Unknown error' }, 500)
   }
 })
 

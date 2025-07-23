@@ -47,7 +47,10 @@ export default function UserMenu() {
   const sessionQuery = useQuery({
     queryKey: ['session'],
     queryFn: fetchSession,
-    retry: false
+    retry: 2,
+    staleTime: 0, // Always consider stale
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   })
 
   const handleSignOut = async () => {

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { useEffect } from "react"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/")({
@@ -31,12 +32,45 @@ async function checkApiHealth() {
   return response.ok
 }
 
+async function fetchSession() {
+  const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+    import.meta.env.VITE_SERVER_URL : 
+    window.location.origin
+  
+  const response = await fetch(`${baseUrl}/api/session`, {
+    credentials: 'include'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch session')
+  }
+  
+  return response.json()
+}
+
 function HomeComponent() {
+  const navigate = Route.useNavigate()
+  
+  const sessionQuery = useQuery({
+    queryKey: ['session'],
+    queryFn: fetchSession,
+    retry: false
+  })
+  
   const healthCheck = useQuery({
     queryKey: ['api-health'],
     queryFn: checkApiHealth,
     retry: 1
   })
+
+  // Redirect to dashboard if user is already authenticated
+  useEffect(() => {
+    if (sessionQuery.data?.authenticated) {
+      navigate({
+        to: "/dashboard",
+      })
+    }
+  }, [sessionQuery.data, navigate])
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-2">

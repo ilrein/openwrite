@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form"
 import { useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import z from "zod"
 import { authClient } from "@/lib/auth-client"
@@ -12,6 +13,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
   const navigate = useNavigate({
     from: "/",
   })
+  const queryClient = useQueryClient()
   const { isPending } = authClient.useSession()
 
   const form = useForm({
@@ -21,24 +23,71 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       name: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signUp.email(
-        {
-          email: value.email,
-          password: value.password,
-          name: value.name,
-        },
-        {
-          onSuccess: () => {
+      try {
+        const result = await authClient.signUp.email(
+          {
+            email: value.email,
+            password: value.password,
+            name: value.name,
+          },
+          {
+            onError: (error) => {
+              toast.error(error.error.message)
+            },
+          }
+        )
+        
+        // Check if sign-up was successful (user object exists)
+        if (result && (result as any)?.user) {
+          toast.success("Sign up successful")
+          
+          // Function to fetch fresh session data
+          const fetchSessionData = async () => {
+            const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+              import.meta.env.VITE_SERVER_URL : 
+              window.location.origin
+            
+            const response = await fetch(`${baseUrl}/api/session`, {
+              credentials: 'include'
+            })
+            
+            if (!response.ok) {
+              throw new Error('Failed to fetch session')
+            }
+            
+            return response.json()
+          }
+          
+          try {
+            // Wait a moment for cookies to be set
+            await new Promise(resolve => setTimeout(resolve, 200))
+            
+            // Fetch fresh session data and immediately update the query cache
+            const sessionData = await fetchSessionData()
+            console.log("Fresh session data after sign-up:", sessionData)
+            
+            // Set the session data in the query cache to immediately update all components
+            queryClient.setQueryData(['session'], sessionData)
+            
+            // Also trigger a refetch to ensure all instances are updated
+            queryClient.invalidateQueries({ queryKey: ['session'] })
+            
+            // Navigate to dashboard
             navigate({
               to: "/dashboard",
             })
-            toast.success("Sign up successful")
-          },
-          onError: (error) => {
-            toast.error(error.error.message)
-          },
+          } catch (error) {
+            console.error("Failed to refresh session data:", error)
+            // Still navigate, dashboard will handle the session check
+            navigate({
+              to: "/dashboard",
+            })
+          }
         }
-      )
+      } catch (error) {
+        console.error("Sign up error:", error)
+        toast.error("Sign up failed")
+      }
     },
     validators: {
       onSubmit: z.object({

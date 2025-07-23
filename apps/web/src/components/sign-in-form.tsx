@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form"
 import { useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import z from "zod"
 import { authClient } from "@/lib/auth-client"
@@ -12,6 +13,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
   const navigate = useNavigate({
     from: "/",
   })
+  const queryClient = useQueryClient()
   const { isPending } = authClient.useSession()
 
   const form = useForm({
@@ -20,23 +22,93 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
       password: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
-        {
-          email: value.email,
-          password: value.password,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
+      try {
+        const result = await authClient.signIn.email(
+          {
+            email: value.email,
+            password: value.password,
+          },
+          {
+            onError: (error) => {
+              toast.error(error.error.message)
+            },
+          }
+        )
+        
+        
+        console.log("Better Auth sign-in result:", result)
+        console.log("Result type:", typeof result)
+        console.log("Result keys:", result ? Object.keys(result) : 'null')
+        
+        // Check if sign-in was successful - look for either user data or successful response
+        const isSuccess = result && (
+          (result as any)?.user || 
+          (result as any)?.data?.user ||
+          // If no errors and we got a response, consider it successful
+          (result && typeof result === 'object' && !(result as any)?.error)
+        )
+        
+        if (isSuccess) {
+          toast.success("Sign in successful")
+          
+          // Function to fetch fresh session data
+          const fetchSessionData = async () => {
+            const baseUrl = import.meta.env.DEV && import.meta.env.VITE_SERVER_URL ? 
+              import.meta.env.VITE_SERVER_URL : 
+              window.location.origin
+            
+            const response = await fetch(`${baseUrl}/api/session`, {
+              credentials: 'include'
             })
-            toast.success("Sign in successful")
-          },
-          onError: (error) => {
-            toast.error(error.error.message)
-          },
+            
+            if (!response.ok) {
+              throw new Error('Failed to fetch session')
+            }
+            
+            return response.json()
+          }
+          
+          try {
+            // Wait a moment for cookies to be set
+            await new Promise(resolve => setTimeout(resolve, 200))
+            
+            // Fetch fresh session data and immediately update the query cache
+            const sessionData = await fetchSessionData()
+            console.log("Fresh session data after sign-in:", sessionData)
+            
+            // Only navigate if session was actually established
+            if (sessionData?.authenticated) {
+              // Set the session data in the query cache to immediately update all components
+              queryClient.setQueryData(['session'], sessionData)
+              
+              // Force all components to re-render by invalidating and refetching
+              await queryClient.invalidateQueries({ queryKey: ['session'] })
+              await queryClient.refetchQueries({ 
+                queryKey: ['session'],
+                type: 'all'
+              })
+              
+              // Wait a moment for all components to re-render with new data
+              await new Promise(resolve => setTimeout(resolve, 100))
+              
+              // Navigate to dashboard
+              navigate({
+                to: "/dashboard",
+              })
+            } else {
+              toast.error("Sign in successful but session not established. Please try again.")
+            }
+          } catch (error) {
+            console.error("Failed to refresh session data:", error)
+            toast.error("Sign in failed. Please try again.")
+          }
+        } else {
+          toast.error("Sign in failed - invalid credentials")
         }
-      )
+      } catch (error) {
+        console.error("Sign in error:", error)
+        toast.error("Sign in failed")
+      }
     },
     validators: {
       onSubmit: z.object({

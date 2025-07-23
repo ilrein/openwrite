@@ -44,7 +44,9 @@ function RouteComponent() {
   const sessionQuery = useQuery({
     queryKey: ['session'],
     queryFn: fetchSession,
-    retry: false
+    retry: 2,
+    staleTime: 0, // Always consider stale
+    gcTime: 0 // Don't cache
   })
 
   const privateDataQuery = useQuery({
@@ -55,12 +57,13 @@ function RouteComponent() {
   })
 
   useEffect(() => {
-    if (sessionQuery.data && !sessionQuery.data.authenticated) {
+    // Only redirect if query is not loading and definitely not authenticated
+    if (!sessionQuery.isLoading && sessionQuery.data && !sessionQuery.data.authenticated) {
       navigate({
         to: "/login",
       })
     }
-  }, [sessionQuery.data, navigate])
+  }, [sessionQuery.data, sessionQuery.isLoading, navigate])
 
   if (sessionQuery.isLoading) {
     return <div>Loading...</div>
