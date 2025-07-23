@@ -15,6 +15,14 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardNovelsRouteImport } from './routes/dashboard/novels'
+import { Route as DashboardNovelNovelIdRouteImport } from './routes/dashboard/novel/$novelId'
+import { Route as DashboardNovelNovelIdIndexRouteImport } from './routes/dashboard/novel/$novelId/index'
+import { Route as DashboardNovelNovelIdWriteRouteImport } from './routes/dashboard/novel/$novelId/write'
+import { Route as DashboardNovelNovelIdSettingsRouteImport } from './routes/dashboard/novel/$novelId/settings'
+import { Route as DashboardNovelNovelIdOutlineRouteImport } from './routes/dashboard/novel/$novelId/outline'
+import { Route as DashboardNovelNovelIdCharactersRouteImport } from './routes/dashboard/novel/$novelId/characters'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -46,37 +54,130 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardNovelsRoute = DashboardNovelsRouteImport.update({
+  id: '/novels',
+  path: '/novels',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardNovelNovelIdRoute = DashboardNovelNovelIdRouteImport.update({
+  id: '/novel/$novelId',
+  path: '/novel/$novelId',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardNovelNovelIdIndexRoute =
+  DashboardNovelNovelIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardNovelNovelIdRoute,
+  } as any)
+const DashboardNovelNovelIdWriteRoute =
+  DashboardNovelNovelIdWriteRouteImport.update({
+    id: '/write',
+    path: '/write',
+    getParentRoute: () => DashboardNovelNovelIdRoute,
+  } as any)
+const DashboardNovelNovelIdSettingsRoute =
+  DashboardNovelNovelIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardNovelNovelIdRoute,
+  } as any)
+const DashboardNovelNovelIdOutlineRoute =
+  DashboardNovelNovelIdOutlineRouteImport.update({
+    id: '/outline',
+    path: '/outline',
+    getParentRoute: () => DashboardNovelNovelIdRoute,
+  } as any)
+const DashboardNovelNovelIdCharactersRoute =
+  DashboardNovelNovelIdCharactersRouteImport.update({
+    id: '/characters',
+    path: '/characters',
+    getParentRoute: () => DashboardNovelNovelIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/dashboard/novels': typeof DashboardNovelsRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/novel/$novelId': typeof DashboardNovelNovelIdRouteWithChildren
+  '/dashboard/novel/$novelId/characters': typeof DashboardNovelNovelIdCharactersRoute
+  '/dashboard/novel/$novelId/outline': typeof DashboardNovelNovelIdOutlineRoute
+  '/dashboard/novel/$novelId/settings': typeof DashboardNovelNovelIdSettingsRoute
+  '/dashboard/novel/$novelId/write': typeof DashboardNovelNovelIdWriteRoute
+  '/dashboard/novel/$novelId/': typeof DashboardNovelNovelIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/dashboard/novels': typeof DashboardNovelsRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/novel/$novelId/characters': typeof DashboardNovelNovelIdCharactersRoute
+  '/dashboard/novel/$novelId/outline': typeof DashboardNovelNovelIdOutlineRoute
+  '/dashboard/novel/$novelId/settings': typeof DashboardNovelNovelIdSettingsRoute
+  '/dashboard/novel/$novelId/write': typeof DashboardNovelNovelIdWriteRoute
+  '/dashboard/novel/$novelId': typeof DashboardNovelNovelIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/dashboard/novels': typeof DashboardNovelsRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/novel/$novelId': typeof DashboardNovelNovelIdRouteWithChildren
+  '/dashboard/novel/$novelId/characters': typeof DashboardNovelNovelIdCharactersRoute
+  '/dashboard/novel/$novelId/outline': typeof DashboardNovelNovelIdOutlineRoute
+  '/dashboard/novel/$novelId/settings': typeof DashboardNovelNovelIdSettingsRoute
+  '/dashboard/novel/$novelId/write': typeof DashboardNovelNovelIdWriteRoute
+  '/dashboard/novel/$novelId/': typeof DashboardNovelNovelIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/privacy' | '/register' | '/terms'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/terms'
+    | '/dashboard/novels'
+    | '/dashboard/'
+    | '/dashboard/novel/$novelId'
+    | '/dashboard/novel/$novelId/characters'
+    | '/dashboard/novel/$novelId/outline'
+    | '/dashboard/novel/$novelId/settings'
+    | '/dashboard/novel/$novelId/write'
+    | '/dashboard/novel/$novelId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/privacy' | '/register' | '/terms'
+  to:
+    | '/'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/terms'
+    | '/dashboard/novels'
+    | '/dashboard'
+    | '/dashboard/novel/$novelId/characters'
+    | '/dashboard/novel/$novelId/outline'
+    | '/dashboard/novel/$novelId/settings'
+    | '/dashboard/novel/$novelId/write'
+    | '/dashboard/novel/$novelId'
   id:
     | '__root__'
     | '/'
@@ -85,11 +186,19 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/dashboard/novels'
+    | '/dashboard/'
+    | '/dashboard/novel/$novelId'
+    | '/dashboard/novel/$novelId/characters'
+    | '/dashboard/novel/$novelId/outline'
+    | '/dashboard/novel/$novelId/settings'
+    | '/dashboard/novel/$novelId/write'
+    | '/dashboard/novel/$novelId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
@@ -140,12 +249,105 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/novels': {
+      id: '/dashboard/novels'
+      path: '/novels'
+      fullPath: '/dashboard/novels'
+      preLoaderRoute: typeof DashboardNovelsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/novel/$novelId': {
+      id: '/dashboard/novel/$novelId'
+      path: '/novel/$novelId'
+      fullPath: '/dashboard/novel/$novelId'
+      preLoaderRoute: typeof DashboardNovelNovelIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/novel/$novelId/': {
+      id: '/dashboard/novel/$novelId/'
+      path: '/'
+      fullPath: '/dashboard/novel/$novelId/'
+      preLoaderRoute: typeof DashboardNovelNovelIdIndexRouteImport
+      parentRoute: typeof DashboardNovelNovelIdRoute
+    }
+    '/dashboard/novel/$novelId/write': {
+      id: '/dashboard/novel/$novelId/write'
+      path: '/write'
+      fullPath: '/dashboard/novel/$novelId/write'
+      preLoaderRoute: typeof DashboardNovelNovelIdWriteRouteImport
+      parentRoute: typeof DashboardNovelNovelIdRoute
+    }
+    '/dashboard/novel/$novelId/settings': {
+      id: '/dashboard/novel/$novelId/settings'
+      path: '/settings'
+      fullPath: '/dashboard/novel/$novelId/settings'
+      preLoaderRoute: typeof DashboardNovelNovelIdSettingsRouteImport
+      parentRoute: typeof DashboardNovelNovelIdRoute
+    }
+    '/dashboard/novel/$novelId/outline': {
+      id: '/dashboard/novel/$novelId/outline'
+      path: '/outline'
+      fullPath: '/dashboard/novel/$novelId/outline'
+      preLoaderRoute: typeof DashboardNovelNovelIdOutlineRouteImport
+      parentRoute: typeof DashboardNovelNovelIdRoute
+    }
+    '/dashboard/novel/$novelId/characters': {
+      id: '/dashboard/novel/$novelId/characters'
+      path: '/characters'
+      fullPath: '/dashboard/novel/$novelId/characters'
+      preLoaderRoute: typeof DashboardNovelNovelIdCharactersRouteImport
+      parentRoute: typeof DashboardNovelNovelIdRoute
+    }
   }
 }
 
+interface DashboardNovelNovelIdRouteChildren {
+  DashboardNovelNovelIdCharactersRoute: typeof DashboardNovelNovelIdCharactersRoute
+  DashboardNovelNovelIdOutlineRoute: typeof DashboardNovelNovelIdOutlineRoute
+  DashboardNovelNovelIdSettingsRoute: typeof DashboardNovelNovelIdSettingsRoute
+  DashboardNovelNovelIdWriteRoute: typeof DashboardNovelNovelIdWriteRoute
+  DashboardNovelNovelIdIndexRoute: typeof DashboardNovelNovelIdIndexRoute
+}
+
+const DashboardNovelNovelIdRouteChildren: DashboardNovelNovelIdRouteChildren = {
+  DashboardNovelNovelIdCharactersRoute: DashboardNovelNovelIdCharactersRoute,
+  DashboardNovelNovelIdOutlineRoute: DashboardNovelNovelIdOutlineRoute,
+  DashboardNovelNovelIdSettingsRoute: DashboardNovelNovelIdSettingsRoute,
+  DashboardNovelNovelIdWriteRoute: DashboardNovelNovelIdWriteRoute,
+  DashboardNovelNovelIdIndexRoute: DashboardNovelNovelIdIndexRoute,
+}
+
+const DashboardNovelNovelIdRouteWithChildren =
+  DashboardNovelNovelIdRoute._addFileChildren(
+    DashboardNovelNovelIdRouteChildren,
+  )
+
+interface DashboardRouteChildren {
+  DashboardNovelsRoute: typeof DashboardNovelsRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardNovelNovelIdRoute: typeof DashboardNovelNovelIdRouteWithChildren
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardNovelsRoute: DashboardNovelsRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardNovelNovelIdRoute: DashboardNovelNovelIdRouteWithChildren,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,

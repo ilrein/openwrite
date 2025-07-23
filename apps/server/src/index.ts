@@ -1,6 +1,9 @@
+import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
+import { db } from "./db"
+import { novel } from "./db/schema/novel"
 import { getAuth } from "./lib/auth"
 import { openApiApp } from "./lib/openapi"
 import { apiRouter } from "./routers"
@@ -18,6 +21,8 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 app.use(logger())
+
+// CORS configuration - must be before routes
 app.use(
   "/*",
   cors({
@@ -46,6 +51,60 @@ app.use(
     credentials: true,
   })
 )
+
+// Real API endpoints using database
+app.get("/api/novels", async (c) => {
+  try {
+    const novels = await db.select().from(novel)
+    return c.json(novels)
+  } catch {
+    return c.json({ error: "Failed to fetch novels" }, 500)
+  }
+})
+
+app.get("/api/novels/:id", async (c) => {
+  try {
+    const id = c.req.param("id")
+    const [novelRecord] = await db.select().from(novel).where(eq(novel.id, id))
+
+    if (!novelRecord) {
+      return c.json({ error: "Novel not found" }, 404)
+    }
+
+    return c.json(novelRecord)
+  } catch {
+    return c.json({ error: "Failed to fetch novel" }, 500)
+  }
+})
+
+app.post("/api/novels", async (c) => {
+  try {
+    const body = await c.req.json()
+    const novelData = {
+      id: crypto.randomUUID(),
+      title: body.title || "Untitled Novel",
+      description: body.description || null,
+      genre: body.genre || null,
+      targetWordCount: body.targetWordCount || null,
+      currentWordCount: 0,
+      status: "draft" as const,
+      visibility: body.visibility || ("private" as const),
+      ownerId: "temp-user-id", // TODO: Get from auth session
+      organizationId: "temp-org-id", // TODO: Get from auth session
+      coverImage: null,
+      metadata: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      publishedAt: null,
+      lastWrittenAt: null,
+    }
+
+    const [newNovel] = await db.insert(novel).values(novelData).returning()
+    return c.json(newNovel)
+  } catch {
+    return c.json({ error: "Failed to create novel" }, 500)
+  }
+})
 
 // Mount API routes
 app.route("/api", apiRouter)
