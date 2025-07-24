@@ -15,17 +15,20 @@ import { StarterKit } from "@tiptap/starter-kit"
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
-import {
-  ColorHighlightPopover,
-  ColorHighlightPopoverButton,
-  ColorHighlightPopoverContent,
-} from "@/components/tiptap-ui/color-highlight-popover"
+// COMMENTED OUT - ColorHighlightPopover causing popover close issues
+// import {
+//   ColorHighlightPopover,
+//   ColorHighlightPopoverButton,
+//   ColorHighlightPopoverContent,
+// } from "@/components/tiptap-ui/color-highlight-popover"
 
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
 import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
 import { LinkPopover } from "@/components/tiptap-ui/link-popover"
-import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
+// COMMENTED OUT - ListDropdownMenu causing dropdown close issues  
+// import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
+import { ListButton } from "@/components/tiptap-ui/list-button"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
@@ -139,18 +142,12 @@ export default function TiptapEditor({
 
           <ToolbarSeparator />
 
+          {/* COMMENTED OUT - ColorHighlightPopover causing popover close issues */}
           {/* <ToolbarGroup>
-            <ColorHighlightPopover>
-              <ColorHighlightPopoverButton />
-              <ColorHighlightPopoverContent
-                onClose={() => {
-                  console.log("close")
-                }}
-              />
-            </ColorHighlightPopover>
-          </ToolbarGroup> */}
+            <ColorHighlightPopover />
+          </ToolbarGroup>
 
-          {/* <ToolbarSeparator /> */}
+          <ToolbarSeparator /> */}
 
           <ToolbarGroup>
             <TextAlignButton align="left" />
@@ -162,17 +159,19 @@ export default function TiptapEditor({
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <ListDropdownMenu />
+            <ListButton type="bulletList" />
+            <ListButton type="orderedList" />
+            <ListButton type="taskList" />
             <BlockquoteButton />
-            {/* <CodeBlockButton /> */}
+            <CodeBlockButton />
           </ToolbarGroup>
 
           <ToolbarSeparator />
 
-          {/* <ToolbarGroup>
+          <ToolbarGroup>
             <LinkPopover />
             <ImageUploadButton />
-          </ToolbarGroup> */}
+          </ToolbarGroup>
 
           <Spacer />
         </Toolbar>
