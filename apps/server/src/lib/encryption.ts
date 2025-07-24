@@ -127,5 +127,5 @@ export async function hashApiKey(apiKey: string): Promise<string> {
   const hashArray = new Uint8Array(hashBuffer)
   // Use TextDecoder with latin1 to avoid stack overflow with large arrays
   const decoder = new TextDecoder("latin1")
-  return btoa(decoder.decode(hashArray)).substring(0, 16) // First 16 chars for identification
+  return btoa(decoder.decode(hashArray)).substring(0, 32) // First 32 chars for identification
 }
