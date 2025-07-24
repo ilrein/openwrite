@@ -1,4 +1,5 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
+import type { aiProvider } from "../db/schema/ai-providers"
 import type {
   chapter,
   character,
@@ -30,3 +31,6 @@ export type NewNovelCollaborator = InferInsertModel<typeof novelCollaborator>
 
 export type WritingSession = InferSelectModel<typeof writingSession>
 export type NewWritingSession = InferInsertModel<typeof writingSession>
+
+export type AiProvider = InferSelectModel<typeof aiProvider>
+export type NewAiProvider = InferInsertModel<typeof aiProvider>

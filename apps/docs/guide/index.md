@@ -5,7 +5,8 @@ OpenWrite is an open-source, AI-powered writing platform designed specifically f
 ## Key Features
 
 ### 🤖 **AI Writing Assistant**
-- **Multi-Provider Support**: Integrate with OpenAI, Anthropic, Groq, and local models
+- **Multi-Provider Support**: Connect OpenRouter, OpenAI, Anthropic, Groq, and local models
+- **Secure OAuth Integration**: One-click connection with supported providers
 - **Context-Aware**: AI remembers your characters, plot, and writing style
 - **Smart Suggestions**: Continue writing, rewrite passages, and expand ideas
 - **Style Matching**: AI adapts to your unique voice and tone
