@@ -1,6 +1,5 @@
 import type { Editor } from "@tiptap/react"
 import * as React from "react"
-import * as PopoverPrimitive from "@radix-ui/react-popover"
 // --- Icons ---
 import { BanIcon } from "@/components/tiptap-icons/ban-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
@@ -10,7 +9,6 @@ import type {
   UseColorHighlightConfig,
 } from "@/components/tiptap-ui/color-highlight-button"
 import {
-  ColorHighlightButton,
   pickHighlightColorsByValue,
   useColorHighlight,
 } from "@/components/tiptap-ui/color-highlight-button"
@@ -18,17 +16,10 @@ import {
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
 import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button"
 import { Card, CardBody, CardItemGroup } from "@/components/tiptap-ui-primitive/card"
-import {
-  Popover,
-  PopoverClose,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/tiptap-ui-primitive/popover"
 import { Separator } from "@/components/tiptap-ui-primitive/separator"
 // --- Hooks ---
 import { useMenuNavigation } from "@/hooks/use-menu-navigation"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 
 export interface ColorHighlightPopoverContentProps {
   /**
@@ -76,43 +67,43 @@ export const ColorHighlightPopoverButton = React.forwardRef<HTMLButtonElement, B
 
 ColorHighlightPopoverButton.displayName = "ColorHighlightPopoverButton"
 
-export const ColorHighlightPopoverContent = React.memo(function ColorHighlightPopoverContent({
+export const ColorHighlightPopoverContent = React.memo(function ColorHighlightPopoverContentImpl({
   editor,
   colors,
   onClose,
 }: ColorHighlightPopoverContentProps) {
-  const defaultColors = React.useMemo(() => pickHighlightColorsByValue([
-    "var(--tt-color-highlight-green)",
-    "var(--tt-color-highlight-blue)",
-    "var(--tt-color-highlight-red)",
-    "var(--tt-color-highlight-purple)",
-    "var(--tt-color-highlight-yellow)",
-  ]), [])
-  
+  const defaultColors = React.useMemo(
+    () =>
+      pickHighlightColorsByValue([
+        "var(--tt-color-highlight-green)",
+        "var(--tt-color-highlight-blue)",
+        "var(--tt-color-highlight-red)",
+        "var(--tt-color-highlight-purple)",
+        "var(--tt-color-highlight-yellow)",
+      ]),
+    []
+  )
+
   const finalColors = colors || defaultColors
-  
+
   // Track what's causing re-renders in content
-  const prevContentValues = React.useRef({ hasEditor: !!editor, hasOnClose: !!onClose, colorsCount: finalColors.length })
-  React.useEffect(() => {
-    const current = { hasEditor: !!editor, hasOnClose: !!onClose, colorsCount: finalColors.length }
-    const prev = prevContentValues.current
-    
-    const changed = Object.keys(current).filter(key => current[key] !== prev[key])
-    if (changed.length > 0) {
-      console.log('[ColorHighlightPopoverContent] Values changed causing re-render:', {
-        changed,
-        prev,
-        current
-      })
-    }
-    prevContentValues.current = current
-  })
-  
-  console.log('[ColorHighlightPopoverContent] Component render:', {
+  const prevContentValues = React.useRef({
     hasEditor: !!editor,
     hasOnClose: !!onClose,
     colorsCount: finalColors.length,
-    timestamp: Date.now()
+  })
+  React.useEffect(() => {
+    const current = { hasEditor: !!editor, hasOnClose: !!onClose, colorsCount: finalColors.length }
+    const prev = prevContentValues.current
+
+    const changed = Object.keys(current).filter((key) => {
+      const currentKey = key as keyof typeof current
+      return current[currentKey] !== prev[currentKey]
+    })
+    if (changed.length > 0) {
+      // Re-render detected but logging removed for production
+    }
+    prevContentValues.current = current
   })
 
   const { handleRemoveHighlight } = useColorHighlight({ editor })
@@ -129,7 +120,6 @@ export const ColorHighlightPopoverContent = React.memo(function ColorHighlightPo
     items: menuItems,
     orientation: "both",
     onSelect: (item) => {
-      console.log('[ColorHighlightPopoverContent] Menu navigation onSelect:', item)
       if (!containerRef.current) {
         return false
       }
@@ -151,46 +141,29 @@ export const ColorHighlightPopoverContent = React.memo(function ColorHighlightPo
       <CardBody style={isMobile ? { padding: 0 } : {}}>
         <CardItemGroup orientation="horizontal">
           <ButtonGroup orientation="horizontal">
-            {finalColors.map((color, index) => {
-              const { handleColorHighlight, canColorHighlight, isActive } = useColorHighlight({ 
-                editor, 
-                highlightColor: color.value,
-                label: color.label
-              })
-              
-              return (
-                <Button
-                  key={color.value}
-                  aria-label={`${color.label} highlight color`}
-                  data-highlighted={selectedIndex === index}
-                  data-active-state={isActive ? "on" : "off"}
-                  data-style="ghost"
-                  disabled={!canColorHighlight}
-                  onClick={(e) => {
-                    console.log('[ColorHighlightPopoverContent] Color button clicked:', {
-                      color: color.label,
-                      value: color.value,
-                      canColorHighlight,
-                      isActive,
-                      event: e.type
-                    })
-                    handleColorHighlight()
-                    console.log('[ColorHighlightPopoverContent] About to call onClose')
-                    onClose()
-                    console.log('[ColorHighlightPopoverContent] onClose called')
-                  }}
-                  tabIndex={index === selectedIndex ? 0 : -1}
-                  tooltip={color.label}
-                  type="button"
+            {finalColors.map((color, index) => (
+              <Button
+                aria-label={`${color.label} highlight color`}
+                data-highlighted={selectedIndex === index}
+                data-style="ghost"
+                key={color.value}
+                onClick={(_e) => {
+                  if (editor) {
+                    editor.chain().focus().setHighlight({ color: color.value }).run()
+                  }
+                  onClose()
+                }}
+                style={{ "--highlight-color": color.value } as React.CSSProperties}
+                tabIndex={index === selectedIndex ? 0 : -1}
+                tooltip={color.label}
+                type="button"
+              >
+                <span
+                  className="tiptap-button-highlight"
                   style={{ "--highlight-color": color.value } as React.CSSProperties}
-                >
-                  <span
-                    className="tiptap-button-highlight"
-                    style={{ "--highlight-color": color.value } as React.CSSProperties}
-                  />
-                </Button>
-              )
-            })}
+                />
+              </Button>
+            ))}
           </ButtonGroup>
           <Separator />
           <ButtonGroup orientation="horizontal">
@@ -198,14 +171,9 @@ export const ColorHighlightPopoverContent = React.memo(function ColorHighlightPo
               aria-label="Remove highlight"
               data-highlighted={selectedIndex === finalColors.length}
               data-style="ghost"
-              onClick={(e) => {
-                console.log('[ColorHighlightPopoverContent] Remove highlight button clicked:', {
-                  event: e.type
-                })
+              onClick={(_e) => {
                 handleRemoveHighlight()
-                console.log('[ColorHighlightPopoverContent] About to call onClose (remove)')
                 onClose()
-                console.log('[ColorHighlightPopoverContent] onClose called (remove)')
               }}
               role="menuitem"
               tabIndex={selectedIndex === finalColors.length ? 0 : -1}

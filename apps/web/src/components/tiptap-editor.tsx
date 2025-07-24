@@ -26,7 +26,7 @@ import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
 import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
 import { LinkPopover } from "@/components/tiptap-ui/link-popover"
-// COMMENTED OUT - ListDropdownMenu causing dropdown close issues  
+// COMMENTED OUT - ListDropdownMenu causing dropdown close issues
 // import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
 import { ListButton } from "@/components/tiptap-ui/list-button"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
