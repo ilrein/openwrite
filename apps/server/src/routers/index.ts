@@ -3,6 +3,7 @@ import { type Context, Hono } from "hono"
 import { db } from "../db"
 import { member, novel, organization } from "../db/schema"
 import { getAuth } from "../lib/auth"
+import { aiProvidersRouter } from "./ai-providers"
 
 interface Env {
   CORS_ORIGIN: string
@@ -300,5 +301,8 @@ router.delete(
     }
   }
 )
+
+// Mount AI providers router
+router.route("/ai-providers", aiProvidersRouter)
 
 export { router as apiRouter }

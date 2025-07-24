@@ -74,6 +74,7 @@ For errors:
 
 - [Authentication](./auth.md) - Login, logout, session management
 - [Projects](./projects.md) - Create and manage writing projects
+- [AI Providers](./ai-providers.md) - Connect and manage AI service providers
 - [AI Integration](./ai.md) - AI writing assistance endpoints
 - [WebSocket Events](./websocket.md) - Real-time collaboration
 

@@ -22,6 +22,20 @@
       "when": 1753295151620,
       "tag": "0002_lame_ben_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1753365806722,
+      "tag": "0003_early_silver_surfer",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1753368549094,
+      "tag": "0004_luxuriant_jackpot",
+      "breakpoints": true
     }
   ]
 }
