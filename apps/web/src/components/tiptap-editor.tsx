@@ -34,7 +34,6 @@ import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar"
 
 // --- Styles ---
-import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 // --- Types ---
 interface TiptapEditorProps {
@@ -140,14 +139,18 @@ export default function TiptapEditor({
 
           <ToolbarSeparator />
 
-          <ToolbarGroup>
+          {/* <ToolbarGroup>
             <ColorHighlightPopover>
               <ColorHighlightPopoverButton />
-              <ColorHighlightPopoverContent />
+              <ColorHighlightPopoverContent
+                onClose={() => {
+                  console.log("close")
+                }}
+              />
             </ColorHighlightPopover>
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
-          <ToolbarSeparator />
+          {/* <ToolbarSeparator /> */}
 
           <ToolbarGroup>
             <TextAlignButton align="left" />
@@ -161,15 +164,15 @@ export default function TiptapEditor({
           <ToolbarGroup>
             <ListDropdownMenu />
             <BlockquoteButton />
-            <CodeBlockButton />
+            {/* <CodeBlockButton /> */}
           </ToolbarGroup>
 
           <ToolbarSeparator />
 
-          <ToolbarGroup>
+          {/* <ToolbarGroup>
             <LinkPopover />
             <ImageUploadButton />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
           <Spacer />
         </Toolbar>
