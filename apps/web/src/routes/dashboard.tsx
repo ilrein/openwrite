@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
-import { BookOpen, Brain, Settings, Users } from "lucide-react"
+import { BookOpen, Brain, PenTool, Settings, Users } from "lucide-react"
 import DashboardHeader from "@/components/dashboard-header"
 import {
   Sidebar,
@@ -48,7 +48,13 @@ function DashboardLayout() {
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center px-4 py-2">
-              <h1 className="font-bold text-xl">OpenWrite</h1>
+              <Link
+                className="flex items-center gap-2 transition-opacity hover:opacity-80"
+                to="/dashboard"
+              >
+                <PenTool className="h-6 w-6" />
+                <h1 className="font-bold text-xl">OpenWrite</h1>
+              </Link>
             </div>
           </SidebarHeader>
 

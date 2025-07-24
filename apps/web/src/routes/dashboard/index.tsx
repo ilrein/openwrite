@@ -132,30 +132,29 @@ function DashboardHome() {
             <CardContent>
               <div className="space-y-4">
                 {recentNovels.map((novel: Novel) => (
-                  <div
-                    className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
+                  <Link
+                    className="block"
                     key={novel.id}
+                    params={{ novelId: novel.id }}
+                    to="/write/$novelId/write"
                   >
-                    <div className="flex items-center space-x-4">
-                      <BookOpen className="h-8 w-8 text-blue-600" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{novel.title}</p>
-                        <p className="text-muted-foreground text-sm">
-                          {novel.currentWordCount.toLocaleString()} words
-                        </p>
+                    <div className="flex cursor-pointer flex-col space-y-3 rounded-lg p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                      <div className="flex items-center space-x-4">
+                        <BookOpen className="h-8 w-8 text-blue-600" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{novel.title}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {novel.currentWordCount.toLocaleString()} words
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={novel.status === "draft" ? "secondary" : "default"}>
+                          {novel.status}
+                        </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between space-x-2 sm:justify-end">
-                      <Badge variant={novel.status === "draft" ? "secondary" : "default"}>
-                        {novel.status}
-                      </Badge>
-                      <Button asChild size="sm" variant="ghost">
-                        <Link params={{ novelId: novel.id }} to="/write/$novelId/write">
-                          Open
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
 
                 {recentNovels.length === 0 && (
