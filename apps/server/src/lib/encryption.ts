@@ -53,7 +53,9 @@ export async function encryptApiKey(
     combined.set(iv)
     combined.set(new Uint8Array(encrypted), iv.length)
 
-    return btoa(String.fromCharCode(...combined))
+    // Use TextDecoder with latin1 to avoid stack overflow with large arrays
+    const decoder = new TextDecoder("latin1")
+    return btoa(decoder.decode(combined))
   } catch (error) {
     throw new Error(
       `Failed to encrypt API key: ${error instanceof Error ? error.message : "Unknown error"}`
@@ -109,7 +111,9 @@ export async function generateEncryptionKey(): Promise<string> {
   )
 
   const keyBuffer = await crypto.subtle.exportKey("raw", key)
-  return btoa(String.fromCharCode(...new Uint8Array(keyBuffer)))
+  // Use TextDecoder with latin1 to avoid stack overflow with large arrays
+  const decoder = new TextDecoder("latin1")
+  return btoa(decoder.decode(new Uint8Array(keyBuffer)))
 }
 
 /**
@@ -121,5 +125,7 @@ export async function hashApiKey(apiKey: string): Promise<string> {
   const data = encoder.encode(apiKey)
   const hashBuffer = await crypto.subtle.digest("SHA-256", data)
   const hashArray = new Uint8Array(hashBuffer)
-  return btoa(String.fromCharCode(...hashArray)).substring(0, 16) // First 16 chars for identification
+  // Use TextDecoder with latin1 to avoid stack overflow with large arrays
+  const decoder = new TextDecoder("latin1")
+  return btoa(decoder.decode(hashArray)).substring(0, 16) // First 16 chars for identification
 }
