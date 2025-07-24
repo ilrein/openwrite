@@ -197,17 +197,19 @@ bun db:migrate
 
 ## Schema Relationships
 
-```mermaid
 erDiagram
-    user ||--o{ session : has
-    user ||--o{ ai_provider : owns
-    user ||--o{ member : belongs_to
+    user ||--o{ session      : has
+    user ||--o{ ai_provider  : owns
+    user ||--o{ member       : belongs_to
+    user ||--o{ member       : invited_by
     organization ||--o{ member : contains
-    organization ||--o{ novel : contains
-    novel ||--o{ chapter : contains
-    novel ||--o{ character : contains
-    novel ||--o{ location : contains
-```
+    organization ||--o{ novel  : contains
+    user ||--o{ novel        : owns
+    novel ||--o{ chapter      : contains
+    novel ||--o{ character    : contains
+    novel ||--o{ location     : contains
+    location ||--o{ location   : parent
+    team ||--o{ member       : has
 
 ## Best Practices
 
