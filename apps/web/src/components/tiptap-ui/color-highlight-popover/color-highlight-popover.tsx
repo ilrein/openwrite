@@ -17,7 +17,12 @@ import {
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
 import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button"
 import { Card, CardBody, CardItemGroup } from "@/components/tiptap-ui-primitive/card"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/tiptap-ui-primitive/popover"
+import {
+  Popover,
+  PopoverClose,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/tiptap-ui-primitive/popover"
 import { Separator } from "@/components/tiptap-ui-primitive/separator"
 // --- Hooks ---
 import { useMenuNavigation } from "@/hooks/use-menu-navigation"
@@ -34,6 +39,10 @@ export interface ColorHighlightPopoverContentProps {
    * If not provided, defaults to a predefined set of colors.
    */
   colors?: HighlightColor[]
+  /**
+   * Function to close the popover.
+   */
+  onClose: () => void
 }
 
 export interface ColorHighlightPopoverProps
@@ -75,6 +84,7 @@ export function ColorHighlightPopoverContent({
     "var(--tt-color-highlight-purple)",
     "var(--tt-color-highlight-yellow)",
   ]),
+  onClose,
 }: ColorHighlightPopoverContentProps) {
   const { handleRemoveHighlight } = useColorHighlight({ editor })
   const isMobile = useIsMobile()
@@ -111,17 +121,37 @@ export function ColorHighlightPopoverContent({
       <CardBody style={isMobile ? { padding: 0 } : {}}>
         <CardItemGroup orientation="horizontal">
           <ButtonGroup orientation="horizontal">
-            {colors.map((color, index) => (
-              <ColorHighlightButton
-                aria-label={`${color.label} highlight color`}
-                data-highlighted={selectedIndex === index}
-                editor={editor}
-                highlightColor={color.value}
-                key={color.value}
-                tabIndex={index === selectedIndex ? 0 : -1}
-                tooltip={color.label}
-              />
-            ))}
+            {colors.map((color, index) => {
+              const { handleColorHighlight, canColorHighlight, isActive } = useColorHighlight({ 
+                editor, 
+                highlightColor: color.value,
+                label: color.label
+              })
+              
+              return (
+                <Button
+                  key={color.value}
+                  aria-label={`${color.label} highlight color`}
+                  data-highlighted={selectedIndex === index}
+                  data-active-state={isActive ? "on" : "off"}
+                  data-style="ghost"
+                  disabled={!canColorHighlight}
+                  onClick={() => {
+                    handleColorHighlight()
+                    onClose()
+                  }}
+                  tabIndex={index === selectedIndex ? 0 : -1}
+                  tooltip={color.label}
+                  type="button"
+                  style={{ "--highlight-color": color.value } as React.CSSProperties}
+                >
+                  <span
+                    className="tiptap-button-highlight"
+                    style={{ "--highlight-color": color.value } as React.CSSProperties}
+                  />
+                </Button>
+              )
+            })}
           </ButtonGroup>
           <Separator />
           <ButtonGroup orientation="horizontal">
@@ -129,7 +159,10 @@ export function ColorHighlightPopoverContent({
               aria-label="Remove highlight"
               data-highlighted={selectedIndex === colors.length}
               data-style="ghost"
-              onClick={handleRemoveHighlight}
+              onClick={() => {
+                handleRemoveHighlight()
+                onClose()
+              }}
               role="menuitem"
               tabIndex={selectedIndex === colors.length ? 0 : -1}
               tooltip="Remove highlight"
@@ -185,7 +218,7 @@ export function ColorHighlightPopover({
         </ColorHighlightPopoverButton>
       </PopoverTrigger>
       <PopoverContent aria-label="Highlight colors">
-        <ColorHighlightPopoverContent colors={colors} editor={editor} />
+        <ColorHighlightPopoverContent colors={colors} editor={editor} onClose={() => setIsOpen(false)} />
       </PopoverContent>
     </Popover>
   )

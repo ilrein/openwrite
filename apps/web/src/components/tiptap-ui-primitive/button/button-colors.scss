@@ -147,12 +147,12 @@
     /* Light mode */
     --tt-button-default-bg-color: var(--transparent);
     --tt-button-hover-bg-color: var(--tt-gray-light-200);
-    --tt-button-active-bg-color: var(--tt-gray-light-a-100);
+    --tt-button-active-bg-color: var(--tt-gray-light-900); /* Inverted: dark background */
     --tt-button-active-bg-color-emphasized: var(
       --tt-brand-color-100
     ); //more important active state
     --tt-button-active-bg-color-subdued: var(
-      --tt-gray-light-a-100
+      --tt-gray-light-900
     ); //less important active state
     --tt-button-active-hover-bg-color: var(--tt-gray-light-200);
     --tt-button-active-hover-bg-color-emphasized: var(
@@ -167,12 +167,12 @@
     .dark & {
       --tt-button-default-bg-color: var(--transparent);
       --tt-button-hover-bg-color: var(--tt-gray-dark-200);
-      --tt-button-active-bg-color: var(--tt-gray-dark-a-100);
+      --tt-button-active-bg-color: var(--tt-gray-dark-100); /* Inverted: light background */
       --tt-button-active-bg-color-emphasized: var(
         --tt-brand-color-900
       ); //more important active state
       --tt-button-active-bg-color-subdued: var(
-        --tt-gray-dark-a-100
+        --tt-gray-dark-100
       ); //less important active state
       --tt-button-active-hover-bg-color: var(--tt-gray-dark-200);
       --tt-button-active-hover-bg-color-emphasized: var(
@@ -191,18 +191,18 @@
     /* Light mode */
     --tt-button-default-text-color: var(--tt-gray-light-a-600);
     --tt-button-hover-text-color: var(--tt-gray-light-a-900);
-    --tt-button-active-text-color: var(--tt-gray-light-a-900);
+    --tt-button-active-text-color: var(--tt-gray-light-100); /* Inverted: light text on dark bg */
     --tt-button-active-text-color-emphasized: var(--tt-gray-light-a-900);
-    --tt-button-active-text-color-subdued: var(--tt-gray-light-a-900);
+    --tt-button-active-text-color-subdued: var(--tt-gray-light-100);
     --tt-button-disabled-text-color: var(--tt-gray-light-a-400);
 
     /* Dark mode */
     .dark & {
       --tt-button-default-text-color: var(--tt-gray-dark-a-600);
       --tt-button-hover-text-color: var(--tt-gray-dark-a-900);
-      --tt-button-active-text-color: var(--tt-gray-dark-a-900);
+      --tt-button-active-text-color: var(--tt-gray-dark-900); /* Inverted: dark text on light bg */
       --tt-button-active-text-color-emphasized: var(--tt-gray-dark-a-900);
-      --tt-button-active-text-color-subdued: var(--tt-gray-dark-a-900);
+      --tt-button-active-text-color-subdued: var(--tt-gray-dark-900);
       --tt-button-disabled-text-color: var(--tt-gray-dark-a-300);
     }
 
@@ -213,18 +213,18 @@
     /* Light mode */
     --tt-button-default-icon-color: var(--tt-gray-light-a-600);
     --tt-button-hover-icon-color: var(--tt-gray-light-a-900);
-    --tt-button-active-icon-color: var(--tt-brand-color-500);
+    --tt-button-active-icon-color: var(--tt-gray-light-100); /* Inverted: light icon on dark bg */
     --tt-button-active-icon-color-emphasized: var(--tt-brand-color-600);
-    --tt-button-active-icon-color-subdued: var(--tt-gray-light-a-900);
+    --tt-button-active-icon-color-subdued: var(--tt-gray-light-100);
     --tt-button-disabled-icon-color: var(--tt-gray-light-a-400);
 
     /* Dark mode */
     .dark & {
       --tt-button-default-icon-color: var(--tt-gray-dark-a-600);
       --tt-button-hover-icon-color: var(--tt-gray-dark-a-900);
-      --tt-button-active-icon-color: var(--tt-brand-color-400);
+      --tt-button-active-icon-color: var(--tt-gray-dark-900); /* Inverted: dark icon on light bg */
       --tt-button-active-icon-color-emphasized: var(--tt-brand-color-300);
-      --tt-button-active-icon-color-subdued: var(--tt-gray-dark-a-900);
+      --tt-button-active-icon-color-subdued: var(--tt-gray-dark-900);
       --tt-button-disabled-icon-color: var(--tt-gray-dark-a-400);
     }
 
