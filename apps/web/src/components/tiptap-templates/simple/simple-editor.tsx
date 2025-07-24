@@ -168,8 +168,8 @@ export function SimpleEditor() {
   const toolbarRef = React.useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
-    immediatelyRender: false,
-    shouldRerenderOnTransaction: false,
+    immediatelyRender: true,
+    shouldRerenderOnTransaction: true,
     editorProps: {
       attributes: {
         autocomplete: "off",

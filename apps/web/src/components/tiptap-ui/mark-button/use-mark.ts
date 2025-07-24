@@ -176,46 +176,11 @@ export function useMark(config: UseMarkConfig) {
   const { editor: providedEditor, type, hideWhenUnavailable = false, onToggled } = config
 
   const { editor } = useTiptapEditor(providedEditor)
-  const [isVisible, setIsVisible] = React.useState<boolean>(true)
 
-  // Use React state for reactive updates
-  const [canToggle, setCanToggle] = React.useState<boolean>(false)
-  const [isActive, setIsActive] = React.useState<boolean>(false)
-
-  // Update states when editor or selection changes
-  React.useEffect(() => {
-    if (!editor) {
-      setCanToggle(false)
-      setIsActive(false)
-      setIsVisible(false)
-      return
-    }
-
-    const updateStates = () => {
-      const newCanToggle = canToggleMark(editor, type)
-      const newIsActive = isMarkActive(editor, type)
-      const newIsVisible = shouldShowButton({ editor, type, hideWhenUnavailable })
-
-      setCanToggle(newCanToggle)
-      setIsActive(newIsActive)
-      setIsVisible(newIsVisible)
-    }
-
-    // Initial update
-    updateStates()
-
-    // Listen to all relevant editor events
-    const events = ["selectionUpdate", "transaction", "update", "focus", "blur"] as const
-    for (const event of events) {
-      editor.on(event, updateStates)
-    }
-
-    return () => {
-      for (const event of events) {
-        editor.off(event, updateStates)
-      }
-    }
-  }, [editor, type, hideWhenUnavailable])
+  // Use direct approach like official Tiptap examples - shouldRerenderOnTransaction handles re-renders
+  const isActive = editor ? isMarkActive(editor, type) : false
+  const canToggle = editor ? canToggleMark(editor, type) : false
+  const isVisible = editor ? shouldShowButton({ editor, type, hideWhenUnavailable }) : false
 
   const handleMark = React.useCallback(() => {
     if (!editor) {

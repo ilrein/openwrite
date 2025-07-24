@@ -7,7 +7,6 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
-import { Underline } from "@tiptap/extension-underline"
 import { Selection } from "@tiptap/extensions"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 // --- Tiptap Core Extensions ---
@@ -50,6 +49,8 @@ export default function TiptapEditor({
   placeholder = "Start writing...",
 }: TiptapEditorProps) {
   const editor = useEditor({
+    shouldRerenderOnTransaction: true,
+    immediatelyRender: true,
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -75,6 +76,12 @@ export default function TiptapEditor({
             class: "rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm",
           },
         },
+        // Configure underline within StarterKit (since it's included by default)
+        underline: {
+          HTMLAttributes: {
+            class: "underline",
+          },
+        },
       }),
       Selection,
       Image.configure({ allowBase64: true }),
@@ -83,11 +90,6 @@ export default function TiptapEditor({
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Typography,
       Highlight.configure({ multicolor: true }),
-      Underline.configure({
-        HTMLAttributes: {
-          class: "underline",
-        },
-      }), // Add underline support
       Subscript,
       Superscript,
       TaskList,
@@ -106,9 +108,6 @@ export default function TiptapEditor({
         class: "focus:outline-none min-h-full p-6",
       },
     },
-    // Ensure immediate rendering for better reactivity
-    immediatelyRender: false,
-    shouldRerenderOnTransaction: false,
   })
 
   if (!editor) {

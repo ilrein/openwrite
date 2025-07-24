@@ -1,45 +1,24 @@
 import type { Editor } from "@tiptap/react"
-import { useCurrentEditor, useEditorState } from "@tiptap/react"
+import { useCurrentEditor } from "@tiptap/react"
 import * as React from "react"
 
 /**
  * Hook that provides access to a Tiptap editor instance.
  *
- * Accepts an optional editor instance directly, or falls back to retrieving
- * the editor from the Tiptap context if available. This allows components
- * to work both when given an editor directly and when used within a Tiptap
- * editor context.
+ * Simplified version that relies on shouldRerenderOnTransaction for re-renders,
+ * following the official Tiptap React examples pattern.
  *
  * @param providedEditor - Optional editor instance to use instead of the context editor
  * @returns The provided editor or the editor from context, whichever is available
  */
 export function useTiptapEditor(providedEditor?: Editor | null): {
   editor: Editor | null
-  editorState?: Editor["state"]
-  canCommand?: Editor["can"]
 } {
-  const { editor: coreEditor } = useCurrentEditor()
-  const mainEditor = React.useMemo(() => providedEditor || coreEditor, [providedEditor, coreEditor])
+  const { editor: contextEditor } = useCurrentEditor()
+  const editor = React.useMemo(
+    () => providedEditor || contextEditor,
+    [providedEditor, contextEditor]
+  )
 
-  const editorState = useEditorState({
-    editor: mainEditor,
-    selector(context) {
-      if (!context.editor) {
-        return {
-          editor: null,
-          editorState: undefined,
-          canCommand: undefined,
-        }
-      }
-
-      return {
-        editor: context.editor,
-        editorState: context.editor.state,
-        canCommand: context.editor.can,
-      }
-    },
-  })
-
-  // Ensure we always return the editor instance even if editorState fails
-  return editorState || { editor: mainEditor }
+  return { editor }
 }
