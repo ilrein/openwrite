@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `ai_provider_user_provider_unique` ON `ai_provider` (`user_id`,`provider`);

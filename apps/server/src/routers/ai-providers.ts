@@ -3,11 +3,13 @@ import { type Context, Hono } from "hono"
 import { db } from "../db"
 import { aiProvider, member, organization } from "../db/schema"
 import { getAuth } from "../lib/auth"
+import { decryptApiKey, encryptApiKey, hashApiKey } from "../lib/encryption"
 
 interface Env {
   CORS_ORIGIN: string
   BETTER_AUTH_SECRET: string
   BETTER_AUTH_URL: string
+  ENCRYPTION_KEY: string
 }
 
 interface Variables {
@@ -86,6 +88,7 @@ aiProvidersRouter.get("/", async (c: Context<{ Bindings: Env; Variables: Variabl
       id: aiProvider.id,
       provider: aiProvider.provider,
       keyLabel: aiProvider.keyLabel,
+      keyHash: aiProvider.keyHash, // Safe to return, it's just for identification
       isActive: aiProvider.isActive,
       isDefault: aiProvider.isDefault,
       usageLimit: aiProvider.usageLimit,
@@ -129,6 +132,21 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
       return c.json({ error: "Provider and API key are required" }, 400)
     }
 
+    // Check if user already has a provider of this type (due to unique constraint)
+    const existingProvider = await db
+      .select({ id: aiProvider.id })
+      .from(aiProvider)
+      .where(and(eq(aiProvider.userId, user.id), eq(aiProvider.provider, provider)))
+      .limit(1)
+      .get()
+
+    if (existingProvider) {
+      return c.json(
+        { error: "Provider already exists for this user. Use update endpoint instead." },
+        409
+      )
+    }
+
     // If this should be the default, unset other defaults for this provider type
     if (isDefault) {
       await db
@@ -140,13 +158,18 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
     const id = crypto.randomUUID()
     const now = new Date()
 
+    // Encrypt the API key before storing
+    const encryptedApiKey = await encryptApiKey(apiKey, c.env)
+    // Generate hash for identification if not provided
+    const apiKeyHash = keyHash || (await hashApiKey(apiKey))
+
     await db.insert(aiProvider).values({
       id,
       userId: user.id,
       provider,
-      apiKey, // In production, this should be encrypted
+      apiKey: encryptedApiKey, // Now encrypted
       keyLabel: keyLabel || null,
-      keyHash: keyHash || null,
+      keyHash: apiKeyHash,
       providerUserId: providerUserId || null,
       isActive: true,
       isDefault,
@@ -321,10 +344,14 @@ aiProvidersRouter.post(
 
       if (existingProvider) {
         // Update existing provider
+        const encryptedApiKey = await encryptApiKey(key, c.env)
+        const keyHash = await hashApiKey(key)
+
         await db
           .update(aiProvider)
           .set({
-            apiKey: key, // In production, encrypt this
+            apiKey: encryptedApiKey, // Now encrypted
+            keyHash,
             providerUserId: user_id,
             isActive: true,
             updatedAt: now,
@@ -335,12 +362,15 @@ aiProvidersRouter.post(
       }
       // Create new provider
       const id = crypto.randomUUID()
+      const encryptedApiKey = await encryptApiKey(key, c.env)
+      const keyHash = await hashApiKey(key)
 
       await db.insert(aiProvider).values({
         id,
         userId: user.id,
         provider: "openrouter",
-        apiKey: key, // In production, encrypt this
+        apiKey: encryptedApiKey, // Now encrypted
+        keyHash,
         providerUserId: user_id,
         keyLabel: "OpenRouter",
         isActive: true,
@@ -356,5 +386,36 @@ aiProvidersRouter.post(
     }
   }
 )
+
+// Helper function to get decrypted API key for a provider (for internal use)
+export async function getDecryptedApiKey(
+  userId: string,
+  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere",
+  env: Env
+): Promise<string | null> {
+  const providerRecord = await db
+    .select({ apiKey: aiProvider.apiKey })
+    .from(aiProvider)
+    .where(
+      and(
+        eq(aiProvider.userId, userId),
+        eq(aiProvider.provider, provider),
+        eq(aiProvider.isActive, true)
+      )
+    )
+    .limit(1)
+    .get()
+
+  if (!providerRecord) {
+    return null
+  }
+
+  try {
+    return await decryptApiKey(providerRecord.apiKey, env)
+  } catch (_error) {
+    // Failed to decrypt - key may be corrupted or encryption key changed
+    return null
+  }
+}
 
 export { aiProvidersRouter }

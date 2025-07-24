@@ -40,9 +40,9 @@ CREATE TABLE ai_provider (
   )),
   provider_user_id TEXT,
   
-  -- API key details (encrypted in production)
-  api_key TEXT NOT NULL,
-  key_hash TEXT,
+  -- API key details (encrypted at application layer)
+  api_key TEXT NOT NULL, -- Encrypted using AES-GCM
+  key_hash TEXT, -- SHA-256 hash for identification
   key_label TEXT,
   
   -- Configuration
@@ -59,14 +59,17 @@ CREATE TABLE ai_provider (
   updated_at TIMESTAMP NOT NULL,
   last_used_at TIMESTAMP,
   
-  -- OAuth fields
-  access_token TEXT,
-  refresh_token TEXT,
+  -- OAuth fields (encrypted at application layer)
+  access_token TEXT, -- Encrypted using AES-GCM
+  refresh_token TEXT, -- Encrypted using AES-GCM
   token_expires_at TIMESTAMP,
   
   -- Provider-specific configuration (JSON)
   supported_models TEXT, -- JSON array
-  provider_config TEXT   -- JSON object
+  provider_config TEXT,  -- JSON object
+  
+  -- Constraints
+  UNIQUE(user_id, provider) -- Each user can have only one configuration per provider
 );
 ```
 
@@ -301,9 +304,11 @@ export function useCreateAiProvider() {
 
 ### API Key Storage
 
-- **Encryption**: API keys are encrypted before storage (implement in production)
+- **Encryption**: API keys and OAuth tokens are encrypted using AES-GCM before storage
+- **Key Derivation**: Uses ENCRYPTION_KEY environment variable for encryption/decryption
+- **Hash Identification**: SHA-256 hashes are stored for key identification without exposing plain text
 - **Scope Limitation**: Keys are only accessible by the owning user
-- **Secure Deletion**: Keys are permanently deleted when providers are removed
+- **Secure Deletion**: Encrypted keys are permanently deleted when providers are removed
 
 ### OAuth Security
 
@@ -317,6 +322,36 @@ export function useCreateAiProvider() {
 - **Monitoring**: Track unusual usage patterns
 - **Alerts**: Notify users when approaching limits
 
+## Setup and Configuration
+
+### Encryption Key Setup
+
+Before using the AI Providers system, you must generate an encryption key:
+
+```bash
+# Generate encryption key (run once during setup)
+bun run setup-encryption.ts
+```
+
+Add the generated key to your environment variables:
+
+```bash
+# .dev.vars (development)
+ENCRYPTION_KEY=<generated-key>
+
+# Production environment
+ENCRYPTION_KEY=<generated-key>
+```
+
+**⚠️ Important**: 
+- Keep the encryption key secure and never share it publicly
+- Losing this key will make existing encrypted API keys unrecoverable
+- Use different keys for development and production environments
+
+### Database Constraints
+
+The system enforces a unique constraint on `(user_id, provider)` combinations, ensuring each user can have only one configuration per provider type. Attempting to create duplicate entries will result in a 409 Conflict error.
+
 ## Error Handling
 
 ### Common Error Codes
@@ -325,9 +360,10 @@ export function useCreateAiProvider() {
 |------|--------|-------------|
 | `PROVIDER_NOT_FOUND` | 404 | AI provider not found or not owned by user |
 | `INVALID_API_KEY` | 400 | API key format is invalid |
-| `DUPLICATE_PROVIDER` | 409 | Provider already exists for user |
+| `DUPLICATE_PROVIDER` | 409 | Provider already exists for user (unique constraint) |
 | `USAGE_LIMIT_EXCEEDED` | 429 | Provider usage limit exceeded |
 | `OAUTH_EXCHANGE_FAILED` | 400 | Failed to exchange OAuth code |
+| `ENCRYPTION_FAILED` | 500 | Failed to encrypt/decrypt API key (missing ENCRYPTION_KEY) |
 
 ### Error Response Format
 

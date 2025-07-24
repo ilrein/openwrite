@@ -10,6 +10,7 @@ export interface AiProvider {
   id: string
   provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
   keyLabel: string | null
+  keyHash: string | null
   isActive: boolean
   isDefault: boolean
   usageLimit: number | null
@@ -21,7 +22,6 @@ export interface AiProvider {
 
 export interface AiProviderDetails extends AiProvider {
   providerUserId: string | null
-  keyHash: string | null
   updatedAt: string
   supportedModels: string[] | null
   providerConfig: Record<string, unknown> | null
