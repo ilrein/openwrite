@@ -248,18 +248,23 @@ export const LinkPopover = React.forwardRef<HTMLButtonElement, LinkPopoverProps>
     return (
       <Popover onOpenChange={handleOnOpenChange} open={isOpen}>
         <PopoverTrigger asChild>
-          <LinkButton
+          <Button
             aria-label={label}
             aria-pressed={isActive}
+            asChild={true}
+            className="tiptap-button"
             data-active-state={isActive ? "on" : "off"}
             data-disabled={!canSet}
+            data-style="ghost"
             disabled={!canSet}
             onClick={handleClick}
-            {...buttonProps}
             ref={ref}
+            tabIndex={-1}
+            type="button"
+            {...buttonProps}
           >
             {children ?? <Icon className="tiptap-button-icon" />}
-          </LinkButton>
+          </Button>
         </PopoverTrigger>
 
         <PopoverContent>

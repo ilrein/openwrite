@@ -24,7 +24,7 @@ import {
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
 import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
-import { LinkButton, LinkContent, LinkPopover } from "@/components/tiptap-ui/link-popover"
+import { LinkPopover } from "@/components/tiptap-ui/link-popover"
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
@@ -167,10 +167,7 @@ export default function TiptapEditor({
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <LinkPopover>
-              <LinkButton />
-              <LinkContent />
-            </LinkPopover>
+            <LinkPopover />
             <ImageUploadButton />
           </ToolbarGroup>
 

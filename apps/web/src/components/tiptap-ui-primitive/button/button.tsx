@@ -15,6 +15,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   showTooltip?: boolean
   tooltip?: React.ReactNode
   shortcutKeys?: string
+  asChild?: boolean
 }
 
 export const ShortcutDisplay: React.FC<{ shortcuts: string[] }> = ({ shortcuts }) => {
@@ -42,6 +43,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       tooltip,
       showTooltip = true,
       shortcutKeys,
+      asChild = false,
       "aria-label": ariaLabel,
       ...props
     },
@@ -49,7 +51,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const shortcuts = React.useMemo(() => parseShortcutKeys({ shortcutKeys }), [shortcutKeys])
 
-    if (!(tooltip && showTooltip)) {
+    // When asChild is true, always render just the button element (no tooltip)
+    // This allows parent components like PopoverTrigger to properly merge with it
+    if (asChild || !(tooltip && showTooltip)) {
       return (
         <button
           aria-label={ariaLabel}
@@ -64,13 +68,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <Tooltip delay={200}>
-        <TooltipTrigger
-          aria-label={ariaLabel}
-          className={cn("tiptap-button", className)}
-          ref={ref}
-          {...props}
-        >
-          {children}
+        <TooltipTrigger asChild>
+          <button
+            aria-label={ariaLabel}
+            className={cn("tiptap-button", className)}
+            ref={ref}
+            {...props}
+          >
+            {children}
+          </button>
         </TooltipTrigger>
         <TooltipContent>
           {tooltip}
