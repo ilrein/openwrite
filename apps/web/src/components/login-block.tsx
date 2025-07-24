@@ -115,16 +115,16 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
 
   if (isPending) {
     return (
-      <div className="flex min-h-svh w-full items-center justify-center p-6">
+      <div className="flex min-h-[80vh] w-full items-center justify-center px-4 py-6">
         <div className="text-center">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-[80vh] w-full items-center justify-center px-4 py-6">
       <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {/* Header */}
           <div className="flex flex-col items-center text-center">
             <h1 className="font-semibold text-xl tracking-tight">
@@ -291,7 +291,7 @@ export default function LoginBlock({ mode, onModeChange }: LoginBlockProps) {
             )}
           </div>
 
-          <p className="px-8 text-center text-muted-foreground text-sm">
+          <p className="px-2 text-center text-muted-foreground text-sm">
             By clicking continue, you agree to our{" "}
             <Link className="underline underline-offset-4 hover:text-primary" to="/terms">
               Terms of Service

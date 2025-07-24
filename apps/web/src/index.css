@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./styles/_variables.scss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

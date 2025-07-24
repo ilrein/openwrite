@@ -7,7 +7,6 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
-import { Underline } from "@tiptap/extension-underline"
 import { Selection } from "@tiptap/extensions"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 // --- Tiptap Core Extensions ---
@@ -16,17 +15,20 @@ import { StarterKit } from "@tiptap/starter-kit"
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
-import {
-  ColorHighlightPopover,
-  ColorHighlightPopoverButton,
-  ColorHighlightPopoverContent,
-} from "@/components/tiptap-ui/color-highlight-popover"
+// COMMENTED OUT - ColorHighlightPopover causing popover close issues
+// import {
+//   ColorHighlightPopover,
+//   ColorHighlightPopoverButton,
+//   ColorHighlightPopoverContent,
+// } from "@/components/tiptap-ui/color-highlight-popover"
 
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
 import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
-import { LinkButton, LinkContent, LinkPopover } from "@/components/tiptap-ui/link-popover"
-import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
+import { LinkPopover } from "@/components/tiptap-ui/link-popover"
+// COMMENTED OUT - ListDropdownMenu causing dropdown close issues
+// import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
+import { ListButton } from "@/components/tiptap-ui/list-button"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
@@ -35,7 +37,6 @@ import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar"
 
 // --- Styles ---
-import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 // --- Types ---
 interface TiptapEditorProps {
@@ -50,6 +51,8 @@ export default function TiptapEditor({
   placeholder = "Start writing...",
 }: TiptapEditorProps) {
   const editor = useEditor({
+    shouldRerenderOnTransaction: true,
+    immediatelyRender: true,
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -75,6 +78,12 @@ export default function TiptapEditor({
             class: "rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm",
           },
         },
+        // Configure underline within StarterKit (since it's included by default)
+        underline: {
+          HTMLAttributes: {
+            class: "underline",
+          },
+        },
       }),
       Selection,
       Image.configure({ allowBase64: true }),
@@ -83,11 +92,6 @@ export default function TiptapEditor({
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Typography,
       Highlight.configure({ multicolor: true }),
-      Underline.configure({
-        HTMLAttributes: {
-          class: "underline",
-        },
-      }), // Add underline support
       Subscript,
       Superscript,
       TaskList,
@@ -106,9 +110,6 @@ export default function TiptapEditor({
         class: "focus:outline-none min-h-full p-6",
       },
     },
-    // Ensure immediate rendering for better reactivity
-    immediatelyRender: false,
-    shouldRerenderOnTransaction: false,
   })
 
   if (!editor) {
@@ -141,14 +142,12 @@ export default function TiptapEditor({
 
           <ToolbarSeparator />
 
-          <ToolbarGroup>
-            <ColorHighlightPopover>
-              <ColorHighlightPopoverButton />
-              <ColorHighlightPopoverContent />
-            </ColorHighlightPopover>
+          {/* COMMENTED OUT - ColorHighlightPopover causing popover close issues */}
+          {/* <ToolbarGroup>
+            <ColorHighlightPopover />
           </ToolbarGroup>
 
-          <ToolbarSeparator />
+          <ToolbarSeparator /> */}
 
           <ToolbarGroup>
             <TextAlignButton align="left" />
@@ -160,7 +159,9 @@ export default function TiptapEditor({
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <ListDropdownMenu />
+            <ListButton type="bulletList" />
+            <ListButton type="orderedList" />
+            <ListButton type="taskList" />
             <BlockquoteButton />
             <CodeBlockButton />
           </ToolbarGroup>
@@ -168,10 +169,7 @@ export default function TiptapEditor({
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <LinkPopover>
-              <LinkButton />
-              <LinkContent />
-            </LinkPopover>
+            <LinkPopover />
             <ImageUploadButton />
           </ToolbarGroup>
 
