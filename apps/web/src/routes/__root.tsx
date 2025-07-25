@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import AppHeader from "@/components/app-header"
+import { CommandPalette } from "@/components/command-palette"
 import Loader from "@/components/loader"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
@@ -68,6 +69,7 @@ function RootComponent() {
             <main className="flex-1">{isFetching ? <Loader /> : <Outlet />}</main>
           </div>
         )}
+        <CommandPalette />
         <Toaster richColors />
       </ThemeProvider>
       <TanStackRouterDevtools position="bottom-left" />
