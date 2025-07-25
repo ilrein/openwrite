@@ -325,20 +325,9 @@ function AIProvidersPage() {
               </TableHeader>
               <TableBody>
                 {availableProviders
-                  .filter((p) => p.enabled)
+                  .filter((p) => p.enabled && !getConnectedProvider(p.id)) // Only show non-connected providers
                   .sort((a, b) => {
-                    const aConnected = !!getConnectedProvider(a.id)
-                    const bConnected = !!getConnectedProvider(b.id)
-
-                    // Connected providers first
-                    if (aConnected && !bConnected) {
-                      return -1
-                    }
-                    if (!aConnected && bConnected) {
-                      return 1
-                    }
-
-                    // Then by recommended status
+                    // Sort by recommended status first, then alphabetically
                     if (a.recommended && !b.recommended) {
                       return -1
                     }
@@ -350,9 +339,6 @@ function AIProvidersPage() {
                     return a.name.localeCompare(b.name)
                   })
                   .map((provider) => {
-                    const connectedProvider = getConnectedProvider(provider.id)
-                    const isConnected = !!connectedProvider
-
                     return (
                       <TableRow key={provider.id}>
                         <TableCell>
@@ -369,69 +355,45 @@ function AIProvidersPage() {
                           {provider.description}
                         </TableCell>
                         <TableCell>
-                          {isConnected ? (
-                            <Badge className="text-xs" variant="default">
-                              Connected
-                            </Badge>
-                          ) : (
-                            <Badge className="text-xs" variant="outline">
-                              Available
-                            </Badge>
-                          )}
+                          <Badge className="text-xs" variant="outline">
+                            Available
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          {isConnected ? (
-                            <ConfirmDialog
-                              confirmText="Delete"
-                              description="Are you sure you want to delete this AI provider? This action cannot be undone."
-                              onConfirm={() => {
-                                if (connectedProvider) {
-                                  deleteMutation.mutate(connectedProvider.id)
-                                }
-                              }}
-                              title="Delete AI Provider"
-                              variant="destructive"
-                            >
-                              <Button size="sm" variant="destructive">
-                                Delete
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                className="h-8"
+                                onClick={() => setSelectedProviderId(provider.id)}
+                                size="sm"
+                              >
+                                <Plus className="mr-1 h-3 w-3" />
+                                Connect
                               </Button>
-                            </ConfirmDialog>
-                          ) : (
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  className="h-8"
-                                  onClick={() => setSelectedProviderId(provider.id)}
-                                  size="sm"
-                                >
-                                  <Plus className="mr-1 h-3 w-3" />
-                                  Connect
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle>Connect {provider.name}</DialogTitle>
-                                  <DialogDescription>
-                                    Connect to {provider.name} to access their models
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="max-h-[calc(90vh-8rem)] overflow-y-auto pr-2">
-                                  {selectedProviderId === provider.id && (
-                                    <AddProviderForm
-                                      availableProviders={[provider].filter((p) => p.enabled)}
-                                      onSuccess={() => {
-                                        setSelectedProviderId(null)
-                                        queryClient.invalidateQueries({
-                                          queryKey: ["ai-providers"],
-                                        })
-                                      }}
-                                      preSelectedProviderId={provider.id}
-                                    />
-                                  )}
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Connect {provider.name}</DialogTitle>
+                                <DialogDescription>
+                                  Connect to {provider.name} to access their models
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="max-h-[calc(90vh-8rem)] overflow-y-auto pr-2">
+                                {selectedProviderId === provider.id && (
+                                  <AddProviderForm
+                                    availableProviders={[provider].filter((p) => p.enabled)}
+                                    onSuccess={() => {
+                                      setSelectedProviderId(null)
+                                      queryClient.invalidateQueries({
+                                        queryKey: ["ai-providers"],
+                                      })
+                                    }}
+                                    preSelectedProviderId={provider.id}
+                                  />
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </TableCell>
                       </TableRow>
                     )
