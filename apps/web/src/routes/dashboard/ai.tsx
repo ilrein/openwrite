@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { type AiProvider, aiProvidersApi } from "@/lib/api/ai-providers"
+import { buildAuthURL, generatePKCEParams } from "@/lib/pkce"
 
 function AIProvidersPage() {
   const [providers, setProviders] = useState<AiProvider[]>([])
@@ -333,14 +334,101 @@ function AddProviderForm({
   const [selectedProvider, setSelectedProvider] = useState(preSelectedProviderId || "")
   const [apiKey, setApiKey] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showManualApiKey, setShowManualApiKey] = useState(false)
+  const [oauthLoading, setOauthLoading] = useState(false)
 
   useEffect(() => {
     setSelectedProvider(preSelectedProviderId || "")
   }, [preSelectedProviderId])
 
+  // Handle OAuth callback
+  // biome-ignore lint/correctness/useExhaustiveDependencies: OAuth callback only runs once on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get("code")
+
+    // Check if this is an OpenRouter OAuth callback by presence of code and stored PKCE params
+    if (code && localStorage.getItem("openrouter-pkce")) {
+      handleOAuthCallback(code, "")
+      // Clean up URL parameters
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, document.title, newUrl)
+    }
+  }, [])
+
+  const handleOAuthCallback = async (code: string, _state: string) => {
+    try {
+      setOauthLoading(true)
+
+      // Get stored PKCE parameters
+      const storedParams = localStorage.getItem("openrouter-pkce")
+      if (!storedParams) {
+        console.error("No PKCE parameters found in localStorage")
+        return
+      }
+
+      const { codeVerifier, codeChallengeMethod } = JSON.parse(storedParams)
+      localStorage.removeItem("openrouter-pkce")
+
+      console.log("Exchanging OAuth code:", code)
+      console.log("Using code verifier:", codeVerifier)
+      console.log("Using challenge method:", codeChallengeMethod)
+
+      // Exchange code for API key
+      const result = await aiProvidersApi.exchangeOpenRouterCode({
+        code,
+        codeVerifier,
+        codeChallengeMethod,
+      })
+
+      console.log("Exchange result:", result)
+      onSuccess()
+    } catch (error) {
+      console.error("OAuth callback failed:", error)
+    } finally {
+      setOauthLoading(false)
+    }
+  }
+
+  const handleOAuthLogin = async () => {
+    try {
+      setOauthLoading(true)
+
+      // Generate PKCE parameters
+      const pkceParams = await generatePKCEParams()
+
+      // Store PKCE parameters for later use
+      localStorage.setItem(
+        "openrouter-pkce",
+        JSON.stringify({
+          codeVerifier: pkceParams.codeVerifier,
+          codeChallengeMethod: pkceParams.codeChallengeMethod,
+        })
+      )
+
+      // Build OAuth URL
+      const callbackUrl = `${window.location.origin}/dashboard/ai`
+
+      const authUrl = buildAuthURL({
+        callbackUrl,
+        codeChallenge: pkceParams.codeChallenge,
+        codeChallengeMethod: pkceParams.codeChallengeMethod,
+      })
+
+      // Redirect to OpenRouter OAuth
+      window.location.href = authUrl
+    } catch (_error) {
+      // Error handling removed for linting
+      setOauthLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!(selectedProvider && apiKey)) {
+
+    // For OpenRouter, only require API key if manual mode is selected
+    const requiresApiKey = selectedProvider !== "openrouter" || showManualApiKey
+    if (!selectedProvider || (requiresApiKey && !apiKey)) {
       return
     }
 
@@ -417,20 +505,45 @@ function AddProviderForm({
       {selectedProvider === "openrouter" && (
         <div className="space-y-3">
           <Separator />
-          <div className="flex gap-2">
-            <Button className="flex-1" type="button" variant="default">
-              OAuth Login (Recommended)
-            </Button>
-            <Button className="flex-1" type="button" variant="outline">
-              Manual API Key
-            </Button>
-          </div>
+          {!showManualApiKey && (
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                disabled={oauthLoading}
+                onClick={handleOAuthLogin}
+                type="button"
+                variant="default"
+              >
+                {oauthLoading ? "Connecting..." : "OAuth Login (Recommended)"}
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => setShowManualApiKey(true)}
+                type="button"
+                variant="outline"
+              >
+                Manual API Key
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
-      {selectedProvider && selectedProvider !== "openrouter" && (
+      {selectedProvider && (selectedProvider !== "openrouter" || showManualApiKey) && (
         <div className="space-y-2">
-          <Label htmlFor="apiKey">API Key</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="apiKey">API Key</Label>
+            {selectedProvider === "openrouter" && showManualApiKey && (
+              <Button
+                onClick={() => setShowManualApiKey(false)}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                ← Back to OAuth
+              </Button>
+            )}
+          </div>
           <Input
             id="apiKey"
             onChange={(e) => setApiKey(e.target.value)}
@@ -447,7 +560,13 @@ function AddProviderForm({
 
       <div className="flex gap-2 pt-4">
         <Button
-          disabled={!selectedProvider || (!apiKey && selectedProvider !== "openrouter") || loading}
+          disabled={
+            !selectedProvider ||
+            (selectedProvider === "openrouter" && showManualApiKey && !apiKey) ||
+            (selectedProvider !== "openrouter" && !apiKey) ||
+            loading ||
+            oauthLoading
+          }
           type="submit"
         >
           {loading ? "Connecting..." : "Connect Provider"}

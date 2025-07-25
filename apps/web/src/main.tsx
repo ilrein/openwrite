@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import ReactDOM from "react-dom/client"
 import Loader from "./components/loader"
+import { initializeTheme } from "./lib/theme"
 import { routeTree } from "./routeTree.gen"
 
 const queryClient = new QueryClient({
@@ -36,6 +37,9 @@ if (!rootElement) {
 }
 
 if (!rootElement.innerHTML) {
+  // Initialize theme system
+  initializeTheme()
+
   const root = ReactDOM.createRoot(rootElement)
   root.render(<RouterProvider router={router} />)
 }

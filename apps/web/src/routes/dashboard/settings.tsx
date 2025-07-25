@@ -1,38 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Palette } from "lucide-react"
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import themes from "./themes.json" with { type: "json" }
 
 function OrganizationSettingsPage() {
-  const [selectedTheme, setSelectedTheme] = useState("caffeine")
-
-  const applyTheme = (themeId: string) => {
-    const theme = themes.find((t) => t.id === themeId)
-    if (!theme) {
-      return
-    }
-
-    const root = document.documentElement
-    const isDark = root.classList.contains("dark")
-    const colorMode = isDark ? "dark" : "light"
-    const colors = theme.colors[colorMode]
-
-    for (const [property, value] of Object.entries(colors)) {
-      root.style.setProperty(property, value)
-    }
-
-    setSelectedTheme(themeId)
-  }
-
   return (
     <div className="container mx-auto space-y-6 p-6">
       <div>
@@ -41,7 +10,8 @@ function OrganizationSettingsPage() {
       </div>
 
       <div className="grid gap-6">
-        <Card>
+        {/* Theme selection temporarily disabled */}
+        {/* <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5" />
@@ -52,12 +22,12 @@ function OrganizationSettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="theme-select">Color Theme</Label>
-              <Select onValueChange={applyTheme} value={selectedTheme}>
+              <Select onValueChange={handleThemeChange} value={selectedTheme}>
                 <SelectTrigger id="theme-select">
                   <SelectValue placeholder="Select a theme" />
                 </SelectTrigger>
                 <SelectContent>
-                  {themes.map((theme) => (
+                  {availableThemes.map((theme) => (
                     <SelectItem key={theme.id} value={theme.id}>
                       <div>
                         <div className="font-medium">{theme.name}</div>
@@ -72,7 +42,7 @@ function OrganizationSettingsPage() {
               Theme changes apply immediately and work with both light and dark modes
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader>
