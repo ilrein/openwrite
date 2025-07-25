@@ -41,7 +41,7 @@ Visit:
 openwrite/
 ├── apps/
 │   ├── web/           # React frontend with TanStack Router
-│   ├── server/        # Hono API with ORPC
+│   ├── server/        # Hono API with REST endpoints
 │   └── docs/          # VitePress documentation
 ├── packages/          # Shared packages (future)
 └── tooling/           # Development tools (future)
@@ -90,7 +90,7 @@ git checkout -b fix/issue-description
 - Use TypeScript for all props and state
 
 ### Backend
-- Use ORPC for all API endpoints
+- Use REST APIs for all endpoints
 - Validate all inputs with Zod schemas
 - Follow RESTful conventions where applicable
 - Handle errors gracefully

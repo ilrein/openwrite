@@ -71,9 +71,9 @@
   - Phase: Phase 1, Priority: High, Effort: S, Team: Backend
   - Extend Better Auth with user profiles, usage tracking, social login
 
-- [ ] **ORPC API Structure**
+- [ ] **REST API Structure**
   - Phase: Phase 1, Priority: High, Effort: M, Team: Backend
-  - Design and implement all core API endpoints with type safety
+  - Design and implement all core endpoints with type safety
 
 ### AI Integration Layer
 - [ ] **Multi-Provider AI Service**

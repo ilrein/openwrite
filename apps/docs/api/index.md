@@ -5,7 +5,7 @@ Welcome to the OpenWrite API documentation. This section provides comprehensive 
 ## Overview
 
 The OpenWrite API is built with:
-- **ORPC** for type-safe RPC calls
+- **REST endpoints** for type-safe calls
 - **Hono** framework for fast, lightweight endpoints
 - **Zod** for runtime validation and type safety
 - **Better Auth** for authentication

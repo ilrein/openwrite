@@ -94,7 +94,7 @@ pub fn sign_in(
 ```
 
 ### 3. API Layer (Tauri Commands)
-Replace ORPC endpoints with Tauri commands:
+Replace REST API endpoints with Tauri commands:
 
 ```rust
 // src-tauri/src/api.rs
@@ -121,7 +121,7 @@ pub fn create_project(
 ```
 
 ### 4. Frontend Adapter Layer
-Create adapter to replace ORPC client:
+Create adapter to replace REST API client:
 
 ```typescript
 // apps/desktop/src/lib/tauri-client.ts
@@ -181,7 +181,7 @@ export const tauriClient = {
 
 ### Week 5-6: UI Integration
 - Port existing React components
-- Replace ORPC calls with Tauri commands
+- Replace REST API calls with Tauri commands
 - Test complete user flows
 
 ### Week 7-8: Polish & Distribution
