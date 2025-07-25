@@ -52,9 +52,9 @@ export function CommandPalette() {
             <HomeIcon />
             Dashboard
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate({ to: "/dashboard/novels" }))}>
+          <CommandItem onSelect={() => runCommand(() => navigate({ to: "/dashboard/projects" }))}>
             <BookOpenIcon />
-            Novels
+            Projects
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate({ to: "/dashboard/ai" }))}>
             <PaletteIcon />
@@ -81,7 +81,7 @@ export function CommandPalette() {
             }
           >
             <PlusIcon />
-            Create New Novel
+            Create New Project
           </CommandItem>
           <CommandItem
             onSelect={() =>
@@ -91,7 +91,7 @@ export function CommandPalette() {
             }
           >
             <SearchIcon />
-            Search Novels
+            Search Projects
           </CommandItem>
         </CommandGroup>
 
