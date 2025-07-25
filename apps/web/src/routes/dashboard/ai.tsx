@@ -269,7 +269,7 @@ function useOAuthLogin() {
 
 // Helper function for provider form validation
 function isFormValid(selectedProvider: string, showManualApiKey: boolean, apiKey: string): boolean {
-  const requiresApiKey = selectedProvider !== "openrouter" || showManualApiKey
+  const requiresApiKey = (selectedProvider !== "openrouter" || showManualApiKey) && selectedProvider !== "ollama"
   return !!(selectedProvider && (!requiresApiKey || apiKey))
 }
 
