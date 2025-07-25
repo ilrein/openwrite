@@ -21,7 +21,7 @@ The `drizzle.config.ts` automatically chooses the appropriate driver:
 ### For Remote D1 (in `.dev.vars` or production secrets):
 ```bash
 CLOUDFLARE_ACCOUNT_ID=a9c9538ffdbcd1f606f241c5d9a22512
-CLOUDFLARE_DATABASE_ID=71198766-b4ea-4e7e-ab8c-ae76037060ff
+CLOUDFLARE_DATABASE_ID=9c50826a-1e7a-498c-ab1b-d1a73192cca9
 CLOUDFLARE_D1_TOKEN=your-api-token-here
 ```
 

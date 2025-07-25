@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1753152205100,
-      "tag": "0000_faulty_tag",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1753244167698,
-      "tag": "0001_bouncy_sally_floyd",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1753295151620,
-      "tag": "0002_lame_ben_parker",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1753365806722,
-      "tag": "0003_early_silver_surfer",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1753368549094,
-      "tag": "0004_luxuriant_jackpot",
+      "when": 1753474831207,
+      "tag": "0000_initial_project_schema",
       "breakpoints": true
     }
   ]
