@@ -1,0 +1,31 @@
+# OpenWrite Server Environment Variables
+# Copy this file to .dev.vars and fill in your actual values
+
+# CORS origin for the web application
+CORS_ORIGIN="http://localhost:3001"
+
+# Better Auth Configuration
+BETTER_AUTH_SECRET="your-secret-key-here-change-this-in-production"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# AI Provider API Keys (optional - configure as needed)
+# OpenAI
+OPENAI_API_KEY="sk-your-openai-api-key"
+
+# Anthropic
+ANTHROPIC_API_KEY="sk-ant-your-anthropic-api-key"
+
+# OpenRouter (recommended for multi-model access)
+OPENROUTER_API_KEY="sk-or-your-openrouter-api-key"
+
+# Groq (for fast inference)
+GROQ_API_KEY="gsk-your-groq-api-key"
+
+# Google (for Gemini models)
+GOOGLE_API_KEY="your-google-api-key"
+
+# Local AI (Ollama) - uncomment if using local models
+# OLLAMA_BASE_URL="http://localhost:11434"
+
+# Environment mode
+NODE_ENV="development"

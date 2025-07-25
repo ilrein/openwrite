@@ -86,7 +86,7 @@ Visit `http://localhost:3001` to start writing!
 ## Community
 
 - **GitHub**: [ilrein/openwrite](https://github.com/ilrein/openwrite)
-- **Documentation**: [docs.openwrite.dev](https://docs.openwrite.dev)
+- **Issues & Support**: [GitHub Issues](https://github.com/ilrein/openwrite/issues)
 - **Discord**: Coming soon
 - **Twitter**: [@OpenWriteAI](https://twitter.com/OpenWriteAI)
 
