@@ -56,6 +56,13 @@ export interface OpenRouterExchangeData {
   codeChallengeMethod?: "S256" | "plain"
 }
 
+export interface OAuthExchangeData {
+  code: string
+  codeVerifier: string
+  codeChallengeMethod: "S256" | "plain"
+  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+}
+
 /**
  * AI Providers API client
  */
@@ -116,6 +123,16 @@ export const aiProvidersApi = {
     data: OpenRouterExchangeData
   ): Promise<{ success: boolean; id: string }> {
     return (await apiCall("/api/ai-providers/openrouter/exchange", {
+      method: "POST",
+      body: JSON.stringify(data),
+    })) as { success: boolean; id: string }
+  },
+
+  /**
+   * Exchange OAuth code for any supported provider
+   */
+  async exchangeOAuth(data: OAuthExchangeData): Promise<{ success: boolean; id: string }> {
+    return (await apiCall(`/api/ai-providers/${data.provider}/exchange`, {
       method: "POST",
       body: JSON.stringify(data),
     })) as { success: boolean; id: string }

@@ -81,7 +81,8 @@ function AIProvidersPage() {
       code: string
       codeVerifier: string
       codeChallengeMethod: "S256" | "plain"
-    }) => aiProvidersApi.exchangeOpenRouterCode(params),
+      provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+    }) => aiProvidersApi.exchangeOAuth(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
       toast.success("Provider connected successfully via OAuth")
@@ -120,14 +121,26 @@ function AIProvidersPage() {
         const {
           codeVerifier,
           codeChallengeMethod,
-        }: { codeVerifier: string; codeChallengeMethod: "S256" | "plain" } =
-          JSON.parse(storedParams)
+          providerId,
+        }: {
+          codeVerifier: string
+          codeChallengeMethod: "S256" | "plain"
+          providerId:
+            | "openrouter"
+            | "openai"
+            | "anthropic"
+            | "ollama"
+            | "groq"
+            | "gemini"
+            | "cohere"
+        } = JSON.parse(storedParams)
         sessionStorage.removeItem(pkceKey)
 
         oauthMutation.mutate({
           code,
           codeVerifier,
           codeChallengeMethod,
+          provider: providerId,
         })
       } catch (callbackError) {
         toast.error(
