@@ -22,6 +22,7 @@ interface CodexModalProps {
 export default function CodexModal({
   isOpen,
   onClose,
+  projectId: _projectId, // TODO: Use projectId to fetch project-specific codex data instead of hardcoded data
   initialType = null,
   initialEntry = null,
 }: CodexModalProps) {

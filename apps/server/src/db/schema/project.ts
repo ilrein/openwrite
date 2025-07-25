@@ -160,10 +160,10 @@ export const character = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (_table) => ({
-    // CHECK constraint to ensure character is associated with either project or work, but not both null
+    // CHECK constraint to ensure character is associated with either project or work
     characterAssociation: check(
       "character_association",
-      sql`((project_id IS NOT NULL AND work_id IS NULL) OR (work_id IS NOT NULL))`
+      sql`project_id IS NOT NULL OR work_id IS NOT NULL`
     ),
   })
 )
@@ -193,10 +193,10 @@ export const location = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (_table) => ({
-    // CHECK constraint to ensure location is associated with either project or work, but not both null
+    // CHECK constraint to ensure location is associated with either project or work
     locationAssociation: check(
       "location_association",
-      sql`((project_id IS NOT NULL AND work_id IS NULL) OR (work_id IS NOT NULL))`
+      sql`project_id IS NOT NULL OR work_id IS NOT NULL`
     ),
   })
 )
@@ -224,10 +224,10 @@ export const plotPoint = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (_table) => ({
-    // CHECK constraint to ensure plot point is associated with either project or work, but not both null
+    // CHECK constraint to ensure plot point is associated with either project or work
     plotPointAssociation: check(
       "plot_point_association",
-      sql`((project_id IS NOT NULL AND work_id IS NULL) OR (work_id IS NOT NULL))`
+      sql`project_id IS NOT NULL OR work_id IS NOT NULL`
     ),
   })
 )
