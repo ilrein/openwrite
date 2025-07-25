@@ -11,7 +11,7 @@ export interface Project {
   type: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
   genre: string | null
   status: "draft" | "in_progress" | "completed" | "published" | "archived"
-  visibility: "private" | "team" | "organization" | "public"
+  visibility: "private" | "organization" | "public"
   currentWordCount: number
   targetWordCount: number | null
   coverImage: string | null
@@ -48,7 +48,7 @@ export interface CreateProjectData {
   type?: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
   genre?: string | null
   targetWordCount?: number | null
-  visibility?: "private" | "team" | "organization" | "public"
+  visibility?: "private" | "organization" | "public"
 }
 
 // Legacy type for backward compatibility
@@ -60,7 +60,7 @@ export interface UpdateProjectData {
   type?: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
   genre?: string | null
   targetWordCount?: number | null
-  visibility?: "private" | "team" | "organization" | "public"
+  visibility?: "private" | "organization" | "public"
 }
 
 // Legacy type for backward compatibility

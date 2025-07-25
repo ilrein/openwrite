@@ -19,7 +19,7 @@ export const projectStatusEnum = [
   "published",
   "archived",
 ] as const
-export const visibilityEnum = ["private", "team", "organization", "public"] as const
+export const visibilityEnum = ["private", "organization", "public"] as const
 export const workTypeEnum = [
   "novel",
   "short_story",
@@ -160,10 +160,10 @@ export const character = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (_table) => ({
-    // CHECK constraint to ensure character is associated with either project or work
+    // CHECK constraint to ensure character is associated with either project or work (mutually exclusive)
     characterAssociation: check(
       "character_association",
-      sql`project_id IS NOT NULL OR work_id IS NOT NULL`
+      sql`(project_id IS NULL) IS NOT (work_id IS NULL)`
     ),
   })
 )
@@ -193,10 +193,10 @@ export const location = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (_table) => ({
-    // CHECK constraint to ensure location is associated with either project or work
+    // CHECK constraint to ensure location is associated with either project or work (mutually exclusive)
     locationAssociation: check(
       "location_association",
-      sql`project_id IS NOT NULL OR work_id IS NOT NULL`
+      sql`(project_id IS NULL) IS NOT (work_id IS NULL)`
     ),
   })
 )
@@ -224,10 +224,10 @@ export const plotPoint = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (_table) => ({
-    // CHECK constraint to ensure plot point is associated with either project or work
+    // CHECK constraint to ensure plot point is associated with either project or work (mutually exclusive)
     plotPointAssociation: check(
       "plot_point_association",
-      sql`project_id IS NOT NULL OR work_id IS NOT NULL`
+      sql`(project_id IS NULL) IS NOT (work_id IS NULL)`
     ),
   })
 )

@@ -43,7 +43,7 @@ interface CreateProjectForm {
   type: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
   genre: string
   targetWordCount: string
-  visibility: "private" | "team" | "organization" | "public"
+  visibility: "private" | "organization" | "public"
 }
 
 function ProjectsPage() {
@@ -242,7 +242,7 @@ function ProjectsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="visibility">Visibility</Label>
                       <Select
-                        onValueChange={(value: "private" | "team" | "organization" | "public") =>
+                        onValueChange={(value: "private" | "organization" | "public") =>
                           setCreateForm((prev) => ({ ...prev, visibility: value }))
                         }
                         value={createForm.visibility}
