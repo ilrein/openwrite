@@ -73,7 +73,7 @@
 
 - [ ] **REST API Structure**
   - Phase: Phase 1, Priority: High, Effort: M, Team: Backend
-  - Design and implement all core API endpoints with type safety
+  - Design and implement all core endpoints with type safety
 
 ### AI Integration Layer
 - [ ] **Multi-Provider AI Service**

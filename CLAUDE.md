@@ -7,29 +7,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 OpenWrite is a full-stack TypeScript application built with the Better-T-Stack, featuring a monorepo structure managed by Turborepo. This open-source AI-powered writing platform consists of three main applications:
 
 - **Web App** (`apps/web/`): React frontend with TanStack Router, TailwindCSS, and shadcn/ui components
-- **Server** (`apps/server/`): Hono-based REST API server deployed on Cloudflare Workers  
+- **Server** (`apps/server/`): Hono-based REST server deployed on Cloudflare Workers  
 - **Documentation** (`apps/docs/`): VitePress documentation site
 
 ## Architecture
 
 ### Backend (apps/server/)
 - **Framework**: Hono with Cloudflare Workers runtime
-- **API Layer**: REST API with Hono and OpenAPI for type-safe endpoints
+- **API Layer**: Hono REST API with OpenAPI type safety
 - **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
 - **Authentication**: Better Auth with email/password support
 - **Key Files**:
-  - `src/index.ts`: Main Hono application with CORS, auth handlers, and REST API setup
+  - `src/index.ts`: Main Hono application with CORS, auth handlers, and REST routing setup
   - `src/lib/context.ts`: Request context creation with session handling
   - `src/lib/auth.ts`: Better Auth configuration with Drizzle adapter
 
 ### Frontend (apps/web/)
 - **Framework**: React 19 with TanStack Router for file-based routing
 - **Styling**: TailwindCSS with shadcn/ui component library
-- **State Management**: TanStack Query for REST API calls
+- **State Management**: TanStack Query for REST calls
 - **Key Files**:
   - `src/main.tsx`: Application entry point with router and query client setup
   - `src/routes/`: File-based routing structure
   - `src/components/`: Reusable UI components
+  - `src/utils/api.ts`: REST API client configuration and utilities
 
 ## Development Commands
 

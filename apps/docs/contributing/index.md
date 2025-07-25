@@ -90,7 +90,7 @@ git checkout -b fix/issue-description
 - Use TypeScript for all props and state
 
 ### Backend
-- Use REST APIs for all API endpoints
+- Use REST APIs for all endpoints
 - Validate all inputs with Zod schemas
 - Follow RESTful conventions where applicable
 - Handle errors gracefully
