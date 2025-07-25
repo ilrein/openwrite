@@ -494,7 +494,7 @@ function useProviderSubmit(options: {
       })
       // Get provider name for the toast
       const providerData = availableProviders.find((p) => p.id === selectedProvider)
-      const providerName = providerData?.name || selectedProvider
+      const providerName = providerData?.name || "AI Provider"
       toast.success(`${providerName} connected successfully`, {
         icon: successIcon,
       })
