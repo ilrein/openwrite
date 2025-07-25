@@ -638,7 +638,6 @@ function ProviderForm({
   const isFormValid =
     hasSelectedProvider && (canUseOAuth || hasApiKeyForNonPKCE || hasApiKeyForManualMode || isOllama)
   const isSubmitDisabled = !isFormValid || loading || oauthLoading
-
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       {!preSelectedProviderId && (
