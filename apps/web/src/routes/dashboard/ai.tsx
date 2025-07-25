@@ -1,19 +1,12 @@
 "use client"
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { BarChart3, Plus, RefreshCw, Settings, TestTube, Trash2 } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
+import { AiProviderCard } from "@/components/ai-provider-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -24,40 +17,99 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-import { type AiProvider, aiProvidersApi } from "@/lib/api/ai-providers"
+import { aiProvidersApi } from "@/lib/api/ai-providers"
 import { buildAuthURL, generatePKCEParams } from "@/lib/pkce"
 
 function AIProvidersPage() {
-  const [providers, setProviders] = useState<AiProvider[]>([])
-  const [loading, setLoading] = useState(true)
-  const [addProviderOpen, setAddProviderOpen] = useState(false)
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null)
+  const [oauthProcessing, setOauthProcessing] = useState(false)
+  const queryClient = useQueryClient()
 
-  const loadProviders = useCallback(async () => {
-    try {
-      setLoading(true)
-      const data = await aiProvidersApi.list()
-      setProviders(data)
-    } catch (_error) {
-      // Error handling removed for linting
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  // Prevent double OAuth execution in React StrictMode
+  const oauthHandled = useRef(false)
+
+  // Use TanStack Query for providers data
+  const { data: providers = [], isLoading: loading } = useQuery({
+    queryKey: ["ai-providers"],
+    queryFn: () => aiProvidersApi.list(),
+    staleTime: 30 * 1000, // 30 seconds
+  })
+
+  // OAuth exchange mutation
+  const oauthMutation = useMutation({
+    mutationFn: aiProvidersApi.exchangeOpenRouterCode,
+    onSuccess: () => {
+      toast.success("OAuth connection successful!")
+      // Invalidate and refetch providers
+      queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
+      setSelectedProviderId(null)
+    },
+    onError: (error: Error) => {
+      toast.error(`OAuth callback failed: ${error.message}`)
+    },
+    onSettled: () => {
+      setOauthProcessing(false)
+    },
+  })
+
+  // Delete provider mutation
+  const deleteMutation = useMutation({
+    mutationFn: aiProvidersApi.delete,
+    onSuccess: () => {
+      toast.success("Provider deleted successfully!")
+      // Invalidate and refetch providers
+      queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete provider: ${error.message}`)
+    },
+  })
+
+  const handleOAuthCallback = useCallback(
+    (code: string) => {
+      try {
+        setOauthProcessing(true)
+
+        const storedParams = sessionStorage.getItem("openrouter-pkce")
+        if (!storedParams) {
+          toast.error("No PKCE parameters found in session storage")
+          setOauthProcessing(false)
+          return
+        }
+
+        const { codeVerifier, codeChallengeMethod } = JSON.parse(storedParams)
+        sessionStorage.removeItem("openrouter-pkce")
+
+        oauthMutation.mutate({
+          code,
+          codeVerifier,
+          codeChallengeMethod,
+        })
+      } catch (error) {
+        toast.error(
+          `OAuth callback failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        )
+        setOauthProcessing(false)
+      }
+    },
+    [oauthMutation]
+  )
 
   useEffect(() => {
-    loadProviders()
-  }, [loadProviders])
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get("code")
 
-  const getProviderStatus = (provider: AiProvider) => {
-    if (!provider.isActive) {
-      return { variant: "outline" as const, text: "Inactive" }
+    if (code && !oauthHandled.current) {
+      // Set flag immediately to prevent StrictMode double execution
+      oauthHandled.current = true
+
+      // OAuth flow - handleOAuthCallback will invalidate and refetch providers
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, document.title, newUrl)
+      handleOAuthCallback(code)
     }
-    // Note: No lastError property in AiProvider interface - using isActive only
-    return { variant: "default" as const, text: "Active" }
-  }
+    // No else block needed - TanStack Query handles normal loading
+  }, [handleOAuthCallback])
 
   const availableProviders = [
     {
@@ -105,213 +157,73 @@ function AIProvidersPage() {
     },
   ]
 
-  const connectedProviders = providers
-  const unconnectedProviders = availableProviders.filter(
-    (ap) => !providers.some((p) => p.provider === ap.id)
+  const getConnectedProvider = useCallback(
+    (providerId: string) => {
+      return providers.find((p) => p.provider === providerId)
+    },
+    [providers]
+  )
+
+  const isProviderConnected = useCallback(
+    (providerId: string) => {
+      return !!getConnectedProvider(providerId)
+    },
+    [getConnectedProvider]
   )
 
   return (
     <div className="container mx-auto space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-bold text-3xl">AI Providers & Models</h1>
-          <p className="text-muted-foreground">
-            Manage your AI provider connections and API configurations
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Dialog onOpenChange={setAddProviderOpen} open={addProviderOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => {
-                  setSelectedProviderId(null)
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Provider
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add AI Provider</DialogTitle>
-                <DialogDescription>
-                  Connect a new AI provider to access their models
-                </DialogDescription>
-              </DialogHeader>
-              <AddProviderForm
-                availableProviders={unconnectedProviders.filter((p) => p.enabled)}
-                onSuccess={() => {
-                  setAddProviderOpen(false)
-                  setSelectedProviderId(null)
-                  loadProviders()
-                }}
-                preSelectedProviderId={selectedProviderId}
-              />
-            </DialogContent>
-          </Dialog>
-          <Button onClick={loadProviders} variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Sync All
-          </Button>
-          <Button variant="outline">
-            <BarChart3 className="mr-2 h-4 w-4" />
-            Usage Stats
-          </Button>
-        </div>
+      <div>
+        <h1 className="font-bold text-3xl">AI Providers</h1>
+        <p className="text-muted-foreground">Connect AI providers to access their models</p>
       </div>
 
-      <Tabs className="space-y-4" defaultValue="connected">
-        <TabsList>
-          <TabsTrigger value="connected">Connected Providers</TabsTrigger>
-          <TabsTrigger value="available">Available Providers</TabsTrigger>
-          <TabsTrigger value="usage">Usage Overview</TabsTrigger>
-        </TabsList>
+      {(loading || oauthProcessing) && (
+        <div className="py-8 text-center">
+          {oauthProcessing ? "Processing OAuth..." : "Loading providers..."}
+        </div>
+      )}
 
-        <TabsContent className="space-y-4" value="connected">
-          {loading && <div className="py-8 text-center">Loading providers...</div>}
+      {!loading && (
+        <div className="grid gap-4">
+          {availableProviders.map((provider) => {
+            const connectedProvider = getConnectedProvider(provider.id)
+            const isConnected = isProviderConnected(provider.id)
 
-          {!loading && connectedProviders.length === 0 && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="py-8 text-center">
-                  <p className="text-muted-foreground">No providers connected yet</p>
-                  <Button
-                    className="mt-4"
-                    onClick={() => {
+            return (
+              <AiProviderCard
+                description={provider.description}
+                enabled={provider.enabled}
+                isConnected={isConnected}
+                key={provider.id}
+                name={provider.name}
+                onConnect={() => {
+                  if (provider.enabled) {
+                    setSelectedProviderId(provider.id)
+                  }
+                }}
+                onDelete={() => {
+                  if (connectedProvider) {
+                    deleteMutation.mutate(connectedProvider.id)
+                  }
+                }}
+                recommended={provider.recommended}
+              >
+                {selectedProviderId === provider.id && (
+                  <AddProviderForm
+                    availableProviders={[provider].filter((p) => p.enabled)}
+                    onSuccess={() => {
                       setSelectedProviderId(null)
-                      setAddProviderOpen(true)
+                      queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
                     }}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Your First Provider
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {!loading && connectedProviders.length > 0 && (
-            <div className="grid gap-4">
-              {connectedProviders.map((provider) => {
-                const status = getProviderStatus(provider)
-                return (
-                  <Card key={provider.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <CardTitle className="capitalize">{provider.provider}</CardTitle>
-                          <Badge variant={status.variant}>{status.text}</Badge>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
-                            <TestTube className="mr-2 h-4 w-4" />
-                            Test API
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Settings className="mr-2 h-4 w-4" />
-                            Configure
-                          </Button>
-                          <Button size="sm" variant="destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Disconnect
-                          </Button>
-                        </div>
-                      </div>
-                      <CardDescription>
-                        API Key: {provider.keyHash ? `${provider.keyHash}...` : "Not set"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <Label>Usage This Month</Label>
-                          <p className="font-medium">{provider.currentUsage || 0} requests</p>
-                        </div>
-                        <div>
-                          <Label>Last Used</Label>
-                          <p className="font-medium">
-                            {provider.lastUsedAt
-                              ? new Date(provider.lastUsedAt).toLocaleDateString()
-                              : "Never"}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent className="space-y-4" value="available">
-          <div className="grid gap-4">
-            {unconnectedProviders.map((provider) => (
-              <Card className={provider.enabled ? "" : "opacity-60"} key={provider.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CardTitle className={provider.enabled ? "" : "text-muted-foreground"}>
-                        {provider.name}
-                      </CardTitle>
-                      {provider.recommended && <Badge variant="secondary">Recommended</Badge>}
-                      {!provider.enabled && <Badge variant="outline">Coming Soon</Badge>}
-                    </div>
-                    <Button
-                      disabled={!provider.enabled}
-                      onClick={() => {
-                        if (provider.enabled) {
-                          setSelectedProviderId(provider.id)
-                          setAddProviderOpen(true)
-                        }
-                      }}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      {provider.enabled ? "Connect" : "Coming Soon"}
-                    </Button>
-                  </div>
-                  <CardDescription className={provider.enabled ? "" : "text-muted-foreground/70"}>
-                    {provider.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent className="space-y-4" value="usage">
-          <Card>
-            <CardHeader>
-              <CardTitle>Usage Overview</CardTitle>
-              <CardDescription>Your AI provider usage statistics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <div>
-                  <Label>Total Requests</Label>
-                  <p className="font-bold text-2xl">
-                    {providers.reduce((sum, p) => sum + (p.currentUsage || 0), 0)}
-                  </p>
-                </div>
-                <div>
-                  <Label>Active Providers</Label>
-                  <p className="font-bold text-2xl">{providers.filter((p) => p.isActive).length}</p>
-                </div>
-                <div>
-                  <Label>This Month</Label>
-                  <p className="font-bold text-2xl">
-                    {providers.reduce((sum, p) => sum + (p.currentUsage || 0), 0)}
-                  </p>
-                </div>
-                <div>
-                  <Label>Avg Response Time</Label>
-                  <p className="font-bold text-2xl">1.2s</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                    preSelectedProviderId={provider.id}
+                  />
+                )}
+              </AiProviderCard>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -341,55 +253,6 @@ function AddProviderForm({
     setSelectedProvider(preSelectedProviderId || "")
   }, [preSelectedProviderId])
 
-  // Handle OAuth callback
-  // biome-ignore lint/correctness/useExhaustiveDependencies: OAuth callback only runs once on mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const code = urlParams.get("code")
-
-    // Check if this is an OpenRouter OAuth callback by presence of code and stored PKCE params
-    if (code && localStorage.getItem("openrouter-pkce")) {
-      handleOAuthCallback(code, "")
-      // Clean up URL parameters
-      const newUrl = window.location.pathname
-      window.history.replaceState({}, document.title, newUrl)
-    }
-  }, [])
-
-  const handleOAuthCallback = async (code: string, _state: string) => {
-    try {
-      setOauthLoading(true)
-
-      // Get stored PKCE parameters
-      const storedParams = localStorage.getItem("openrouter-pkce")
-      if (!storedParams) {
-        console.error("No PKCE parameters found in localStorage")
-        return
-      }
-
-      const { codeVerifier, codeChallengeMethod } = JSON.parse(storedParams)
-      localStorage.removeItem("openrouter-pkce")
-
-      console.log("Exchanging OAuth code:", code)
-      console.log("Using code verifier:", codeVerifier)
-      console.log("Using challenge method:", codeChallengeMethod)
-
-      // Exchange code for API key
-      const result = await aiProvidersApi.exchangeOpenRouterCode({
-        code,
-        codeVerifier,
-        codeChallengeMethod,
-      })
-
-      console.log("Exchange result:", result)
-      onSuccess()
-    } catch (error) {
-      console.error("OAuth callback failed:", error)
-    } finally {
-      setOauthLoading(false)
-    }
-  }
-
   const handleOAuthLogin = async () => {
     try {
       setOauthLoading(true)
@@ -397,8 +260,8 @@ function AddProviderForm({
       // Generate PKCE parameters
       const pkceParams = await generatePKCEParams()
 
-      // Store PKCE parameters for later use
-      localStorage.setItem(
+      // Store PKCE parameters in sessionStorage for the callback
+      sessionStorage.setItem(
         "openrouter-pkce",
         JSON.stringify({
           codeVerifier: pkceParams.codeVerifier,
