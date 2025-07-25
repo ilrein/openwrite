@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react"
-import { Send, Bot, User, Sparkles, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Bot, Send, Sparkles, User, X } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { CardContent, CardHeader } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface Message {
@@ -25,23 +25,23 @@ const DEMO_RESPONSES = {
   character: [
     "Let me help you develop this character. What's their main motivation in this scene?",
     "I notice this character could use more depth. Consider adding a specific mannerism or speech pattern that makes them unique.",
-    "This character's dialogue feels authentic. You might want to show their internal conflict through their actions rather than just their words."
+    "This character's dialogue feels authentic. You might want to show their internal conflict through their actions rather than just their words.",
   ],
   plot: [
     "This plot point has great potential. Have you considered how it connects to your character's arc?",
     "To heighten the tension here, try introducing an unexpected obstacle that forces your protagonist to make a difficult choice.",
-    "This scene could benefit from raising the stakes. What does your character stand to lose if they fail here?"
+    "This scene could benefit from raising the stakes. What does your character stand to lose if they fail here?",
   ],
   style: [
     "Your prose has a nice rhythm. Consider varying your sentence length to create more dynamic pacing.",
     "This description is vivid. You might want to engage more senses beyond just visual details.",
-    "Strong dialogue! The subtext comes through clearly. Consider adding a beat of action to break up the conversation."
+    "Strong dialogue! The subtext comes through clearly. Consider adding a beat of action to break up the conversation.",
   ],
   general: [
     "This is a compelling scene. What aspect would you like me to help you develop further?",
     "I can help you brainstorm ideas, develop characters, plot points, or refine your writing style. What would be most helpful?",
-    "Your writing shows promise. Would you like suggestions on pacing, character development, or world-building?"
-  ]
+    "Your writing shows promise. Would you like suggestions on pacing, character development, or world-building?",
+  ],
 }
 
 const PROMPT_SUGGESTIONS = [
@@ -50,7 +50,7 @@ const PROMPT_SUGGESTIONS = [
   "Improve the pacing here",
   "Make this dialogue more realistic",
   "Add more sensory details",
-  "What's missing from this scene?"
+  "What's missing from this scene?",
 ]
 
 export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPanelProps) {
@@ -60,13 +60,15 @@ export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPan
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (messages.length > 0) {
+      scrollToBottom()
+    }
+  }, [messages, scrollToBottom])
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -74,49 +76,62 @@ export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPan
     }
   }, [isOpen])
 
-  const getRandomResponse = (input: string): string => {
-    const lowerInput = input.toLowerCase()
-    
+  const getRandomResponse = (userInput: string): string => {
+    const lowerInput = userInput.toLowerCase()
+
     if (lowerInput.includes("character") || lowerInput.includes("dialogue")) {
       return DEMO_RESPONSES.character[Math.floor(Math.random() * DEMO_RESPONSES.character.length)]
     }
-    if (lowerInput.includes("plot") || lowerInput.includes("story") || lowerInput.includes("scene")) {
+    if (
+      lowerInput.includes("plot") ||
+      lowerInput.includes("story") ||
+      lowerInput.includes("scene")
+    ) {
       return DEMO_RESPONSES.plot[Math.floor(Math.random() * DEMO_RESPONSES.plot.length)]
     }
-    if (lowerInput.includes("style") || lowerInput.includes("writing") || lowerInput.includes("prose")) {
+    if (
+      lowerInput.includes("style") ||
+      lowerInput.includes("writing") ||
+      lowerInput.includes("prose")
+    ) {
       return DEMO_RESPONSES.style[Math.floor(Math.random() * DEMO_RESPONSES.style.length)]
     }
-    
+
     return DEMO_RESPONSES.general[Math.floor(Math.random() * DEMO_RESPONSES.general.length)]
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || isTyping) return
+    if (!input.trim() || isTyping) {
+      return
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       content: input.trim(),
       role: "user",
-      timestamp: new Date()
+      timestamp: new Date(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsTyping(true)
 
     // Simulate AI response delay
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: getRandomResponse(input),
-        role: "assistant",
-        timestamp: new Date()
-      }
-      
-      setMessages(prev => [...prev, assistantMessage])
-      setIsTyping(false)
-    }, 1000 + Math.random() * 1500) // Random delay between 1-2.5 seconds
+    setTimeout(
+      () => {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: getRandomResponse(input),
+          role: "assistant",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, assistantMessage])
+        setIsTyping(false)
+      },
+      1000 + Math.random() * 1500
+    ) // Random delay between 1-2.5 seconds
   }
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -128,54 +143,52 @@ export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPan
     onInsertText?.(text)
   }
 
-  if (!isOpen) return null
+  if (!isOpen) {
+    return null
+  }
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-background border-l border-border z-50 flex flex-col shadow-lg">
-      <CardHeader className="pb-3 border-b border-border">
+    <div className="fixed top-0 right-0 z-50 flex h-full w-96 flex-col border-border border-l bg-background shadow-lg">
+      <CardHeader className="border-border border-b pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="rounded-lg bg-primary/10 p-2">
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-sm">Writing Assistant</h3>
-              <p className="text-xs text-muted-foreground">AI-powered writing help</p>
+              <p className="text-muted-foreground text-xs">AI-powered writing help</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0"
-          >
+          <Button className="h-8 w-8 p-0" onClick={onClose} size="sm" variant="ghost">
             <X className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
+      <CardContent className="flex flex-1 flex-col p-0">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
           {messages.length === 0 && (
-            <div className="text-center py-8">
-              <div className="p-3 rounded-full bg-muted w-fit mx-auto mb-3">
+            <div className="py-8 text-center">
+              <div className="mx-auto mb-3 w-fit rounded-full bg-muted p-3">
                 <Bot className="h-6 w-6 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Hi! I'm here to help with your writing. Ask me anything about characters, plot, style, or storytelling.
+              <p className="mb-4 text-muted-foreground text-sm">
+                Hi! I'm here to help with your writing. Ask me anything about characters, plot,
+                style, or storytelling.
               </p>
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
                   Try asking:
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {PROMPT_SUGGESTIONS.map((suggestion, index) => (
+                  {PROMPT_SUGGESTIONS.map((suggestion) => (
                     <Badge
-                      key={index}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-secondary/80 text-xs py-1"
+                      className="cursor-pointer py-1 text-xs hover:bg-secondary/80"
+                      key={suggestion}
                       onClick={() => handleSuggestionClick(suggestion)}
+                      variant="secondary"
                     >
                       {suggestion}
                     </Badge>
@@ -187,36 +200,34 @@ export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPan
 
           {messages.map((message) => (
             <div
-              key={message.id}
               className={cn(
                 "flex gap-3",
                 message.role === "user" ? "justify-end" : "justify-start"
               )}
+              key={message.id}
             >
               {message.role === "assistant" && (
-                <Avatar className="h-8 w-8 mt-1">
+                <Avatar className="mt-1 h-8 w-8">
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     <Bot className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
               )}
-              
+
               <div
                 className={cn(
                   "max-w-[280px] rounded-lg px-3 py-2 text-sm",
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                  message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                 )}
               >
                 <p className="whitespace-pre-wrap">{message.content}</p>
                 {message.role === "assistant" && (
-                  <div className="mt-2 pt-2 border-t border-border/50">
+                  <div className="mt-2 border-border/50 border-t pt-2">
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 text-xs p-1"
+                      className="h-6 p-1 text-xs"
                       onClick={() => handleInsertToEditor(message.content)}
+                      size="sm"
+                      variant="ghost"
                     >
                       Insert into editor
                     </Button>
@@ -225,7 +236,7 @@ export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPan
               </div>
 
               {message.role === "user" && (
-                <Avatar className="h-8 w-8 mt-1">
+                <Avatar className="mt-1 h-8 w-8">
                   <AvatarFallback className="bg-secondary">
                     <User className="h-4 w-4" />
                   </AvatarFallback>
@@ -235,42 +246,43 @@ export function CursorChatPanel({ isOpen, onClose, onInsertText }: CursorChatPan
           ))}
 
           {isTyping && (
-            <div className="flex gap-3 justify-start">
-              <Avatar className="h-8 w-8 mt-1">
+            <div className="flex justify-start gap-3">
+              <Avatar className="mt-1 h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   <Bot className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted rounded-lg px-3 py-2 text-sm">
+              <div className="rounded-lg bg-muted px-3 py-2 text-sm">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60" />
+                  <div
+                    className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60"
+                    style={{ animationDelay: "0.1s" }}
+                  />
+                  <div
+                    className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60"
+                    style={{ animationDelay: "0.2s" }}
+                  />
                 </div>
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input */}
-        <div className="border-t border-border p-4">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+        <div className="border-border border-t p-4">
+          <form className="flex gap-2" onSubmit={handleSubmit}>
             <Input
-              ref={inputRef}
-              value={input}
+              className="flex-1"
+              disabled={isTyping}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about your writing..."
-              disabled={isTyping}
-              className="flex-1"
+              ref={inputRef}
+              value={input}
             />
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!input.trim() || isTyping}
-              className="px-3"
-            >
+            <Button className="px-3" disabled={!input.trim() || isTyping} size="sm" type="submit">
               <Send className="h-4 w-4" />
             </Button>
           </form>

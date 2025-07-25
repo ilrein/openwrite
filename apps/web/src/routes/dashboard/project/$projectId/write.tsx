@@ -38,7 +38,7 @@ function ProjectWritePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col h-full">
+    <div className="flex h-full flex-1 flex-col">
       <CursorWritingInterface
         content={project.content || ""}
         onUpdate={(_content) => {
