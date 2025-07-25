@@ -18,6 +18,7 @@ interface AiProviderCardProps {
   enabled: boolean
   recommended?: boolean
   isConnected: boolean
+  supportsPKCE?: boolean
   onConnect: () => void
   onDelete?: () => void
   children?: React.ReactNode // For the AddProviderForm
@@ -29,6 +30,7 @@ export function AiProviderCard({
   enabled,
   recommended,
   isConnected,
+  supportsPKCE: _supportsPKCE,
   onConnect,
   onDelete,
   children,
