@@ -18,7 +18,7 @@ interface AiProviderCardProps {
   enabled: boolean
   recommended?: boolean
   isConnected: boolean
-  supportsPKCE?: boolean
+  supportsPKCE?: boolean // Passed through for type consistency, used by parent components
   onConnect: () => void
   onDelete?: () => void
   children?: React.ReactNode // For the AddProviderForm
