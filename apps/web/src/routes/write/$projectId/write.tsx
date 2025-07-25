@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import TiptapEditor from "@/components/tiptap-editor"
 
-export const Route = createFileRoute("/write/$novelId/write")({
+export const Route = createFileRoute("/write/$projectId/write")({
   component: WriteInterface,
 })
 

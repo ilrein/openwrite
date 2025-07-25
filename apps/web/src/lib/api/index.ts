@@ -16,12 +16,20 @@ export type {
 export { aiProvidersApi } from "./ai-providers"
 export type { ApiClient, ApiRequestOptions } from "./base"
 export { apiCall } from "./base"
-export type { CreateNovelData, Novel, UpdateNovelData } from "./novels"
-// Novel API
-export { novelApi } from "./novels"
+export type {
+  CreateNovelData,
+  CreateProjectData,
+  Novel,
+  Project,
+  UpdateNovelData,
+  UpdateProjectData,
+  Work,
+} from "./projects"
+// Project API (formerly Novel API)
+export { novelApi, projectApi } from "./projects"
 
 import { aiProvidersApi } from "./ai-providers"
-import { novelApi } from "./novels"
+import { novelApi, projectApi } from "./projects"
 
 // Future API clients will be exported here:
 // export { chapterApi } from "./chapters"
@@ -32,7 +40,8 @@ import { novelApi } from "./novels"
  * Combined API object for convenient access
  */
 export const api = {
-  novels: novelApi,
+  projects: projectApi,
+  novels: novelApi, // Legacy support
   aiProviders: aiProvidersApi,
   // chapters: chapterApi,
   // characters: characterApi,

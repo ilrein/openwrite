@@ -14,7 +14,7 @@ interface CodexEntry {
 interface CodexModalProps {
   isOpen: boolean
   onClose: () => void
-  novelId: string
+  projectId: string
   initialType?: string | null
   initialEntry?: string | null
 }
@@ -22,6 +22,7 @@ interface CodexModalProps {
 export default function CodexModal({
   isOpen,
   onClose,
+  projectId: _projectId, // TODO: Use projectId to fetch project-specific codex data instead of hardcoded data
   initialType = null,
   initialEntry = null,
 }: CodexModalProps) {
@@ -185,7 +186,7 @@ export default function CodexModal({
   const renderOverview = () => (
     <div className="space-y-6">
       <div className="mb-8 text-center">
-        <h2 className="mb-2 font-bold text-2xl">Novel Codex</h2>
+        <h2 className="mb-2 font-bold text-2xl">Project Codex</h2>
         <p className="text-muted-foreground">Manage all aspects of your story world</p>
       </div>
 

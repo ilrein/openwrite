@@ -12,18 +12,18 @@ import {
 import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
 
-export const Route = createFileRoute("/dashboard/novel/$novelId")({
-  component: NovelLayout,
+export const Route = createFileRoute("/dashboard/project/$projectId")({
+  component: ProjectLayout,
 })
 
-function NovelLayout() {
-  const { novelId: id } = Route.useParams()
+function ProjectLayout() {
+  const { projectId: id } = Route.useParams()
 
-  // Fetch novel details
-  const { data: novel, isLoading } = useQuery({
-    queryKey: ["novel", id],
+  // Fetch project details
+  const { data: project, isLoading } = useQuery({
+    queryKey: ["project", id],
     queryFn: async () => {
-      const result = await api.novels.get(id)
+      const result = await api.projects.get(id)
       return result
     },
   })
@@ -31,18 +31,18 @@ function NovelLayout() {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="animate-pulse">Loading novel...</div>
+        <div className="animate-pulse">Loading project...</div>
       </div>
     )
   }
 
-  if (!novel) {
+  if (!project) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 font-semibold text-2xl text-gray-900">Novel not found</h2>
-          <Link to="/dashboard/novels">
-            <Button variant="outline">Back to Novels</Button>
+          <h2 className="mb-2 font-semibold text-2xl text-gray-900">Project not found</h2>
+          <Link to="/dashboard/projects">
+            <Button variant="outline">Back to Projects</Button>
           </Link>
         </div>
       </div>
@@ -59,12 +59,12 @@ function NovelLayout() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/dashboard/novels">Novels</Link>
+                  <Link to="/dashboard/projects">Projects</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{novel.title}</BreadcrumbPage>
+                <BreadcrumbPage>{project.title}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -72,13 +72,13 @@ function NovelLayout() {
           {/* Title and Stats */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-bold text-2xl">{novel.title}</h1>
-              {novel.description && <p className="mt-1">{novel.description}</p>}
+              <h1 className="font-bold text-2xl">{project.title}</h1>
+              {project.description && <p className="mt-1">{project.description}</p>}
             </div>
 
             <div className="text-sm opacity-75">
-              {novel.currentWordCount.toLocaleString()} /{" "}
-              {novel.targetWordCount?.toLocaleString() || "∞"} words
+              {project.currentWordCount.toLocaleString()} /{" "}
+              {project.targetWordCount?.toLocaleString() || "∞"} words
             </div>
           </div>
         </div>
@@ -88,8 +88,8 @@ function NovelLayout() {
           <Link
             activeProps={{ className: "text-blue-600 border-blue-600" }}
             className="flex items-center border-transparent border-b-2 px-3 py-2 font-medium text-sm [&.active]:border-blue-600 [&.active]:text-blue-600"
-            params={{ novelId: id }}
-            to="/dashboard/novel/$novelId/write"
+            params={{ projectId: id }}
+            to="/dashboard/project/$projectId/write"
           >
             <Edit3 className="mr-2 h-4 w-4" />
             Write
@@ -98,8 +98,8 @@ function NovelLayout() {
           <Link
             activeProps={{ className: "text-blue-600 border-blue-600" }}
             className="flex items-center border-transparent border-b-2 px-3 py-2 font-medium text-sm [&.active]:border-blue-600 [&.active]:text-blue-600"
-            params={{ novelId: id }}
-            to="/dashboard/novel/$novelId/outline"
+            params={{ projectId: id }}
+            to="/dashboard/project/$projectId/outline"
           >
             <FileText className="mr-2 h-4 w-4" />
             Outline
@@ -108,8 +108,8 @@ function NovelLayout() {
           <Link
             activeProps={{ className: "text-blue-600 border-blue-600" }}
             className="flex items-center border-transparent border-b-2 px-3 py-2 font-medium text-sm [&.active]:border-blue-600 [&.active]:text-blue-600"
-            params={{ novelId: id }}
-            to="/dashboard/novel/$novelId/characters"
+            params={{ projectId: id }}
+            to="/dashboard/project/$projectId/characters"
           >
             <Users className="mr-2 h-4 w-4" />
             Characters
@@ -118,8 +118,8 @@ function NovelLayout() {
           <Link
             activeProps={{ className: "text-blue-600 border-blue-600" }}
             className="flex items-center border-transparent border-b-2 px-3 py-2 font-medium text-sm [&.active]:border-blue-600 [&.active]:text-blue-600"
-            params={{ novelId: id }}
-            to="/dashboard/novel/$novelId/settings"
+            params={{ projectId: id }}
+            to="/dashboard/project/$projectId/settings"
           >
             <Settings className="mr-2 h-4 w-4" />
             Settings

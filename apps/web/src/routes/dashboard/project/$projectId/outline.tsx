@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { FileText } from "lucide-react"
 
-export const Route = createFileRoute("/dashboard/novel/$novelId/outline")({
-  component: NovelOutlinePage,
+export const Route = createFileRoute("/dashboard/project/$projectId/outline")({
+  component: ProjectOutlinePage,
 })
 
-function NovelOutlinePage() {
+function ProjectOutlinePage() {
   return (
     <div className="flex-1 p-8">
       <div className="mx-auto max-w-4xl">
@@ -13,8 +13,8 @@ function NovelOutlinePage() {
           <FileText className="mx-auto mb-4 h-16 w-16 opacity-50" />
           <h3 className="mb-2 font-medium text-xl">Outline Coming Soon</h3>
           <p>
-            This is where you'll be able to create and manage your novel's outline, plot structure,
-            and chapter organization.
+            This is where you'll be able to create and manage your project's outline, plot
+            structure, and chapter organization.
           </p>
         </div>
       </div>

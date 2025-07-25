@@ -65,9 +65,9 @@ function DashboardLayout() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/dashboard/novels">
+                      <Link to="/dashboard/projects">
                         <BookOpen />
-                        <span>My Novels</span>
+                        <span>My Projects</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

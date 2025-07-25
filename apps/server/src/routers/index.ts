@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm"
 import { type Context, Hono } from "hono"
 import { db } from "../db"
-import { member, novel, organization } from "../db/schema"
+import { member, organization, project } from "../db/schema"
 import { getAuth } from "../lib/auth"
 import { aiProvidersRouter } from "./ai-providers"
 
@@ -124,126 +124,143 @@ router.post(
   }
 )
 
-// List novels
-router.get("/novels", requireAuth, async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
-  const activeOrganization = c.get("activeOrganization")
-
-  // If user has no organization, return indication that they need to create one
-  if (!activeOrganization) {
-    return c.json({ novels: [], needsOrganization: true })
-  }
-
-  const novels = await db
-    .select({
-      id: novel.id,
-      title: novel.title,
-      description: novel.description,
-      genre: novel.genre,
-      status: novel.status,
-      visibility: novel.visibility,
-      currentWordCount: novel.currentWordCount,
-      targetWordCount: novel.targetWordCount,
-      coverImage: novel.coverImage,
-      createdAt: novel.createdAt,
-      updatedAt: novel.updatedAt,
-      lastWrittenAt: novel.lastWrittenAt,
-    })
-    .from(novel)
-    .where(eq(novel.organizationId, activeOrganization.id))
-    .orderBy(desc(novel.updatedAt))
-
-  return c.json({
-    novels: novels.map((n) => ({
-      ...n,
-      currentWordCount: n.currentWordCount ?? 0,
-      createdAt: n.createdAt.toISOString(),
-      updatedAt: n.updatedAt.toISOString(),
-      lastWrittenAt: n.lastWrittenAt?.toISOString() || null,
-    })),
-  })
-})
-
-// Get a specific novel
+// List projects
 router.get(
-  "/novels/:id",
+  "/projects",
   requireAuth,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
-    const novelId = c.req.param("id")
+    const activeOrganization = c.get("activeOrganization")
+
+    // If user has no organization, return indication that they need to create one
+    if (!activeOrganization) {
+      return c.json({ projects: [], needsOrganization: true })
+    }
+
+    const projects = await db
+      .select({
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        type: project.type,
+        genre: project.genre,
+        status: project.status,
+        visibility: project.visibility,
+        currentWordCount: project.currentWordCount,
+        targetWordCount: project.targetWordCount,
+        coverImage: project.coverImage,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        lastWrittenAt: project.lastWrittenAt,
+      })
+      .from(project)
+      .where(eq(project.organizationId, activeOrganization.id))
+      .orderBy(desc(project.updatedAt))
+
+    return c.json({
+      projects: projects.map((p) => ({
+        ...p,
+        currentWordCount: p.currentWordCount ?? 0,
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString(),
+        lastWrittenAt: p.lastWrittenAt?.toISOString() || null,
+      })),
+    })
+  }
+)
+
+// Get a specific project
+router.get(
+  "/projects/:id",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("id")
     const activeOrganization = c.get("activeOrganization")
 
     if (!activeOrganization) {
       return c.json({ error: "No organization found" }, 400)
     }
 
-    const novelData = await db
+    const projectData = await db
       .select()
-      .from(novel)
-      .where(and(eq(novel.id, novelId), eq(novel.organizationId, activeOrganization.id)))
+      .from(project)
+      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
       .get()
 
-    if (!novelData) {
-      return c.json({ error: "Novel not found" }, 404)
+    if (!projectData) {
+      return c.json({ error: "Project not found" }, 404)
     }
 
     return c.json({
-      novel: {
-        ...novelData,
-        currentWordCount: novelData.currentWordCount ?? 0,
-        createdAt: novelData.createdAt.toISOString(),
-        updatedAt: novelData.updatedAt.toISOString(),
-        lastWrittenAt: novelData.lastWrittenAt?.toISOString() || null,
+      project: {
+        ...projectData,
+        currentWordCount: projectData.currentWordCount ?? 0,
+        createdAt: projectData.createdAt.toISOString(),
+        updatedAt: projectData.updatedAt.toISOString(),
+        lastWrittenAt: projectData.lastWrittenAt?.toISOString() || null,
       },
     })
   }
 )
 
-// Create a new novel
-router.post("/novels", requireAuth, async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
-  const user = c.get("user")
-  const activeOrganization = c.get("activeOrganization")
-
-  if (!activeOrganization) {
-    return c.json({ error: "No organization found" }, 400)
-  }
-
-  try {
-    const body = await c.req.json()
-    const { title, description, genre, targetWordCount, visibility = "private" } = body
-
-    if (!title || title.trim().length === 0) {
-      return c.json({ error: "Title is required" }, 400)
-    }
-
-    const id = crypto.randomUUID()
-    const now = new Date()
-
-    await db.insert(novel).values({
-      id,
-      title: title.trim(),
-      description: description?.trim() || null,
-      genre: genre?.trim() || null,
-      targetWordCount: targetWordCount ? Number.parseInt(targetWordCount, 10) : null,
-      currentWordCount: 0,
-      status: "draft",
-      visibility,
-      ownerId: user.id,
-      organizationId: activeOrganization.id,
-      createdAt: now,
-      updatedAt: now,
-    })
-
-    return c.json({ success: true, id })
-  } catch (_error) {
-    return c.json({ error: "Failed to create novel" }, 500)
-  }
-})
-
-// Update a novel
-router.put(
-  "/novels/:id",
+// Create a new project
+router.post(
+  "/projects",
   requireAuth,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
-    const novelId = c.req.param("id")
+    const user = c.get("user")
+    const activeOrganization = c.get("activeOrganization")
+
+    if (!activeOrganization) {
+      return c.json({ error: "No organization found" }, 400)
+    }
+
+    try {
+      const body = await c.req.json()
+      const {
+        title,
+        description,
+        type = "novel",
+        genre,
+        targetWordCount,
+        visibility = "private",
+      } = body
+
+      if (!title || title.trim().length === 0) {
+        return c.json({ error: "Title is required" }, 400)
+      }
+
+      const id = crypto.randomUUID()
+      const now = new Date()
+
+      await db.insert(project).values({
+        id,
+        title: title.trim(),
+        description: description?.trim() || null,
+        type,
+        genre: genre?.trim() || null,
+        targetWordCount: targetWordCount ? Number.parseInt(targetWordCount, 10) : null,
+        currentWordCount: 0,
+        status: "draft",
+        visibility,
+        ownerId: user.id,
+        organizationId: activeOrganization.id,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return c.json({ success: true, id })
+    } catch (_error) {
+      return c.json({ error: "Failed to create project" }, 500)
+    }
+  }
+)
+
+// Update a project
+router.put(
+  "/projects/:id",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("id")
     const user = c.get("user")
     const activeOrganization = c.get("activeOrganization")
 
@@ -256,29 +273,29 @@ router.put(
       }
 
       await db
-        .update(novel)
+        .update(project)
         .set(updateData)
         .where(
           and(
-            eq(novel.id, novelId),
-            eq(novel.organizationId, activeOrganization.id),
-            eq(novel.ownerId, user.id) // Only owner can update
+            eq(project.id, projectId),
+            eq(project.organizationId, activeOrganization.id),
+            eq(project.ownerId, user.id) // Only owner can update
           )
         )
 
       return c.json({ success: true })
     } catch (_error) {
-      return c.json({ error: "Failed to update novel" }, 500)
+      return c.json({ error: "Failed to update project" }, 500)
     }
   }
 )
 
-// Delete a novel
+// Delete a project
 router.delete(
-  "/novels/:id",
+  "/projects/:id",
   requireAuth,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
-    const novelId = c.req.param("id")
+    const projectId = c.req.param("id")
     const user = c.get("user")
     const activeOrganization = c.get("activeOrganization")
 
@@ -287,17 +304,17 @@ router.delete(
         return c.json({ error: "No organization found" }, 400)
       }
 
-      await db.delete(novel).where(
+      await db.delete(project).where(
         and(
-          eq(novel.id, novelId),
-          eq(novel.organizationId, activeOrganization.id),
-          eq(novel.ownerId, user.id) // Only owner can delete
+          eq(project.id, projectId),
+          eq(project.organizationId, activeOrganization.id),
+          eq(project.ownerId, user.id) // Only owner can delete
         )
       )
 
       return c.json({ success: true })
     } catch (_error) {
-      return c.json({ error: "Failed to delete novel" }, 500)
+      return c.json({ error: "Failed to delete project" }, 500)
     }
   }
 )

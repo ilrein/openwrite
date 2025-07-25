@@ -20,7 +20,7 @@ export default function DashboardHeader() {
           <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
           <Input
             className="w-48 pl-10 sm:w-64 lg:w-96"
-            placeholder="Search novels, characters, locations..."
+            placeholder="Search projects, characters, locations..."
           />
         </div>
 

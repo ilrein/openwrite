@@ -31,46 +31,49 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { api, type Novel } from "@/lib/api"
+import { api, type Project } from "@/lib/api"
 
-export const Route = createFileRoute("/dashboard/novels")({
-  component: NovelsPage,
+export const Route = createFileRoute("/dashboard/projects")({
+  component: ProjectsPage,
 })
 
-interface CreateNovelForm {
+interface CreateProjectForm {
   title: string
   description: string
+  type: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
   genre: string
   targetWordCount: string
-  visibility: "private" | "team" | "organization" | "public"
+  visibility: "private" | "organization" | "public"
 }
 
-function NovelsPage() {
+function ProjectsPage() {
   const queryClient = useQueryClient()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [createForm, setCreateForm] = useState<CreateNovelForm>({
+  const [createForm, setCreateForm] = useState<CreateProjectForm>({
     title: "",
     description: "",
+    type: "novel",
     genre: "",
     targetWordCount: "",
     visibility: "private",
   })
 
-  // Fetch novels
-  const { data: novels, isLoading } = useQuery({
-    queryKey: ["novels"],
+  // Fetch projects
+  const { data: projects, isLoading } = useQuery({
+    queryKey: ["projects"],
     queryFn: async () => {
-      const result = await api.novels.list()
+      const result = await api.projects.list()
       return result
     },
   })
 
-  // Create novel mutation
-  const createNovelMutation = useMutation({
-    mutationFn: async (data: CreateNovelForm) => {
-      const result = await api.novels.create({
+  // Create project mutation
+  const createProjectMutation = useMutation({
+    mutationFn: async (data: CreateProjectForm) => {
+      const result = await api.projects.create({
         title: data.title,
         description: data.description || null,
+        type: data.type,
         genre: data.genre || null,
         targetWordCount: data.targetWordCount ? Number.parseInt(data.targetWordCount, 10) : null,
         visibility: data.visibility,
@@ -78,28 +81,29 @@ function NovelsPage() {
       return result
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["novels"] })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
       setIsCreateDialogOpen(false)
       setCreateForm({
         title: "",
         description: "",
+        type: "novel",
         genre: "",
         targetWordCount: "",
         visibility: "private",
       })
-      toast.success("Novel created successfully!")
+      toast.success("Project created successfully!")
     },
     onError: (_error) => {
-      toast.error("Failed to create novel")
+      toast.error("Failed to create project")
     },
   })
 
-  const handleCreateNovel = () => {
+  const handleCreateProject = () => {
     if (!createForm.title.trim()) {
       toast.error("Title is required")
       return
     }
-    createNovelMutation.mutate(createForm)
+    createProjectMutation.mutate(createForm)
   }
 
   if (isLoading) {
@@ -125,7 +129,7 @@ function NovelsPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Novels</BreadcrumbPage>
+                <BreadcrumbPage>Projects</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -133,7 +137,7 @@ function NovelsPage() {
           {/* Title and Action */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-bold text-3xl">My Novels</h1>
+              <h1 className="font-bold text-3xl">My Projects</h1>
               <p className="mt-2">Manage your writing projects</p>
             </div>
 
@@ -141,12 +145,12 @@ function NovelsPage() {
               <DialogTrigger asChild>
                 <Button className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  New Novel
+                  New Project
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Create New Novel</DialogTitle>
+                  <DialogTitle>Create New Project</DialogTitle>
                   <DialogDescription>
                     Start your next writing project. You can always edit these details later.
                   </DialogDescription>
@@ -172,55 +176,87 @@ function NovelsPage() {
                       onChange={(e) =>
                         setCreateForm((prev) => ({ ...prev, description: e.target.value }))
                       }
-                      placeholder="A brief description of your novel..."
+                      placeholder="A brief description of your project..."
                       value={createForm.description}
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="genre">Genre</Label>
-                      <Input
-                        id="genre"
-                        onChange={(e) =>
-                          setCreateForm((prev) => ({ ...prev, genre: e.target.value }))
-                        }
-                        placeholder="e.g., Fantasy, Sci-Fi"
-                        value={createForm.genre}
-                      />
+                      <Label htmlFor="type">Project Type</Label>
+                      <Select
+                        onValueChange={(
+                          value:
+                            | "novel"
+                            | "trilogy"
+                            | "series"
+                            | "short_story_collection"
+                            | "graphic_novel"
+                            | "screenplay"
+                        ) => setCreateForm((prev) => ({ ...prev, type: value }))}
+                        value={createForm.type}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="novel">Novel</SelectItem>
+                          <SelectItem value="trilogy">Trilogy</SelectItem>
+                          <SelectItem value="series">Series</SelectItem>
+                          <SelectItem value="short_story_collection">
+                            Short Story Collection
+                          </SelectItem>
+                          <SelectItem value="graphic_novel">Graphic Novel</SelectItem>
+                          <SelectItem value="screenplay">Screenplay</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="genre">Genre</Label>
+                        <Input
+                          id="genre"
+                          onChange={(e) =>
+                            setCreateForm((prev) => ({ ...prev, genre: e.target.value }))
+                          }
+                          placeholder="e.g., Fantasy, Sci-Fi"
+                          value={createForm.genre}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="targetWordCount">Target Words</Label>
+                        <Input
+                          id="targetWordCount"
+                          onChange={(e) =>
+                            setCreateForm((prev) => ({ ...prev, targetWordCount: e.target.value }))
+                          }
+                          placeholder="50000"
+                          type="number"
+                          value={createForm.targetWordCount}
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="targetWordCount">Target Words</Label>
-                      <Input
-                        id="targetWordCount"
-                        onChange={(e) =>
-                          setCreateForm((prev) => ({ ...prev, targetWordCount: e.target.value }))
+                      <Label htmlFor="visibility">Visibility</Label>
+                      <Select
+                        onValueChange={(value: "private" | "organization" | "public") =>
+                          setCreateForm((prev) => ({ ...prev, visibility: value }))
                         }
-                        placeholder="50000"
-                        type="number"
-                        value={createForm.targetWordCount}
-                      />
+                        value={createForm.visibility}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="private">Private</SelectItem>
+                          <SelectItem value="organization">Organization</SelectItem>
+                          <SelectItem value="public">Public</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="visibility">Visibility</Label>
-                    <Select
-                      onValueChange={(value: "private" | "team" | "organization" | "public") =>
-                        setCreateForm((prev) => ({ ...prev, visibility: value }))
-                      }
-                      value={createForm.visibility}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="organization">Organization</SelectItem>
-                        <SelectItem value="public">Public</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
 
@@ -228,8 +264,8 @@ function NovelsPage() {
                   <Button onClick={() => setIsCreateDialogOpen(false)} variant="outline">
                     Cancel
                   </Button>
-                  <Button disabled={createNovelMutation.isPending} onClick={handleCreateNovel}>
-                    {createNovelMutation.isPending ? "Creating..." : "Create Novel"}
+                  <Button disabled={createProjectMutation.isPending} onClick={handleCreateProject}>
+                    {createProjectMutation.isPending ? "Creating..." : "Create Project"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -237,44 +273,52 @@ function NovelsPage() {
           </div>
         </div>
 
-        {/* Novels Grid */}
-        {novels && novels.length > 0 ? (
+        {/* Projects Grid */}
+        {projects && projects.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {novels.map((novel: Novel) => (
-              <Link key={novel.id} params={{ novelId: novel.id }} to="/write/$novelId/write">
+            {projects.map((project: Project) => (
+              <Link
+                key={project.id}
+                params={{ projectId: project.id }}
+                to="/write/$projectId/write"
+              >
                 <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <BookOpen className="h-8 w-8 text-blue-600" />
-                      <Badge variant={novel.status === "draft" ? "secondary" : "default"}>
-                        {novel.status}
+                      <Badge variant={project.status === "draft" ? "secondary" : "default"}>
+                        {project.status}
                       </Badge>
                     </div>
-                    <CardTitle className="mt-4">{novel.title}</CardTitle>
-                    {novel.description && (
+                    <CardTitle className="mt-4">{project.title}</CardTitle>
+                    {project.description && (
                       <CardDescription className="line-clamp-2">
-                        {novel.description}
+                        {project.description}
                       </CardDescription>
                     )}
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {novel.genre && (
+                      <div className="text-gray-600 text-sm">
+                        <span className="font-medium">Type:</span>{" "}
+                        {project.type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </div>
+                      {project.genre && (
                         <div className="text-gray-600 text-sm">
-                          <span className="font-medium">Genre:</span> {novel.genre}
+                          <span className="font-medium">Genre:</span> {project.genre}
                         </div>
                       )}
                       <div className="text-gray-600 text-sm">
                         <span className="font-medium">Progress:</span>{" "}
-                        {novel.currentWordCount.toLocaleString()} /{" "}
-                        {novel.targetWordCount?.toLocaleString() || "∞"} words
+                        {project.currentWordCount.toLocaleString()} /{" "}
+                        {project.targetWordCount?.toLocaleString() || "∞"} words
                       </div>
-                      {novel.targetWordCount && (
+                      {project.targetWordCount && (
                         <div className="h-2 w-full rounded-full bg-gray-200">
                           <div
                             className="h-2 rounded-full bg-blue-600"
                             style={{
-                              width: `${Math.min((novel.currentWordCount / novel.targetWordCount) * 100, 100)}%`,
+                              width: `${Math.min((project.currentWordCount / project.targetWordCount) * 100, 100)}%`,
                             }}
                           />
                         </div>
@@ -288,11 +332,11 @@ function NovelsPage() {
         ) : (
           <div className="py-12 text-center">
             <BookOpen className="mx-auto mb-4 h-16 w-16 opacity-50" />
-            <h3 className="mb-2 font-medium text-xl">No novels yet</h3>
-            <p className="mb-6">Create your first novel to get started writing!</p>
+            <h3 className="mb-2 font-medium text-xl">No projects yet</h3>
+            <p className="mb-6">Create your first project to get started writing!</p>
             <Button className="flex items-center gap-2" onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="h-4 w-4" />
-              Create Your First Novel
+              Create Your First Project
             </Button>
           </div>
         )}

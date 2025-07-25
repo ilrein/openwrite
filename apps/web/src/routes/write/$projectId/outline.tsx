@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export const Route = createFileRoute("/write/$novelId/outline")({
+export const Route = createFileRoute("/write/$projectId/outline")({
   component: OutlineInterface,
 })
 
@@ -14,7 +14,7 @@ function OutlineInterface() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="font-bold text-3xl">Novel Outline</h1>
+            <h1 className="font-bold text-3xl">Project Outline</h1>
             <p className="mt-2 text-muted-foreground">Plan your story structure</p>
           </div>
           <Button>

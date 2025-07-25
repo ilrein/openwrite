@@ -34,12 +34,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import WriteHeader from "@/components/write-header"
 import { api } from "@/lib/api"
 
-export const Route = createFileRoute("/write/$novelId")({
+export const Route = createFileRoute("/write/$projectId")({
   component: WriteLayout,
 })
 
 function WriteLayout() {
-  const { novelId } = Route.useParams()
+  const { projectId } = Route.useParams()
   const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
   const [codexModalConfig, setCodexModalConfig] = useState<{
     initialType?: string | null
@@ -52,11 +52,11 @@ function WriteLayout() {
     plot: false,
   })
 
-  // Fetch novel details
-  const { data: novel, isLoading } = useQuery({
-    queryKey: ["novel", novelId],
+  // Fetch project details
+  const { data: project, isLoading } = useQuery({
+    queryKey: ["project", projectId],
     queryFn: async () => {
-      const result = await api.novels.get(novelId)
+      const result = await api.projects.get(projectId)
       return result
     },
   })
@@ -64,27 +64,27 @@ function WriteLayout() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-pulse">Loading novel...</div>
+        <div className="animate-pulse">Loading project...</div>
       </div>
     )
   }
 
-  if (!novel) {
+  if (!project) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 font-semibold text-2xl">Novel not found</h2>
-          <Link to="/dashboard/novels">
-            <Button variant="outline">Back to Novels</Button>
+          <h2 className="mb-2 font-semibold text-2xl">Project not found</h2>
+          <Link to="/dashboard/projects">
+            <Button variant="outline">Back to Projects</Button>
           </Link>
         </div>
       </div>
     )
   }
 
-  const targetWordCount = novel.targetWordCount || 0
+  const targetWordCount = project.targetWordCount || 0
   const progressPercentage = targetWordCount
-    ? Math.min((novel.currentWordCount / targetWordCount) * 100, 100)
+    ? Math.min((project.currentWordCount / targetWordCount) * 100, 100)
     : 0
 
   const toggleCodexSection = (section: string) => {
@@ -139,14 +139,14 @@ function WriteLayout() {
             <div className="px-4 py-2">
               <div className="space-y-2">
                 <p className="text-muted-foreground text-sm">
-                  {novel.currentWordCount.toLocaleString()} words
+                  {project.currentWordCount.toLocaleString()} words
                 </p>
-                {novel.targetWordCount && (
+                {project.targetWordCount && (
                   <div>
                     <Progress className="h-2" value={progressPercentage} />
                     <p className="mt-1 text-muted-foreground text-xs">
-                      {Math.round(progressPercentage)}% of {novel.targetWordCount.toLocaleString()}{" "}
-                      word goal
+                      {Math.round(progressPercentage)}% of{" "}
+                      {project.targetWordCount.toLocaleString()} word goal
                     </p>
                   </div>
                 )}
@@ -161,7 +161,7 @@ function WriteLayout() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link params={{ novelId }} to="/write/$novelId/outline">
+                      <Link params={{ projectId }} to="/write/$projectId/outline">
                         <FileText />
                         <span>Outline</span>
                       </Link>
@@ -169,7 +169,7 @@ function WriteLayout() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link params={{ novelId }} to="/write/$novelId/write">
+                      <Link params={{ projectId }} to="/write/$projectId/write">
                         <PenTool />
                         <span>Write</span>
                       </Link>
@@ -445,8 +445,8 @@ function WriteLayout() {
           <WriteHeader
             breadcrumbs={[
               { label: "Dashboard", to: "/dashboard" },
-              { label: "Novels", to: "/dashboard/novels" },
-              { label: novel.title },
+              { label: "Projects", to: "/dashboard/projects" },
+              { label: project.title },
             ]}
           />
 
@@ -477,8 +477,8 @@ function WriteLayout() {
         initialEntry={codexModalConfig.initialEntry}
         initialType={codexModalConfig.initialType}
         isOpen={isCodexModalOpen}
-        novelId={novelId}
         onClose={closeCodexModal}
+        projectId={projectId}
       />
     </SidebarProvider>
   )
