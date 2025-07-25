@@ -3,7 +3,7 @@ import { defineConfig } from "vitepress"
 export default defineConfig({
   title: "OpenWrite",
   description: "Open-source AI-powered writing platform",
-  base: "/openwrite/",
+  base: "/",
   ignoreDeadLinks: true,
 
   themeConfig: {

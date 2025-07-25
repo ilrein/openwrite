@@ -1,0 +1,19 @@
+# OpenWrite Server Environment Variables
+# Copy this file to .dev.vars and fill in your actual values
+
+# CORS origin for the web application
+CORS_ORIGIN="http://localhost:3001"
+
+# Better Auth Configuration - REQUIRED
+BETTER_AUTH_SECRET="your-secret-key-here-change-this-in-production"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# Environment mode
+NODE_ENV="development"
+
+# NOTE: AI Provider API keys are NOT configured here!
+# They are configured through the web application UI at:
+# Dashboard → AI Providers
+# 
+# The keys are securely encrypted and stored in the database.
+# This approach provides better security and user management.
