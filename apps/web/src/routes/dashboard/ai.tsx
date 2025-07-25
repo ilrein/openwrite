@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -260,7 +260,7 @@ function AIProvidersPage() {
                   <TableHead className="min-w-32">Provider</TableHead>
                   <TableHead className="min-w-48">Description</TableHead>
                   <TableHead className="w-24">Status</TableHead>
-                  <TableHead className="w-20 text-right">Actions</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -296,8 +296,8 @@ function AIProvidersPage() {
                           title="Delete AI Provider"
                           variant="destructive"
                         >
-                          <Button size="sm" variant="destructive">
-                            Delete
+                          <Button className="h-6 px-2 text-xs" variant="destructive">
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </ConfirmDialog>
                       </TableCell>
@@ -320,7 +320,7 @@ function AIProvidersPage() {
                   <TableHead className="min-w-32">Provider</TableHead>
                   <TableHead className="min-w-48">Description</TableHead>
                   <TableHead className="w-24">Status</TableHead>
-                  <TableHead className="w-20 text-right">Actions</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -363,12 +363,11 @@ function AIProvidersPage() {
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
-                                className="h-8"
+                                className="h-6 px-2 text-xs"
                                 onClick={() => setSelectedProviderId(provider.id)}
-                                size="sm"
+                                variant="default"
                               >
-                                <Plus className="mr-1 h-3 w-3" />
-                                Connect
+                                <Plus className="h-3 w-3" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
