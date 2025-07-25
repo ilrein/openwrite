@@ -87,7 +87,7 @@ function prepareProviderConfig(
 ): string | null {
   const combinedConfig = {
     ...(providerConfig || {}),
-    ...(apiUrl && { apiUrl }),
+    ...(apiUrl != null ? { apiUrl } : {}),
     ...(configuration && { ...configuration }),
   }
 

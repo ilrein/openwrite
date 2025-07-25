@@ -17,6 +17,12 @@ import { Separator } from "@/components/ui/separator"
 
 type ConnectionMethod = "ngrok" | "cloudflare" | "manual"
 
+interface SetupStep {
+  title: string
+  content: string
+  copyable?: boolean
+}
+
 interface OllamaSetupProps {
   onConnect: (config: { apiUrl: string; connectionMethod: ConnectionMethod }) => void
   loading?: boolean
@@ -28,9 +34,13 @@ export function OllamaSetup({ onConnect, loading }: OllamaSetupProps) {
   const [testingConnection, setTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "success" | "error">("idle")
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard!")
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success("Copied to clipboard!")
+    } catch (_err) {
+      toast.error("Could not copy to clipboard.")
+    }
   }
 
   const testConnection = async () => {
@@ -43,7 +53,7 @@ export function OllamaSetup({ onConnect, loading }: OllamaSetupProps) {
 
     try {
       // Test the connection by hitting the /api/tags endpoint
-      const testUrl = apiUrl.endsWith("/") ? `${apiUrl}api/tags` : `${apiUrl}/api/tags`
+      const testUrl = new URL("/api/tags", apiUrl).toString()
 
       const response = await fetch(testUrl, {
         method: "GET",
@@ -74,7 +84,10 @@ export function OllamaSetup({ onConnect, loading }: OllamaSetupProps) {
     onConnect({ apiUrl, connectionMethod })
   }
 
-  const setupGuides = {
+  const setupGuides: Record<
+    ConnectionMethod,
+    { title: string; description: string; steps: SetupStep[] }
+  > = {
     ngrok: {
       title: "Ngrok Setup (Recommended)",
       description: "Quick setup with temporary or persistent URLs",
