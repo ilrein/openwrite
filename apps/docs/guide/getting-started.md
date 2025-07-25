@@ -36,17 +36,18 @@ cp apps/server/.dev.vars.example apps/server/.dev.vars
 Edit `apps/server/.dev.vars` with your configuration:
 
 ```bash
-# Database
-DATABASE_URL="file:./dev.db"
+# CORS origin for the web application
+CORS_ORIGIN="http://localhost:3001"
 
-# Authentication
-BETTER_AUTH_SECRET="your-secret-key-here"
+# Better Auth Configuration - REQUIRED
+BETTER_AUTH_SECRET="your-secret-key-here-change-this-in-production"
 BETTER_AUTH_URL="http://localhost:3000"
 
-# AI Providers (optional - configure as needed)
-OPENAI_API_KEY="your-openai-key"
-ANTHROPIC_API_KEY="your-anthropic-key"
+# Environment mode
+NODE_ENV="development"
 ```
+
+**Note**: AI Provider API keys are **not** configured in environment variables. They are configured through the web application interface for better security.
 
 ### 4. Database Setup
 
@@ -80,12 +81,16 @@ Your applications will be available at:
 
 ### Set Up AI Providers
 
-1. Go to Dashboard → AI Providers
-2. Configure your preferred AI services:
-   - **OpenAI**: Add your API key for GPT models
+AI providers are configured securely through the web application, not environment variables:
+
+1. Go to **Dashboard → AI Providers** in the web interface
+2. Configure your preferred AI services by clicking "Connect" or "Add API Key":
+   - **OpenRouter** (recommended): OAuth connection for access to 200+ models
+   - **OpenAI**: Add your API key for GPT models  
    - **Anthropic**: Add your key for Claude models
-   - **OpenRouter**: Connect for access to multiple models
-   - **Local Models**: Set up Ollama or other local providers
+   - **Local Models**: Configure Ollama or other local providers
+
+All API keys are encrypted and stored securely in the database, accessible only to your account.
 
 ### Create Your First Project
 
@@ -135,7 +140,7 @@ bun db:migrate       # Run pending migrations
 
 **Port conflicts**: If ports 3000 or 3001 are in use, you can modify them in the respective app configurations.
 
-**AI provider issues**: Double-check your API keys in the `.dev.vars` file and ensure they have proper permissions.
+**AI provider issues**: Check your API keys in Dashboard → AI Providers and ensure they have proper permissions. Keys are configured through the web interface, not environment variables.
 
 **Build failures**: Run `bun quality` to check for TypeScript or linting issues.
 
