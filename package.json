@@ -32,9 +32,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@biomejs/biome": "2.1.2",
+    "@biomejs/biome": "^2.1.2",
     "turbo": "^2.5.5",
-    "ultracite": "5.0.47"
+    "ultracite": "^5.0.47"
   },
-  "packageManager": "bun@1.2.24"
+  "packageManager": "bun@1.2.19"
 }
