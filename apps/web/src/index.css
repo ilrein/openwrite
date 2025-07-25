@@ -3,16 +3,16 @@
 @import "./styles/_variables.scss";
 
 /* Import fonts */
-@import "@fontsource/geist-sans/variable.css";
-@import "@fontsource/lora/variable.css";
-@import "@fontsource/fira-code/variable.css";
+@import "@fontsource/geist-sans";
+@import "@fontsource/lora";
+@import "@fontsource/fira-code";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Geist Sans Variable", "Geist Sans", system-ui, sans-serif;
-  --font-serif: "Lora Variable", "Lora", Georgia, serif;
-  --font-mono: "Fira Code Variable", "Fira Code", ui-monospace, monospace;
+  --font-sans: "Geist Sans", system-ui, sans-serif;
+  --font-serif: "Lora", Georgia, serif;
+  --font-mono: "Fira Code", ui-monospace, monospace;
 }
 
 html,
@@ -57,9 +57,9 @@ body {
   --sidebar-accent-foreground: oklch(0.3394 0.0441 1.7583);
   --sidebar-border: oklch(0.8719 0.0198 302.169);
   --sidebar-ring: oklch(0.6104 0.0767 299.7335);
-  --font-sans: "Geist Sans Variable", "Geist Sans", system-ui, sans-serif;
-  --font-serif: "Lora Variable", "Lora", Georgia, serif;
-  --font-mono: "Fira Code Variable", "Fira Code", ui-monospace, monospace;
+  --font-sans: "Geist Sans", system-ui, sans-serif;
+  --font-serif: "Lora", Georgia, serif;
+  --font-mono: "Fira Code", ui-monospace, monospace;
   --radius: 0.5rem;
   --shadow-2xs: 1px 2px 5px 1px hsl(0 0% 0% / 0.03);
   --shadow-xs: 1px 2px 5px 1px hsl(0 0% 0% / 0.03);
@@ -111,9 +111,9 @@ body {
   --sidebar-accent-foreground: oklch(0.8391 0.0692 2.6681);
   --sidebar-border: oklch(0.2847 0.0346 291.2726);
   --sidebar-ring: oklch(0.7058 0.0777 302.0489);
-  --font-sans: "Geist Sans Variable", "Geist Sans", system-ui, sans-serif;
-  --font-serif: "Lora Variable", "Lora", Georgia, serif;
-  --font-mono: "Fira Code Variable", "Fira Code", ui-monospace, monospace;
+  --font-sans: "Geist Sans", system-ui, sans-serif;
+  --font-serif: "Lora", Georgia, serif;
+  --font-mono: "Fira Code", ui-monospace, monospace;
   --radius: 0.5rem;
   --shadow-2xs: 1px 2px 5px 1px hsl(0 0% 0% / 0.03);
   --shadow-xs: 1px 2px 5px 1px hsl(0 0% 0% / 0.03);
