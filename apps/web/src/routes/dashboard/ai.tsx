@@ -194,14 +194,14 @@ function AIProvidersPage() {
     {
       id: "openai",
       name: "OpenAI",
-      description: "GPT-4o, GPT-4-turbo, GPT-3.5",
-      enabled: false,
+      description: "GPT-4o, GPT-4o-mini, o1-preview, o1-mini",
+      enabled: true,
       supportsPKCE: false,
     },
     {
       id: "anthropic",
       name: "Anthropic",
-      description: "Claude-3.5-Sonnet, Claude-3-Haiku",
+      description: "Claude-4.0-Opus, Claude-4.0-Sonnet",
       enabled: true,
       supportsPKCE: false,
     },
