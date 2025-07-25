@@ -29,7 +29,9 @@ export interface AiProviderDetails extends AiProvider {
 
 export interface CreateAiProviderData {
   provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
-  apiKey: string
+  apiKey?: string
+  apiUrl?: string
+  configuration?: Record<string, unknown>
   keyLabel?: string
   keyHash?: string
   providerUserId?: string

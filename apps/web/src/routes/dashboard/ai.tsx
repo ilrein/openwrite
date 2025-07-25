@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AiProviderCard } from "@/components/ai-provider-card"
+import { OllamaSetup } from "@/components/ollama-setup"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -153,7 +154,7 @@ function AIProvidersPage() {
       id: "ollama",
       name: "Ollama",
       description: "Run models locally on your device",
-      enabled: false,
+      enabled: true,
     },
   ]
 
@@ -286,6 +287,27 @@ function AddProviderForm({
     }
   }
 
+  const handleOllamaConnect = async (config: { apiUrl: string; connectionMethod: string }) => {
+    try {
+      setLoading(true)
+      await aiProvidersApi.create({
+        provider: "ollama",
+        apiKey: "", // Ollama doesn't require API key
+        apiUrl: config.apiUrl,
+        configuration: {
+          connectionMethod: config.connectionMethod,
+        },
+      })
+      onSuccess()
+      setSelectedProvider("")
+      setApiKey("")
+    } catch (_error) {
+      // Error handling removed for linting
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -365,6 +387,13 @@ function AddProviderForm({
         </div>
       )}
 
+      {selectedProvider === "ollama" && (
+        <div className="space-y-3">
+          <Separator />
+          <OllamaSetup loading={loading} onConnect={handleOllamaConnect} />
+        </div>
+      )}
+
       {selectedProvider === "openrouter" && (
         <div className="space-y-3">
           <Separator />
@@ -392,49 +421,53 @@ function AddProviderForm({
         </div>
       )}
 
-      {selectedProvider && (selectedProvider !== "openrouter" || showManualApiKey) && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="apiKey">API Key</Label>
-            {selectedProvider === "openrouter" && showManualApiKey && (
-              <Button
-                onClick={() => setShowManualApiKey(false)}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                ← Back to OAuth
-              </Button>
-            )}
+      {selectedProvider &&
+        selectedProvider !== "ollama" &&
+        (selectedProvider !== "openrouter" || showManualApiKey) && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="apiKey">API Key</Label>
+              {selectedProvider === "openrouter" && showManualApiKey && (
+                <Button
+                  onClick={() => setShowManualApiKey(false)}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  ← Back to OAuth
+                </Button>
+              )}
+            </div>
+            <Input
+              id="apiKey"
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Enter your API key"
+              required
+              type="password"
+              value={apiKey}
+            />
+            <p className="mt-1 text-muted-foreground text-sm">
+              Your API key will be encrypted and stored securely
+            </p>
           </div>
-          <Input
-            id="apiKey"
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter your API key"
-            required
-            type="password"
-            value={apiKey}
-          />
-          <p className="mt-1 text-muted-foreground text-sm">
-            Your API key will be encrypted and stored securely
-          </p>
+        )}
+
+      {selectedProvider !== "ollama" && (
+        <div className="flex gap-2 pt-4">
+          <Button
+            disabled={
+              !selectedProvider ||
+              (selectedProvider === "openrouter" && showManualApiKey && !apiKey) ||
+              (selectedProvider !== "openrouter" && selectedProvider !== "ollama" && !apiKey) ||
+              loading ||
+              oauthLoading
+            }
+            type="submit"
+          >
+            {loading ? "Connecting..." : "Connect Provider"}
+          </Button>
         </div>
       )}
-
-      <div className="flex gap-2 pt-4">
-        <Button
-          disabled={
-            !selectedProvider ||
-            (selectedProvider === "openrouter" && showManualApiKey && !apiKey) ||
-            (selectedProvider !== "openrouter" && !apiKey) ||
-            loading ||
-            oauthLoading
-          }
-          type="submit"
-        >
-          {loading ? "Connecting..." : "Connect Provider"}
-        </Button>
-      </div>
     </form>
   )
 }

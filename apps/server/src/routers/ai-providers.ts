@@ -79,6 +79,21 @@ const requireAuth = async (
 // Apply auth middleware to all routes
 aiProvidersRouter.use("*", requireAuth)
 
+// Helper function to prepare provider configuration
+function prepareProviderConfig(
+  providerConfig: Record<string, unknown> | undefined,
+  apiUrl: string | undefined,
+  configuration: Record<string, unknown> | undefined
+): string | null {
+  const combinedConfig = {
+    ...(providerConfig || {}),
+    ...(apiUrl && { apiUrl }),
+    ...(configuration && { ...configuration }),
+  }
+
+  return Object.keys(combinedConfig).length > 0 ? JSON.stringify(combinedConfig) : null
+}
+
 // List user's AI providers
 aiProvidersRouter.get("/", async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
   const user = c.get("user")
@@ -119,6 +134,8 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
     const {
       provider,
       apiKey,
+      apiUrl,
+      configuration,
       keyLabel,
       keyHash,
       providerUserId,
@@ -128,8 +145,13 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
       providerConfig,
     } = body
 
-    if (!(provider && apiKey)) {
-      return c.json({ error: "Provider and API key are required" }, 400)
+    if (!provider) {
+      return c.json({ error: "Provider is required" }, 400)
+    }
+
+    // API key is optional for Ollama (local installation)
+    if (provider !== "ollama" && !apiKey) {
+      return c.json({ error: "API key is required for this provider" }, 400)
     }
 
     // Check if user already has a provider of this type (due to unique constraint)
@@ -158,25 +180,28 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
     const id = crypto.randomUUID()
     const now = new Date()
 
-    // Encrypt the API key before storing
-    const encryptedApiKey = await encryptApiKey(apiKey, c.env)
-    // Generate hash for identification if not provided
-    const apiKeyHash = keyHash || (await hashApiKey(apiKey))
+    // Encrypt the API key before storing (if provided)
+    const encryptedApiKey = apiKey ? await encryptApiKey(apiKey, c.env) : ""
+    // Generate hash for identification if not provided (skip for Ollama)
+    const apiKeyHash = apiKey ? keyHash || (await hashApiKey(apiKey)) : ""
+
+    // Prepare provider config with apiUrl and configuration
+    const finalProviderConfig = prepareProviderConfig(providerConfig, apiUrl, configuration)
 
     await db.insert(aiProvider).values({
       id,
       userId: user.id,
       provider,
-      apiKey: encryptedApiKey, // Now encrypted
-      keyLabel: keyLabel || null,
-      keyHash: apiKeyHash,
+      apiKey: encryptedApiKey, // Now encrypted (empty for Ollama)
+      keyLabel: keyLabel || (provider === "ollama" ? "Local Ollama" : null),
+      keyHash: apiKeyHash, // Empty for Ollama
       providerUserId: providerUserId || null,
       isActive: true,
       isDefault,
       usageLimit: usageLimit || null,
       currentUsage: 0,
       supportedModels: supportedModels ? JSON.stringify(supportedModels) : null,
-      providerConfig: providerConfig ? JSON.stringify(providerConfig) : null,
+      providerConfig: finalProviderConfig,
       createdAt: now,
       updatedAt: now,
     })
