@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AiProviderCard } from "@/components/ai-provider-card"
 import { OllamaSetup } from "@/components/ollama-setup"
@@ -18,11 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { aiProvidersApi } from "@/lib/api/ai-providers"
+import { aiProvidersApi, type ProviderId } from "@/lib/api/ai-providers"
 import { buildAuthURL, generatePKCEParams } from "@/lib/pkce"
 
 type AIProvider = {
-  id: string
+  id: ProviderId
   name: string
   description: string
   recommended?: boolean
@@ -81,7 +81,7 @@ function AIProvidersPage() {
       code: string
       codeVerifier: string
       codeChallengeMethod: "S256" | "plain"
-      provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+      provider: ProviderId
     }) => aiProvidersApi.exchangeOAuth(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
@@ -125,14 +125,7 @@ function AIProvidersPage() {
         }: {
           codeVerifier: string
           codeChallengeMethod: "S256" | "plain"
-          providerId:
-            | "openrouter"
-            | "openai"
-            | "anthropic"
-            | "ollama"
-            | "groq"
-            | "gemini"
-            | "cohere"
+          providerId: ProviderId
         } = JSON.parse(storedParams)
         sessionStorage.removeItem(pkceKey)
 
@@ -219,6 +212,11 @@ function AIProvidersPage() {
     },
   ]
 
+  // Performance optimization: Create Map for O(1) provider lookups
+  const providersMap = useMemo(() => {
+    return new Map(availableProviders.map((provider) => [provider.id, provider]))
+  }, [])
+
   const getConnectedProvider = useCallback(
     (providerId: string) => {
       return providers?.find((p) => p.provider === providerId)
@@ -241,24 +239,16 @@ function AIProvidersPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {providers.map((provider) => (
               <AiProviderCard
-                description={
-                  availableProviders.find((p) => p.id === provider.provider)?.description ||
-                  "AI Provider"
-                }
+                description={providersMap.get(provider.provider)?.description || "AI Provider"}
                 enabled={true}
                 isConnected={true}
                 key={provider.id}
-                name={
-                  availableProviders.find((p) => p.id === provider.provider)?.name ||
-                  provider.provider
-                }
+                name={providersMap.get(provider.provider)?.name || provider.provider}
                 onConnect={() => {
                   /* Connected providers don't need connect action */
                 }}
                 onDelete={() => deleteMutation.mutate(provider.id)}
-                recommended={
-                  availableProviders.find((p) => p.id === provider.provider)?.recommended
-                }
+                recommended={providersMap.get(provider.provider)?.recommended}
               />
             ))}
           </div>
@@ -421,7 +411,12 @@ function AddProviderForm({
     setSelectedProvider(preSelectedProviderId || "")
   }, [preSelectedProviderId])
 
-  const selectedProviderData = availableProviders.find((p) => p.id === selectedProvider)
+  // Performance optimization: Create Map for O(1) provider lookups
+  const providersMap = useMemo(() => {
+    return new Map(availableProviders.map((provider) => [provider.id, provider]))
+  }, [availableProviders])
+
+  const selectedProviderData = providersMap.get(selectedProvider as ProviderId)
   const selectedProviderSupportsPKCE = selectedProviderData?.supportsPKCE ?? false
 
   const handleOllamaConnect = async (config: { apiUrl: string; connectionMethod: string }) => {

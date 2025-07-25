@@ -6,9 +6,21 @@
 
 import { apiCall } from "./base"
 
+/**
+ * Centralized provider ID type - single source of truth for all supported providers
+ */
+export type ProviderId =
+  | "openrouter"
+  | "openai"
+  | "anthropic"
+  | "ollama"
+  | "groq"
+  | "gemini"
+  | "cohere"
+
 export interface AiProvider {
   id: string
-  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+  provider: ProviderId
   keyLabel: string | null
   keyHash: string | null
   isActive: boolean
@@ -28,7 +40,7 @@ export interface AiProviderDetails extends AiProvider {
 }
 
 export interface CreateAiProviderData {
-  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+  provider: ProviderId
   apiKey?: string
   apiUrl?: string
   configuration?: Record<string, unknown>
@@ -60,7 +72,7 @@ export interface OAuthExchangeData {
   code: string
   codeVerifier: string
   codeChallengeMethod: "S256" | "plain"
-  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+  provider: ProviderId
 }
 
 /**
