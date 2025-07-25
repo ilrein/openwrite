@@ -435,7 +435,6 @@ function AddProviderForm({
       setLoading(false)
     }
   }
-
   const handleOAuthLogin = useOAuthLogin({
     providerId: selectedProvider,
     setOauthLoading,
