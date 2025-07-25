@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { SidebarWritingInterface } from "@/components/sidebar-writing-interface"
+import { useAISidebar } from "@/contexts/ai-sidebar-context"
 import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/project/$projectId/write")({
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/dashboard/project/$projectId/write")({
 
 function ProjectWritePage() {
   const { projectId: id } = Route.useParams()
+  const { isOpen: aiSidebarOpen, setIsOpen: setAiSidebarOpen } = useAISidebar()
 
   // Fetch project content
   const { data: project, isLoading } = useQuery({
@@ -41,10 +43,12 @@ function ProjectWritePage() {
     <div className="flex h-full flex-1 flex-col">
       <SidebarWritingInterface
         content={project.content || ""}
+        onSidebarOpenChange={setAiSidebarOpen}
         onUpdate={(_content) => {
           // TODO: Implement auto-save functionality
         }}
         placeholder={`Continue writing "${project.title}"... Ask the AI assistant for help with your story development.`}
+        sidebarOpen={aiSidebarOpen}
       />
     </div>
   )
