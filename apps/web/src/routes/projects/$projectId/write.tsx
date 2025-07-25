@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { CursorWritingInterface } from "@/components/cursor-writing-interface"
+import { SidebarWritingInterface } from "@/components/sidebar-writing-interface"
 
 export const Route = createFileRoute("/projects/$projectId/write")({
   component: WriteInterface,
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/projects/$projectId/write")({
 function WriteInterface() {
   return (
     <div className="h-full w-full">
-      <CursorWritingInterface
+      <SidebarWritingInterface
         content=""
         onUpdate={(_content) => {
           // TODO: Implement auto-save functionality

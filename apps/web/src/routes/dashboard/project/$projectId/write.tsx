@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { CursorWritingInterface } from "@/components/cursor-writing-interface"
+import { SidebarWritingInterface } from "@/components/sidebar-writing-interface"
 import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/project/$projectId/write")({
@@ -39,7 +39,7 @@ function ProjectWritePage() {
 
   return (
     <div className="flex h-full flex-1 flex-col">
-      <CursorWritingInterface
+      <SidebarWritingInterface
         content={project.content || ""}
         onUpdate={(_content) => {
           // TODO: Implement auto-save functionality
