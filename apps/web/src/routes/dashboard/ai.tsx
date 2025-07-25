@@ -2,12 +2,21 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { Plus } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { AiProviderCard } from "@/components/ai-provider-card"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { OllamaSetup } from "@/components/ollama-setup"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -18,6 +27,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { aiProvidersApi, type ProviderId } from "@/lib/api/ai-providers"
 import { buildAuthURL, generatePKCEParams } from "@/lib/pkce"
 
@@ -236,21 +253,59 @@ function AIProvidersPage() {
       {providers && providers.length > 0 && (
         <div className="space-y-4">
           <h2 className="font-semibold text-lg sm:text-xl">Connected Providers</h2>
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            {providers.map((provider) => (
-              <AiProviderCard
-                description={providersMap.get(provider.provider)?.description || "AI Provider"}
-                enabled={true}
-                isConnected={true}
-                key={provider.id}
-                name={providersMap.get(provider.provider)?.name || provider.provider}
-                onConnect={() => {
-                  /* Connected providers don't need connect action */
-                }}
-                onDelete={() => deleteMutation.mutate(provider.id)}
-                recommended={providersMap.get(provider.provider)?.recommended}
-              />
-            ))}
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-32">Provider</TableHead>
+                  <TableHead className="min-w-48">Description</TableHead>
+                  <TableHead className="w-24">Status</TableHead>
+                  <TableHead className="w-20 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {providers.map((provider) => {
+                  const providerData = providersMap.get(provider.provider)
+                  return (
+                    <TableRow key={provider.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {providerData?.name || provider.provider}
+                          </span>
+                          {providerData?.recommended && (
+                            <Badge className="text-xs" variant="secondary">
+                              Recommended
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {providerData?.description || "AI Provider"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="text-xs" variant="default">
+                          Connected
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <ConfirmDialog
+                          confirmText="Delete"
+                          description="Are you sure you want to delete this AI provider? This action cannot be undone."
+                          onConfirm={() => deleteMutation.mutate(provider.id)}
+                          title="Delete AI Provider"
+                          variant="destructive"
+                        >
+                          <Button size="sm" variant="destructive">
+                            Delete
+                          </Button>
+                        </ConfirmDialog>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}
@@ -258,68 +313,131 @@ function AIProvidersPage() {
       {availableProviders.some((p) => p.enabled) && (
         <div className="space-y-4">
           <h2 className="font-semibold text-lg sm:text-xl">Available Providers</h2>
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            {availableProviders
-              .filter((p) => p.enabled)
-              .sort((a, b) => {
-                const aConnected = !!getConnectedProvider(a.id)
-                const bConnected = !!getConnectedProvider(b.id)
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-32">Provider</TableHead>
+                  <TableHead className="min-w-48">Description</TableHead>
+                  <TableHead className="w-24">Status</TableHead>
+                  <TableHead className="w-20 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {availableProviders
+                  .filter((p) => p.enabled)
+                  .sort((a, b) => {
+                    const aConnected = !!getConnectedProvider(a.id)
+                    const bConnected = !!getConnectedProvider(b.id)
 
-                // Connected providers first
-                if (aConnected && !bConnected) {
-                  return -1
-                }
-                if (!aConnected && bConnected) {
-                  return 1
-                }
+                    // Connected providers first
+                    if (aConnected && !bConnected) {
+                      return -1
+                    }
+                    if (!aConnected && bConnected) {
+                      return 1
+                    }
 
-                // Then by recommended status
-                if (a.recommended && !b.recommended) {
-                  return -1
-                }
-                if (!a.recommended && b.recommended) {
-                  return 1
-                }
+                    // Then by recommended status
+                    if (a.recommended && !b.recommended) {
+                      return -1
+                    }
+                    if (!a.recommended && b.recommended) {
+                      return 1
+                    }
 
-                // Finally alphabetically
-                return a.name.localeCompare(b.name)
-              })
-              .map((provider) => {
-                const connectedProvider = getConnectedProvider(provider.id)
-                const isConnected = !!connectedProvider
+                    // Finally alphabetically
+                    return a.name.localeCompare(b.name)
+                  })
+                  .map((provider) => {
+                    const connectedProvider = getConnectedProvider(provider.id)
+                    const isConnected = !!connectedProvider
 
-                return (
-                  <AiProviderCard
-                    description={provider.description}
-                    enabled={provider.enabled}
-                    isConnected={isConnected}
-                    key={provider.id}
-                    name={provider.name}
-                    onConnect={() => {
-                      if (!isConnected) {
-                        setSelectedProviderId(provider.id)
-                      }
-                    }}
-                    onDelete={() => {
-                      if (connectedProvider) {
-                        deleteMutation.mutate(connectedProvider.id)
-                      }
-                    }}
-                    recommended={provider.recommended}
-                  >
-                    {selectedProviderId === provider.id && (
-                      <AddProviderForm
-                        availableProviders={[provider].filter((p) => p.enabled)}
-                        onSuccess={() => {
-                          setSelectedProviderId(null)
-                          queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
-                        }}
-                        preSelectedProviderId={provider.id}
-                      />
-                    )}
-                  </AiProviderCard>
-                )
-              })}
+                    return (
+                      <TableRow key={provider.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{provider.name}</span>
+                            {provider.recommended && (
+                              <Badge className="text-xs" variant="secondary">
+                                Recommended
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {provider.description}
+                        </TableCell>
+                        <TableCell>
+                          {isConnected ? (
+                            <Badge className="text-xs" variant="default">
+                              Connected
+                            </Badge>
+                          ) : (
+                            <Badge className="text-xs" variant="outline">
+                              Available
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isConnected ? (
+                            <ConfirmDialog
+                              confirmText="Delete"
+                              description="Are you sure you want to delete this AI provider? This action cannot be undone."
+                              onConfirm={() => {
+                                if (connectedProvider) {
+                                  deleteMutation.mutate(connectedProvider.id)
+                                }
+                              }}
+                              title="Delete AI Provider"
+                              variant="destructive"
+                            >
+                              <Button size="sm" variant="destructive">
+                                Delete
+                              </Button>
+                            </ConfirmDialog>
+                          ) : (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  className="h-8"
+                                  onClick={() => setSelectedProviderId(provider.id)}
+                                  size="sm"
+                                >
+                                  <Plus className="mr-1 h-3 w-3" />
+                                  Connect
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>Connect {provider.name}</DialogTitle>
+                                  <DialogDescription>
+                                    Connect to {provider.name} to access their models
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="max-h-[calc(90vh-8rem)] overflow-y-auto pr-2">
+                                  {selectedProviderId === provider.id && (
+                                    <AddProviderForm
+                                      availableProviders={[provider].filter((p) => p.enabled)}
+                                      onSuccess={() => {
+                                        setSelectedProviderId(null)
+                                        queryClient.invalidateQueries({
+                                          queryKey: ["ai-providers"],
+                                        })
+                                      }}
+                                      preSelectedProviderId={provider.id}
+                                    />
+                                  )}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}
