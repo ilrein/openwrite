@@ -3,6 +3,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { CheckCircle, Plus, Trash2 } from "lucide-react"
+
+// Reusable success icon for toast notifications
+const successIcon = <CheckCircle className="h-4 w-4" />
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -103,7 +107,7 @@ function AIProvidersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
       toast.success("Provider connected successfully via OAuth", {
-        icon: <CheckCircle className="h-4 w-4" />,
+        icon: successIcon,
       })
       setOauthProcessing(false)
     },
@@ -490,8 +494,9 @@ function useProviderSubmit(options: {
       })
       // Get provider name for the toast
       const providerData = availableProviders.find((p) => p.id === selectedProvider)
-      toast.success(`${providerData?.name || selectedProvider} connected successfully`, {
-        icon: <CheckCircle className="h-4 w-4" />,
+      const providerName = providerData?.name || selectedProvider
+      toast.success(`${providerName} connected successfully`, {
+        icon: successIcon,
       })
       onSuccess()
       setSelectedProvider("")
@@ -544,7 +549,7 @@ function AddProviderForm({
         },
       })
       toast.success("Ollama connected successfully", {
-        icon: <CheckCircle className="h-4 w-4" />,
+        icon: successIcon,
       })
       onSuccess()
       setSelectedProvider("")
