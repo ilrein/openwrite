@@ -1,26 +1,73 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { sql } from "drizzle-orm"
+import { check, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { user } from "./auth"
 import { organization } from "./organization"
+
+// Define enums for better type safety
+export const projectTypeEnum = [
+  "novel",
+  "trilogy",
+  "series",
+  "short_story_collection",
+  "graphic_novel",
+  "screenplay",
+] as const
+export const projectStatusEnum = [
+  "draft",
+  "in_progress",
+  "completed",
+  "published",
+  "archived",
+] as const
+export const visibilityEnum = ["private", "team", "organization", "public"] as const
+export const workTypeEnum = [
+  "novel",
+  "short_story",
+  "novella",
+  "graphic_novel",
+  "screenplay",
+] as const
+export const roleEnum = ["protagonist", "antagonist", "supporting", "minor"] as const
+export const locationTypeEnum = [
+  "city",
+  "country",
+  "building",
+  "room",
+  "fantasy_realm",
+  "planet",
+  "dimension",
+] as const
+export const plotPointTypeEnum = [
+  "inciting_incident",
+  "plot_point_1",
+  "midpoint",
+  "plot_point_2",
+  "climax",
+  "resolution",
+  "custom",
+] as const
+export const plotPointStatusEnum = ["planned", "in_progress", "completed"] as const
+export const collaboratorRoleEnum = ["editor", "co_author", "reviewer", "viewer"] as const
 
 // Project table - the main creative project container
 export const project = sqliteTable("project", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  type: text("type").notNull().default("novel"), // "novel", "trilogy", "series", "short_story_collection", "graphic_novel", "screenplay"
+  type: text("type", { enum: projectTypeEnum }).notNull().default("novel"),
   genre: text("genre"), // Fantasy, Science Fiction, Romance, etc.
   targetWordCount: integer("target_word_count"),
   currentWordCount: integer("current_word_count").default(0),
-  status: text("status").notNull().default("draft"), // "draft", "in_progress", "completed", "published", "archived"
-  visibility: text("visibility").notNull().default("private"), // "private", "team", "organization", "public"
+  status: text("status", { enum: projectStatusEnum }).notNull().default("draft"),
+  visibility: text("visibility", { enum: visibilityEnum }).notNull().default("private"),
 
   // Ownership and organization
   ownerId: text("owner_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id),
+    .references(() => organization.id, { onDelete: "cascade" }),
 
   // Cover and metadata
   coverImage: text("cover_image"),
@@ -40,14 +87,14 @@ export const work = sqliteTable("work", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
-    .references(() => project.id),
+    .references(() => project.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  workType: text("work_type").notNull(), // "novel", "short_story", "novella", "graphic_novel", "screenplay"
+  workType: text("work_type", { enum: workTypeEnum }).notNull(),
   order: integer("order").notNull().default(1), // For trilogies/series ordering
   targetWordCount: integer("target_word_count"),
   currentWordCount: integer("current_word_count").default(0),
-  status: text("status").notNull().default("draft"),
+  status: text("status", { enum: projectStatusEnum }).notNull().default("draft"),
 
   // Cover and metadata specific to this work
   coverImage: text("cover_image"),
@@ -68,12 +115,12 @@ export const chapter = sqliteTable("chapter", {
   summary: text("summary"), // Brief chapter summary
   wordCount: integer("word_count").default(0),
   order: integer("order").notNull(), // Chapter order within the work
-  status: text("status").notNull().default("draft"), // "draft", "in_progress", "completed", "published"
+  status: text("status", { enum: projectStatusEnum }).notNull().default("draft"),
 
   // Relationships
   workId: text("work_id")
     .notNull()
-    .references(() => work.id),
+    .references(() => work.id, { onDelete: "cascade" }),
 
   // Metadata
   notes: text("notes"), // Author notes for this chapter
@@ -84,87 +131,117 @@ export const chapter = sqliteTable("chapter", {
 })
 
 // Character table - character management for projects and works
-export const character = sqliteTable("character", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  role: text("role"), // "protagonist", "antagonist", "supporting", "minor"
+export const character = sqliteTable(
+  "character",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    role: text("role", { enum: roleEnum }),
 
-  // Physical and personality traits
-  appearance: text("appearance"), // Physical description
-  personality: text("personality"), // Personality traits
-  backstory: text("backstory"), // Character history
-  motivation: text("motivation"), // What drives the character
+    // Physical and personality traits
+    appearance: text("appearance"), // Physical description
+    personality: text("personality"), // Personality traits
+    backstory: text("backstory"), // Character history
+    motivation: text("motivation"), // What drives the character
 
-  // Relationships - can be shared across project or specific to a work
-  projectId: text("project_id").references(() => project.id), // For shared characters
-  workId: text("work_id").references(() => work.id), // For work-specific characters
+    // Relationships - can be shared across project or specific to a work
+    projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared characters
+    workId: text("work_id").references(() => work.id, { onDelete: "cascade" }), // For work-specific characters
 
-  // Visual
-  image: text("image"), // Character portrait/reference image
+    // Visual
+    image: text("image"), // Character portrait/reference image
 
-  // Metadata
-  metadata: text("metadata"), // JSON for additional character data
+    // Metadata
+    metadata: text("metadata"), // JSON for additional character data
 
-  // Timestamps
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-})
+    // Timestamps
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (_table) => ({
+    // CHECK constraint to ensure character is associated with either project or work, but not both null
+    characterAssociation: check(
+      "character_association",
+      sql`((project_id IS NOT NULL AND work_id IS NULL) OR (work_id IS NOT NULL))`
+    ),
+  })
+)
 
 // Location/Setting table - world-building for projects and works
-export const location = sqliteTable("location", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  type: text("type"), // "city", "country", "building", "room", "fantasy_realm", etc.
+export const location = sqliteTable(
+  "location",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    type: text("type", { enum: locationTypeEnum }),
 
-  // Relationships - can be shared across project or specific to a work
-  projectId: text("project_id").references(() => project.id), // For shared locations
-  workId: text("work_id").references(() => work.id), // For work-specific locations
-  parentLocationId: text("parent_location_id"), // For nested locations (e.g., room within building)
+    // Relationships - can be shared across project or specific to a work
+    projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared locations
+    workId: text("work_id").references(() => work.id, { onDelete: "cascade" }), // For work-specific locations
+    parentLocationId: text("parent_location_id").$type<string | null>(), // For nested locations
 
-  // Visual and details
-  image: text("image"), // Location image/map
+    // Visual and details
+    image: text("image"), // Location image/map
 
-  // Metadata
-  metadata: text("metadata"), // JSON for additional location data
+    // Metadata
+    metadata: text("metadata"), // JSON for additional location data
 
-  // Timestamps
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-})
+    // Timestamps
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (_table) => ({
+    // CHECK constraint to ensure location is associated with either project or work, but not both null
+    locationAssociation: check(
+      "location_association",
+      sql`((project_id IS NOT NULL AND work_id IS NULL) OR (work_id IS NOT NULL))`
+    ),
+  })
+)
 
 // Plot point/Story beat table - story structure management
-export const plotPoint = sqliteTable("plot_point", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  type: text("type"), // "inciting_incident", "plot_point_1", "midpoint", "plot_point_2", "climax", "resolution", "custom"
-  order: integer("order").notNull(), // Order in the story structure
+export const plotPoint = sqliteTable(
+  "plot_point",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    description: text("description"),
+    type: text("type", { enum: plotPointTypeEnum }),
+    order: integer("order").notNull(), // Order in the story structure
 
-  // Relationships - can be at project level or work level
-  projectId: text("project_id").references(() => project.id), // For project-wide plot points
-  workId: text("work_id").references(() => work.id), // For work-specific plot points
-  chapterId: text("chapter_id").references(() => chapter.id), // Optional: link to specific chapter
+    // Relationships - can be at project level or work level
+    projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For project-wide plot points
+    workId: text("work_id").references(() => work.id, { onDelete: "cascade" }), // For work-specific plot points
+    chapterId: text("chapter_id").references(() => chapter.id, { onDelete: "set null" }), // Optional: link to specific chapter
 
-  // Status
-  status: text("status").notNull().default("planned"), // "planned", "in_progress", "completed"
+    // Status
+    status: text("status", { enum: plotPointStatusEnum }).notNull().default("planned"),
 
-  // Timestamps
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-})
+    // Timestamps
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (_table) => ({
+    // CHECK constraint to ensure plot point is associated with either project or work, but not both null
+    plotPointAssociation: check(
+      "plot_point_association",
+      sql`((project_id IS NOT NULL AND work_id IS NULL) OR (work_id IS NOT NULL))`
+    ),
+  })
+)
 
 // Project collaborator table - manage who can work on a project
 export const projectCollaborator = sqliteTable("project_collaborator", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
-    .references(() => project.id),
+    .references(() => project.id, { onDelete: "cascade" }),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
-  role: text("role").notNull(), // "editor", "co_author", "reviewer", "viewer"
+    .references(() => user.id, { onDelete: "cascade" }),
+  role: text("role", { enum: collaboratorRoleEnum }).notNull(),
   permissions: text("permissions"), // JSON array of specific permissions
 
   // Timestamps
@@ -178,12 +255,12 @@ export const writingSession = sqliteTable("writing_session", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
-    .references(() => project.id),
-  workId: text("work_id").references(() => work.id), // Optional: which work was worked on
+    .references(() => project.id, { onDelete: "cascade" }),
+  workId: text("work_id").references(() => work.id, { onDelete: "set null" }), // Optional: which work was worked on
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
-  chapterId: text("chapter_id").references(() => chapter.id), // Optional: which chapter was worked on
+    .references(() => user.id, { onDelete: "cascade" }),
+  chapterId: text("chapter_id").references(() => chapter.id, { onDelete: "set null" }), // Optional: which chapter was worked on
 
   // Session data
   wordsWritten: integer("words_written").default(0),
