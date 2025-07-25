@@ -370,7 +370,7 @@ function WriteLayout() {
                                 </Badge>
                               </SidebarMenuButton>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="right">
                               <p>Chapter 1: The Beginning and the Call to Adventure</p>
                             </TooltipContent>
                           </Tooltip>
@@ -407,7 +407,7 @@ function WriteLayout() {
                                 </Badge>
                               </SidebarMenuButton>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="right">
                               <p>Chapter 2: The Journey Through the Dark Forest</p>
                             </TooltipContent>
                           </Tooltip>
