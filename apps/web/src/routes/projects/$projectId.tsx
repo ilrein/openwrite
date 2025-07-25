@@ -34,7 +34,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import WriteHeader from "@/components/write-header"
 import { api } from "@/lib/api"
 
-export const Route = createFileRoute("/write/$projectId")({
+export const Route = createFileRoute("/projects/$projectId")({
   component: WriteLayout,
 })
 
@@ -161,7 +161,7 @@ function WriteLayout() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link params={{ projectId }} to="/write/$projectId/outline">
+                      <Link params={{ projectId }} to="/projects/$projectId/outline">
                         <FileText />
                         <span>Outline</span>
                       </Link>
@@ -169,7 +169,7 @@ function WriteLayout() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link params={{ projectId }} to="/write/$projectId/write">
+                      <Link params={{ projectId }} to="/projects/$projectId/write">
                         <PenTool />
                         <span>Write</span>
                       </Link>

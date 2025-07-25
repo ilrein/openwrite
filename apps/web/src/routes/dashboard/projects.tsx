@@ -280,7 +280,7 @@ function ProjectsPage() {
               <Link
                 key={project.id}
                 params={{ projectId: project.id }}
-                to="/write/$projectId/write"
+                to="/projects/$projectId/write"
               >
                 <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                   <CardHeader>

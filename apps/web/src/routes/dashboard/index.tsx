@@ -139,7 +139,7 @@ function DashboardHome() {
                     className="block"
                     key={project.id}
                     params={{ projectId: project.id }}
-                    to="/write/$projectId/write"
+                    to="/projects/$projectId/write"
                   >
                     <div className="flex cursor-pointer flex-col space-y-3 rounded-lg p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                       <div className="flex items-center space-x-4">
