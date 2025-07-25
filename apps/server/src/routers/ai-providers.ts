@@ -88,7 +88,7 @@ function prepareProviderConfig(
   const combinedConfig = {
     ...(providerConfig || {}),
     ...(apiUrl != null ? { apiUrl } : {}),
-    ...(configuration && { ...configuration }),
+    ...(configuration || {}),
   }
 
   return Object.keys(combinedConfig).length > 0 ? JSON.stringify(combinedConfig) : null
