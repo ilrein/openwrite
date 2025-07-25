@@ -16,7 +16,7 @@ const getSingularForm = (type: string): string => {
   return typeToSingular[type] || type
 }
 
-export const Route = createFileRoute("/write/$novelId/codex/$type")({
+export const Route = createFileRoute("/write/$projectId/codex/$type")({
   component: CodexTypeInterface,
 })
 

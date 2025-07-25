@@ -7,22 +7,22 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { api, type Novel } from "@/lib/api"
+import { api, type Project } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardHome,
 })
 
 function DashboardHome() {
-  // Fetch novels for overview
+  // Fetch projects for overview
   const {
-    data: novels,
+    data: projects,
     isError,
     error,
   } = useQuery({
-    queryKey: ["novels"],
+    queryKey: ["projects"],
     queryFn: async () => {
-      const result = await api.novels.list()
+      const result = await api.projects.list()
       return result
     },
     retry: 2,
@@ -32,14 +32,15 @@ function DashboardHome() {
   // Handle error with toast notification
   useEffect(() => {
     if (isError && error) {
-      toast.error("Failed to load novels. Please try refreshing the page.")
+      toast.error("Failed to load projects. Please try refreshing the page.")
     }
   }, [isError, error])
 
-  const totalWords = novels?.reduce((sum, novel) => sum + novel.currentWordCount, 0) || 0
-  const activeNovels =
-    novels?.filter((novel) => novel.status === "in_progress" || novel.status === "draft") || []
-  const recentNovels = novels?.slice(0, 3) || []
+  const totalWords = projects?.reduce((sum, project) => sum + project.currentWordCount, 0) || 0
+  const activeProjects =
+    projects?.filter((project) => project.status === "in_progress" || project.status === "draft") ||
+    []
+  const recentProjects = projects?.slice(0, 3) || []
 
   // Handle error state
   if (isError) {
@@ -74,12 +75,14 @@ function DashboardHome() {
         <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="font-medium text-sm">Total Novels</CardTitle>
+              <CardTitle className="font-medium text-sm">Total Projects</CardTitle>
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">{novels?.length || 0}</div>
-              <p className="text-muted-foreground text-xs">{activeNovels.length} active projects</p>
+              <div className="font-bold text-2xl">{projects?.length || 0}</div>
+              <p className="text-muted-foreground text-xs">
+                {activeProjects.length} active projects
+              </p>
             </CardContent>
           </Card>
 
@@ -122,49 +125,49 @@ function DashboardHome() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Recent Novels</CardTitle>
+                <CardTitle>Recent Projects</CardTitle>
                 <CardDescription>Your latest writing projects</CardDescription>
               </div>
               <Button asChild size="sm" variant="outline">
-                <Link to="/dashboard/novels">View All</Link>
+                <Link to="/dashboard/projects">View All</Link>
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentNovels.map((novel: Novel) => (
+                {recentProjects.map((project: Project) => (
                   <Link
                     className="block"
-                    key={novel.id}
-                    params={{ novelId: novel.id }}
-                    to="/write/$novelId/write"
+                    key={project.id}
+                    params={{ projectId: project.id }}
+                    to="/write/$projectId/write"
                   >
                     <div className="flex cursor-pointer flex-col space-y-3 rounded-lg p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                       <div className="flex items-center space-x-4">
                         <BookOpen className="h-8 w-8 text-blue-600" />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium">{novel.title}</p>
+                          <p className="truncate font-medium">{project.title}</p>
                           <p className="text-muted-foreground text-sm">
-                            {novel.currentWordCount.toLocaleString()} words
+                            {project.currentWordCount.toLocaleString()} words
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant={novel.status === "draft" ? "secondary" : "default"}>
-                          {novel.status}
+                        <Badge variant={project.status === "draft" ? "secondary" : "default"}>
+                          {project.status}
                         </Badge>
                       </div>
                     </div>
                   </Link>
                 ))}
 
-                {recentNovels.length === 0 && (
+                {recentProjects.length === 0 && (
                   <div className="py-8 text-center">
                     <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-50" />
-                    <p className="mb-4 text-muted-foreground">No novels yet</p>
+                    <p className="mb-4 text-muted-foreground">No projects yet</p>
                     <Button asChild>
-                      <Link to="/dashboard/novels">
+                      <Link to="/dashboard/projects">
                         <Plus className="mr-2 h-4 w-4" />
-                        Create Your First Novel
+                        Create Your First Project
                       </Link>
                     </Button>
                   </div>
@@ -181,27 +184,27 @@ function DashboardHome() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {activeNovels.slice(0, 3).map((novel: Novel) => {
-                  const progress = novel.targetWordCount
-                    ? Math.min((novel.currentWordCount / novel.targetWordCount) * 100, 100)
+                {activeProjects.slice(0, 3).map((project: Project) => {
+                  const progress = project.targetWordCount
+                    ? Math.min((project.currentWordCount / project.targetWordCount) * 100, 100)
                     : 0
 
                   return (
-                    <div className="space-y-2" key={novel.id}>
+                    <div className="space-y-2" key={project.id}>
                       <div className="flex items-center justify-between">
-                        <p className="font-medium text-sm">{novel.title}</p>
+                        <p className="font-medium text-sm">{project.title}</p>
                         <p className="text-muted-foreground text-sm">{Math.round(progress)}%</p>
                       </div>
                       <Progress className="h-2" value={progress} />
                       <p className="text-muted-foreground text-xs">
-                        {novel.currentWordCount.toLocaleString()} /{" "}
-                        {novel.targetWordCount?.toLocaleString() || "∞"} words
+                        {project.currentWordCount.toLocaleString()} /{" "}
+                        {project.targetWordCount?.toLocaleString() || "∞"} words
                       </p>
                     </div>
                   )
                 })}
 
-                {activeNovels.length === 0 && (
+                {activeProjects.length === 0 && (
                   <div className="py-8 text-center text-muted-foreground">
                     <p>No active projects with word goals</p>
                   </div>

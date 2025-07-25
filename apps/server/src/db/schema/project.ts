@@ -2,11 +2,12 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { user } from "./auth"
 import { organization } from "./organization"
 
-// Novel table - the main creative project
-export const novel = sqliteTable("novel", {
+// Project table - the main creative project container
+export const project = sqliteTable("project", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
+  type: text("type").notNull().default("novel"), // "novel", "trilogy", "series", "short_story_collection", "graphic_novel", "screenplay"
   genre: text("genre"), // Fantasy, Science Fiction, Romance, etc.
   targetWordCount: integer("target_word_count"),
   currentWordCount: integer("current_word_count").default(0),
@@ -23,7 +24,7 @@ export const novel = sqliteTable("novel", {
 
   // Cover and metadata
   coverImage: text("cover_image"),
-  metadata: text("metadata"), // JSON for additional novel data (themes, inspiration, etc.)
+  metadata: text("metadata"), // JSON for additional project data (themes, inspiration, series info, etc.)
 
   // Timestamps
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
@@ -34,20 +35,45 @@ export const novel = sqliteTable("novel", {
   lastWrittenAt: integer("last_written_at", { mode: "timestamp" }),
 })
 
-// Chapter table - organizing novel content
+// Work table - individual novels/stories within a project
+export const work = sqliteTable("work", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => project.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  workType: text("work_type").notNull(), // "novel", "short_story", "novella", "graphic_novel", "screenplay"
+  order: integer("order").notNull().default(1), // For trilogies/series ordering
+  targetWordCount: integer("target_word_count"),
+  currentWordCount: integer("current_word_count").default(0),
+  status: text("status").notNull().default("draft"),
+
+  // Cover and metadata specific to this work
+  coverImage: text("cover_image"),
+  metadata: text("metadata"), // JSON for work-specific data
+
+  // Timestamps
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  publishedAt: integer("published_at", { mode: "timestamp" }),
+  lastWrittenAt: integer("last_written_at", { mode: "timestamp" }),
+})
+
+// Chapter table - organizing work content
 export const chapter = sqliteTable("chapter", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content"), // Markdown/rich text content
   summary: text("summary"), // Brief chapter summary
   wordCount: integer("word_count").default(0),
-  order: integer("order").notNull(), // Chapter order within the novel
+  order: integer("order").notNull(), // Chapter order within the work
   status: text("status").notNull().default("draft"), // "draft", "in_progress", "completed", "published"
 
   // Relationships
-  novelId: text("novel_id")
+  workId: text("work_id")
     .notNull()
-    .references(() => novel.id),
+    .references(() => work.id),
 
   // Metadata
   notes: text("notes"), // Author notes for this chapter
@@ -57,7 +83,7 @@ export const chapter = sqliteTable("chapter", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
-// Character table - character management for novels
+// Character table - character management for projects and works
 export const character = sqliteTable("character", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -70,10 +96,9 @@ export const character = sqliteTable("character", {
   backstory: text("backstory"), // Character history
   motivation: text("motivation"), // What drives the character
 
-  // Relationships
-  novelId: text("novel_id")
-    .notNull()
-    .references(() => novel.id),
+  // Relationships - can be shared across project or specific to a work
+  projectId: text("project_id").references(() => project.id), // For shared characters
+  workId: text("work_id").references(() => work.id), // For work-specific characters
 
   // Visual
   image: text("image"), // Character portrait/reference image
@@ -86,17 +111,16 @@ export const character = sqliteTable("character", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
-// Location/Setting table - world-building for novels
+// Location/Setting table - world-building for projects and works
 export const location = sqliteTable("location", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   type: text("type"), // "city", "country", "building", "room", "fantasy_realm", etc.
 
-  // Relationships
-  novelId: text("novel_id")
-    .notNull()
-    .references(() => novel.id),
+  // Relationships - can be shared across project or specific to a work
+  projectId: text("project_id").references(() => project.id), // For shared locations
+  workId: text("work_id").references(() => work.id), // For work-specific locations
   parentLocationId: text("parent_location_id"), // For nested locations (e.g., room within building)
 
   // Visual and details
@@ -118,10 +142,9 @@ export const plotPoint = sqliteTable("plot_point", {
   type: text("type"), // "inciting_incident", "plot_point_1", "midpoint", "plot_point_2", "climax", "resolution", "custom"
   order: integer("order").notNull(), // Order in the story structure
 
-  // Relationships
-  novelId: text("novel_id")
-    .notNull()
-    .references(() => novel.id),
+  // Relationships - can be at project level or work level
+  projectId: text("project_id").references(() => project.id), // For project-wide plot points
+  workId: text("work_id").references(() => work.id), // For work-specific plot points
   chapterId: text("chapter_id").references(() => chapter.id), // Optional: link to specific chapter
 
   // Status
@@ -132,12 +155,12 @@ export const plotPoint = sqliteTable("plot_point", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
-// Novel collaborator table - manage who can work on a novel
-export const novelCollaborator = sqliteTable("novel_collaborator", {
+// Project collaborator table - manage who can work on a project
+export const projectCollaborator = sqliteTable("project_collaborator", {
   id: text("id").primaryKey(),
-  novelId: text("novel_id")
+  projectId: text("project_id")
     .notNull()
-    .references(() => novel.id),
+    .references(() => project.id),
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
@@ -153,9 +176,10 @@ export const novelCollaborator = sqliteTable("novel_collaborator", {
 // Writing session table - track writing progress and analytics
 export const writingSession = sqliteTable("writing_session", {
   id: text("id").primaryKey(),
-  novelId: text("novel_id")
+  projectId: text("project_id")
     .notNull()
-    .references(() => novel.id),
+    .references(() => project.id),
+  workId: text("work_id").references(() => work.id), // Optional: which work was worked on
   userId: text("user_id")
     .notNull()
     .references(() => user.id),

@@ -3,18 +3,18 @@ import { createFileRoute } from "@tanstack/react-router"
 import TiptapEditor from "@/components/tiptap-editor"
 import { api } from "@/lib/api"
 
-export const Route = createFileRoute("/dashboard/novel/$novelId/write")({
-  component: NovelWritePage,
+export const Route = createFileRoute("/dashboard/project/$projectId/write")({
+  component: ProjectWritePage,
 })
 
-function NovelWritePage() {
-  const { novelId: id } = Route.useParams()
+function ProjectWritePage() {
+  const { projectId: id } = Route.useParams()
 
-  // Fetch novel content
-  const { data: novel, isLoading } = useQuery({
-    queryKey: ["novel", id],
+  // Fetch project content
+  const { data: project, isLoading } = useQuery({
+    queryKey: ["project", id],
     queryFn: async () => {
-      const result = await api.novels.get(id)
+      const result = await api.projects.get(id)
       return result
     },
   })
@@ -27,11 +27,11 @@ function NovelWritePage() {
     )
   }
 
-  if (!novel) {
+  if (!project) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 font-semibold text-2xl text-gray-900">Novel not found</h2>
+          <h2 className="mb-2 font-semibold text-2xl text-gray-900">Project not found</h2>
         </div>
       </div>
     )
@@ -44,7 +44,7 @@ function NovelWritePage() {
         <div className="mx-auto max-w-4xl">
           <div className="prose prose-lg min-h-[600px] max-w-none">
             <TiptapEditor
-              content={novel.content || ""}
+              content={project.content || ""}
               onUpdate={(_content) => {
                 // TODO: Implement auto-save functionality
               }}
@@ -57,11 +57,11 @@ function NovelWritePage() {
       <div className="border-t px-8 py-3">
         <div className="mx-auto flex max-w-4xl items-center justify-between text-sm opacity-75">
           <div className="flex items-center space-x-6">
-            <span>Words: {novel.currentWordCount.toLocaleString()}</span>
-            {novel.targetWordCount && (
+            <span>Words: {project.currentWordCount.toLocaleString()}</span>
+            {project.targetWordCount && (
               <span>
-                Goal: {novel.targetWordCount.toLocaleString()}(
-                {Math.round((novel.currentWordCount / novel.targetWordCount) * 100)}%)
+                Goal: {project.targetWordCount.toLocaleString()}(
+                {Math.round((project.currentWordCount / project.targetWordCount) * 100)}%)
               </span>
             )}
           </div>

@@ -14,7 +14,7 @@ function TeamPage() {
         <Users className="h-4 w-4" />
         <AlertDescription>
           Team management features are coming soon! You'll be able to invite members, assign roles,
-          and collaborate on your novels.
+          and collaborate on your projects.
         </AlertDescription>
       </Alert>
     </div>
