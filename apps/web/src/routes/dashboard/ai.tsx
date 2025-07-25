@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AiProviderCard } from "@/components/ai-provider-card"
+import { OllamaSetup } from "@/components/ollama-setup"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -153,7 +154,7 @@ function AIProvidersPage() {
       id: "ollama",
       name: "Ollama",
       description: "Run models locally on your device",
-      enabled: false,
+      enabled: true,
     },
   ]
 
@@ -228,32 +229,9 @@ function AIProvidersPage() {
   )
 }
 
-function AddProviderForm({
-  availableProviders,
-  preSelectedProviderId,
-  onSuccess,
-}: {
-  availableProviders: Array<{
-    id: string
-    name: string
-    description: string
-    recommended?: boolean
-    enabled?: boolean
-  }>
-  preSelectedProviderId?: string | null
-  onSuccess: () => void
-}) {
-  const [selectedProvider, setSelectedProvider] = useState(preSelectedProviderId || "")
-  const [apiKey, setApiKey] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [showManualApiKey, setShowManualApiKey] = useState(false)
-  const [oauthLoading, setOauthLoading] = useState(false)
-
-  useEffect(() => {
-    setSelectedProvider(preSelectedProviderId || "")
-  }, [preSelectedProviderId])
-
-  const handleOAuthLogin = async () => {
+// Helper hook for OAuth login logic
+function useOAuthLogin() {
+  const handleOAuthLogin = async (setOauthLoading: (loading: boolean) => void) => {
     try {
       setOauthLoading(true)
 
@@ -286,12 +264,183 @@ function AddProviderForm({
     }
   }
 
+  return { handleOAuthLogin }
+}
+
+// Helper function for provider form validation
+function isFormValid(selectedProvider: string, showManualApiKey: boolean, apiKey: string): boolean {
+  const requiresApiKey = (selectedProvider !== "openrouter" || showManualApiKey) && selectedProvider !== "ollama"
+  return !!(selectedProvider && (!requiresApiKey || apiKey))
+}
+
+// Provider selection component
+function ProviderSelection({
+  availableProviders,
+  selectedProvider,
+  onProviderChange,
+  preSelectedProviderId,
+}: {
+  availableProviders: Array<{
+    id: string
+    name: string
+    description: string
+    recommended?: boolean
+    enabled?: boolean
+  }>
+  selectedProvider: string
+  onProviderChange: (provider: string) => void
+  preSelectedProviderId?: string | null
+}) {
+  const selectedProviderData = availableProviders.find((p) => p.id === selectedProvider)
+
+  if (preSelectedProviderId && selectedProviderData) {
+    return (
+      <div className="space-y-2">
+        <Label>Connecting to Provider</Label>
+        <div className="flex items-center gap-3 rounded-md border p-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{selectedProviderData.name}</span>
+              {selectedProviderData.recommended && <Badge variant="secondary">Recommended</Badge>}
+            </div>
+            <p className="text-muted-foreground text-sm">{selectedProviderData.description}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="provider">Select Provider</Label>
+      <Select onValueChange={onProviderChange} value={selectedProvider}>
+        <SelectTrigger>
+          <SelectValue placeholder="Choose an AI provider" />
+        </SelectTrigger>
+        <SelectContent>
+          {availableProviders.map((provider) => (
+            <SelectItem key={provider.id} value={provider.id}>
+              <div className="flex items-center gap-2">
+                {provider.name}
+                {provider.recommended && (
+                  <Badge className="text-xs" variant="secondary">
+                    Recommended
+                  </Badge>
+                )}
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {selectedProviderData && (
+        <p className="mt-1 text-muted-foreground text-sm">{selectedProviderData.description}</p>
+      )}
+    </div>
+  )
+}
+
+// API Key input component
+function ApiKeyInput({
+  selectedProvider,
+  showManualApiKey,
+  apiKey,
+  onApiKeyChange,
+  onBackToOAuth,
+}: {
+  selectedProvider: string
+  showManualApiKey: boolean
+  apiKey: string
+  onApiKeyChange: (apiKey: string) => void
+  onBackToOAuth: () => void
+}) {
+  const shouldShow =
+    selectedProvider &&
+    selectedProvider !== "ollama" &&
+    (selectedProvider !== "openrouter" || showManualApiKey)
+
+  if (!shouldShow) {
+    return null
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label htmlFor="apiKey">API Key</Label>
+        {selectedProvider === "openrouter" && showManualApiKey && (
+          <Button onClick={onBackToOAuth} size="sm" type="button" variant="ghost">
+            ← Back to OAuth
+          </Button>
+        )}
+      </div>
+      <Input
+        id="apiKey"
+        onChange={(e) => onApiKeyChange(e.target.value)}
+        placeholder="Enter your API key"
+        required
+        type="password"
+        value={apiKey}
+      />
+      <p className="mt-1 text-muted-foreground text-sm">
+        Your API key will be encrypted and stored securely
+      </p>
+    </div>
+  )
+}
+
+function AddProviderForm({
+  availableProviders,
+  preSelectedProviderId,
+  onSuccess,
+}: {
+  availableProviders: Array<{
+    id: string
+    name: string
+    description: string
+    recommended?: boolean
+    enabled?: boolean
+  }>
+  preSelectedProviderId?: string | null
+  onSuccess: () => void
+}) {
+  const [selectedProvider, setSelectedProvider] = useState(preSelectedProviderId || "")
+  const [apiKey, setApiKey] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [showManualApiKey, setShowManualApiKey] = useState(false)
+  const [oauthLoading, setOauthLoading] = useState(false)
+
+  const { handleOAuthLogin } = useOAuthLogin()
+
+  useEffect(() => {
+    setSelectedProvider(preSelectedProviderId || "")
+  }, [preSelectedProviderId])
+
+  const handleOllamaConnect = async (config: { apiUrl: string; connectionMethod: string }) => {
+    try {
+      setLoading(true)
+      await aiProvidersApi.create({
+        provider: "ollama",
+        apiKey: "", // Ollama doesn't require API key
+        apiUrl: config.apiUrl,
+        configuration: {
+          connectionMethod: config.connectionMethod,
+        },
+      })
+      onSuccess()
+      setSelectedProvider("")
+      setApiKey("")
+    } catch (error) {
+      toast.error(
+        `Failed to connect Ollama: ${error instanceof Error ? error.message : "Unknown error"}`
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // For OpenRouter, only require API key if manual mode is selected
-    const requiresApiKey = selectedProvider !== "openrouter" || showManualApiKey
-    if (!selectedProvider || (requiresApiKey && !apiKey)) {
+    if (!isFormValid(selectedProvider, showManualApiKey, apiKey)) {
       return
     }
 
@@ -318,50 +467,19 @@ function AddProviderForm({
     }
   }
 
-  const selectedProviderData = availableProviders.find((p) => p.id === selectedProvider)
-
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      {!preSelectedProviderId && (
-        <div className="space-y-2">
-          <Label htmlFor="provider">Select Provider</Label>
-          <Select onValueChange={setSelectedProvider} value={selectedProvider}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose an AI provider" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableProviders.map((provider) => (
-                <SelectItem key={provider.id} value={provider.id}>
-                  <div className="flex items-center gap-2">
-                    {provider.name}
-                    {provider.recommended && (
-                      <Badge className="text-xs" variant="secondary">
-                        Recommended
-                      </Badge>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {selectedProviderData && (
-            <p className="mt-1 text-muted-foreground text-sm">{selectedProviderData.description}</p>
-          )}
-        </div>
-      )}
+      <ProviderSelection
+        availableProviders={availableProviders}
+        onProviderChange={setSelectedProvider}
+        preSelectedProviderId={preSelectedProviderId}
+        selectedProvider={selectedProvider}
+      />
 
-      {preSelectedProviderId && selectedProviderData && (
-        <div className="space-y-2">
-          <Label>Connecting to Provider</Label>
-          <div className="flex items-center gap-3 rounded-md border p-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{selectedProviderData.name}</span>
-                {selectedProviderData.recommended && <Badge variant="secondary">Recommended</Badge>}
-              </div>
-              <p className="text-muted-foreground text-sm">{selectedProviderData.description}</p>
-            </div>
-          </div>
+      {selectedProvider === "ollama" && (
+        <div className="space-y-3">
+          <Separator />
+          <OllamaSetup loading={loading} onConnect={handleOllamaConnect} />
         </div>
       )}
 
@@ -373,7 +491,7 @@ function AddProviderForm({
               <Button
                 className="flex-1"
                 disabled={oauthLoading}
-                onClick={handleOAuthLogin}
+                onClick={() => handleOAuthLogin(setOauthLoading)}
                 type="button"
                 variant="default"
               >
@@ -392,49 +510,26 @@ function AddProviderForm({
         </div>
       )}
 
-      {selectedProvider && (selectedProvider !== "openrouter" || showManualApiKey) && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="apiKey">API Key</Label>
-            {selectedProvider === "openrouter" && showManualApiKey && (
-              <Button
-                onClick={() => setShowManualApiKey(false)}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                ← Back to OAuth
-              </Button>
-            )}
-          </div>
-          <Input
-            id="apiKey"
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter your API key"
-            required
-            type="password"
-            value={apiKey}
-          />
-          <p className="mt-1 text-muted-foreground text-sm">
-            Your API key will be encrypted and stored securely
-          </p>
+      <ApiKeyInput
+        apiKey={apiKey}
+        onApiKeyChange={setApiKey}
+        onBackToOAuth={() => setShowManualApiKey(false)}
+        selectedProvider={selectedProvider}
+        showManualApiKey={showManualApiKey}
+      />
+
+      {selectedProvider !== "ollama" && (
+        <div className="flex gap-2 pt-4">
+          <Button
+            disabled={
+              !isFormValid(selectedProvider, showManualApiKey, apiKey) || loading || oauthLoading
+            }
+            type="submit"
+          >
+            {loading ? "Connecting..." : "Connect Provider"}
+          </Button>
         </div>
       )}
-
-      <div className="flex gap-2 pt-4">
-        <Button
-          disabled={
-            !selectedProvider ||
-            (selectedProvider === "openrouter" && showManualApiKey && !apiKey) ||
-            (selectedProvider !== "openrouter" && !apiKey) ||
-            loading ||
-            oauthLoading
-          }
-          type="submit"
-        >
-          {loading ? "Connecting..." : "Connect Provider"}
-        </Button>
-      </div>
     </form>
   )
 }
