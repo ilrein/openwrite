@@ -29,8 +29,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "openwrite-dev",
-      "database_id": "71198766-b4ea-4e7e-ab8c-ae76037060ff",
+      "database_name": "openwrite-us-east-1",
+      "database_id": "9c50826a-1e7a-498c-ab1b-d1a73192cca9",
       "preview_database_id": "local-test-db",
       "migrations_dir": "./src/db/migrations"
     }
