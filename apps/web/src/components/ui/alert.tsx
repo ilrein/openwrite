@@ -10,7 +10,7 @@ const alertVariants = cva(
       variant: {
         default: "bg-card text-card-foreground",
         destructive:
-          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
+          "bg-card text-destructive [&>[data-slot=alert-description]]:text-destructive/90 [&>svg]:text-current",
       },
     },
     defaultVariants: {
@@ -37,7 +37,7 @@ function Alert({
 function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight", className)}
+      className={cn("col-start-2 min-h-4 font-medium tracking-tight", className)}
       data-slot="alert-title"
       {...props}
     />
