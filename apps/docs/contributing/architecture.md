@@ -94,7 +94,7 @@ Build an open-source AI-powered writing platform that combines the best features
 ## Technical Architecture
 
 ### Backend Services
-- **Core API**: Hono + ORPC for type-safe endpoints
+- **Core API**: Hono + REST APIs for type-safe endpoints
 - **AI Service**: Cloudflare Workers with multiple AI providers
 - **Real-time**: WebSocket implementation for collaboration
 - **File Storage**: Cloudflare R2 for documents and assets

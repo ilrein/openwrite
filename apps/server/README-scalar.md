@@ -78,6 +78,6 @@ apps/server/src/
 - **Coexistence**: OpenAPI routes run alongside existing routes without conflicts
 - **Type Safety**: Full TypeScript inference from Zod schemas to response types
 - **Performance**: Minimal bundle size increase (~400KB for full documentation UI)
-- **Compatibility**: Works with existing Better Auth and ORPC setup
+- **Compatibility**: Works with existing Better Auth and REST API setup
 
 The integration demonstrates how modern API documentation can enhance developer experience while maintaining existing functionality.

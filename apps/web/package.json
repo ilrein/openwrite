@@ -33,9 +33,6 @@
   "dependencies": {
     "@floating-ui/react": "^0.27.13",
     "@hookform/resolvers": "^5.1.1",
-    "@orpc/client": "^1.5.0",
-    "@orpc/server": "^1.5.0",
-    "@orpc/tanstack-query": "^1.5.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.14",

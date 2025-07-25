@@ -2,7 +2,7 @@
 
 **Open-source AI-powered writing platform for novelists, screenwriters, and creative writers. ✨📝**
 
-OpenWrite combines the best features of Sudowrite and NovelCrafter into a single, powerful, and fully open-source platform. Built with a modern TypeScript stack including React, TanStack Router, Hono, ORPC, and more.
+OpenWrite combines the best features of Sudowrite and NovelCrafter into a single, powerful, and fully open-source platform. Built with a modern TypeScript stack including React, TanStack Router, Hono, REST APIs, and more.
 
 ## Features
 
@@ -11,7 +11,7 @@ OpenWrite combines the best features of Sudowrite and NovelCrafter into a single
 - **TailwindCSS** - Utility-first CSS for rapid UI development
 - **shadcn/ui** - Reusable UI components
 - **Hono** - Lightweight, performant server framework
-- **oRPC** - End-to-end type-safe APIs with OpenAPI integration
+- **REST APIs** - Type-safe APIs with OpenAPI integration
 - **workers** - Runtime environment
 - **Drizzle** - TypeScript-first ORM
 - **SQLite/Turso** - Database engine
@@ -57,7 +57,7 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 openwrite/
 ├── apps/
 │   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Hono, ORPC)
+│   └── server/      # Backend API (Hono, REST)
 ```
 
 ## Available Scripts
