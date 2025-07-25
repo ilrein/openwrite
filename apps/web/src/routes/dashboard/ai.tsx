@@ -50,7 +50,7 @@ interface ProviderFormProps {
 
 function AIProvidersPage() {
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null)
-  const [oauthProcessing, setOauthProcessing] = useState(false)
+  const [_oauthProcessing, setOauthProcessing] = useState(false)
   const queryClient = useQueryClient()
 
   // Prevent double OAuth execution in React StrictMode
@@ -71,8 +71,8 @@ function AIProvidersPage() {
       queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
       toast.success("Provider disconnected successfully")
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to disconnect provider: ${error.message}`)
+    onError: (deleteError: Error) => {
+      toast.error(`Failed to disconnect provider: ${deleteError.message}`)
     },
   })
 
@@ -80,16 +80,15 @@ function AIProvidersPage() {
     mutationFn: (params: {
       code: string
       codeVerifier: string
-      codeChallengeMethod: string
-      provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
-    }) => aiProvidersApi.exchangeOAuth(params),
+      codeChallengeMethod: "S256" | "plain"
+    }) => aiProvidersApi.exchangeOpenRouterCode(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
       toast.success("Provider connected successfully via OAuth")
       setOauthProcessing(false)
     },
-    onError: (error: Error) => {
-      toast.error(`OAuth connection failed: ${error.message}`)
+    onError: (oauthError: Error) => {
+      toast.error(`OAuth connection failed: ${oauthError.message}`)
       setOauthProcessing(false)
     },
   })
@@ -118,25 +117,21 @@ function AIProvidersPage() {
           return
         }
 
-        const { codeVerifier, codeChallengeMethod, providerId } = JSON.parse(storedParams)
+        const {
+          codeVerifier,
+          codeChallengeMethod,
+        }: { codeVerifier: string; codeChallengeMethod: "S256" | "plain" } =
+          JSON.parse(storedParams)
         sessionStorage.removeItem(pkceKey)
 
         oauthMutation.mutate({
           code,
           codeVerifier,
           codeChallengeMethod,
-          provider: providerId as
-            | "openrouter"
-            | "openai"
-            | "anthropic"
-            | "ollama"
-            | "groq"
-            | "gemini"
-            | "cohere",
         })
-      } catch (error) {
+      } catch (callbackError) {
         toast.error(
-          `OAuth callback failed: ${error instanceof Error ? error.message : "Unknown error"}`
+          `OAuth callback failed: ${callbackError instanceof Error ? callbackError.message : "Unknown error"}`
         )
         setOauthProcessing(false)
       }
@@ -213,7 +208,7 @@ function AIProvidersPage() {
 
   const getConnectedProvider = useCallback(
     (providerId: string) => {
-      return providers.find((p) => p.provider === providerId)
+      return providers?.find((p) => p.provider === providerId)
     },
     [providers]
   )
@@ -221,7 +216,7 @@ function AIProvidersPage() {
   return (
     <div className="container mx-auto space-y-6 py-6">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">AI Providers</h1>
+        <h1 className="font-bold text-2xl">AI Providers</h1>
         <p className="text-muted-foreground">
           Connect your AI providers to start generating content
         </p>
@@ -229,21 +224,24 @@ function AIProvidersPage() {
 
       {providers && providers.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Connected Providers</h2>
+          <h2 className="font-semibold text-lg">Connected Providers</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {providers.map((provider) => (
               <AiProviderCard
-                key={provider.id}
                 description={
                   availableProviders.find((p) => p.id === provider.provider)?.description ||
                   "AI Provider"
                 }
                 enabled={true}
                 isConnected={true}
+                key={provider.id}
                 name={
-                  availableProviders.find((p) => p.id === provider.provider)?.name || provider.provider
+                  availableProviders.find((p) => p.id === provider.provider)?.name ||
+                  provider.provider
                 }
-                onConnect={() => {}}
+                onConnect={() => {
+                  /* Connected providers don't need connect action */
+                }}
                 onDelete={() => deleteMutation.mutate(provider.id)}
                 recommended={
                   availableProviders.find((p) => p.id === provider.provider)?.recommended
@@ -256,7 +254,7 @@ function AIProvidersPage() {
 
       {availableProviders.some((p) => p.enabled) && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Available Providers</h2>
+          <h2 className="font-semibold text-lg">Available Providers</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {availableProviders.map((provider) => {
               const connectedProvider = getConnectedProvider(provider.id)
@@ -264,10 +262,10 @@ function AIProvidersPage() {
 
               return (
                 <AiProviderCard
-                  key={provider.id}
                   description={provider.description}
                   enabled={provider.enabled}
                   isConnected={isConnected}
+                  key={provider.id}
                   name={provider.name}
                   onConnect={() => {
                     if (!isConnected) {
@@ -630,12 +628,14 @@ function ProviderForm({
   // Extract button state logic for better readability
   const hasSelectedProvider = !!selectedProvider
   const canUseOAuth = selectedProviderSupportsPKCE && !showManualApiKey
-  const hasApiKeyForNonPKCE = !selectedProviderSupportsPKCE && apiKey && selectedProvider !== "ollama"
+  const hasApiKeyForNonPKCE =
+    !selectedProviderSupportsPKCE && apiKey && selectedProvider !== "ollama"
   const hasApiKeyForManualMode = selectedProviderSupportsPKCE && showManualApiKey && apiKey
   const isOllama = selectedProvider === "ollama"
 
   const isFormValid =
-    hasSelectedProvider && (canUseOAuth || hasApiKeyForNonPKCE || hasApiKeyForManualMode || isOllama)
+    hasSelectedProvider &&
+    (canUseOAuth || hasApiKeyForNonPKCE || hasApiKeyForManualMode || isOllama)
   const isSubmitDisabled = !isFormValid || loading || oauthLoading
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
