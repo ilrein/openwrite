@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Plus, Trash2 } from "lucide-react"
+import { CheckCircle, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -102,7 +102,9 @@ function AIProvidersPage() {
     }) => aiProvidersApi.exchangeOAuth(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
-      toast.success("Provider connected successfully via OAuth")
+      toast.success("Provider connected successfully via OAuth", {
+        icon: <CheckCircle className="h-4 w-4" />,
+      })
       setOauthProcessing(false)
     },
     onError: (oauthError: Error) => {
@@ -452,6 +454,7 @@ function useProviderSubmit(options: {
   setLoading: (loading: boolean) => void
   setSelectedProvider: (provider: string) => void
   setApiKey: (key: string) => void
+  availableProviders: AIProvider[]
 }) {
   const {
     selectedProvider,
@@ -462,6 +465,7 @@ function useProviderSubmit(options: {
     setLoading,
     setSelectedProvider,
     setApiKey,
+    availableProviders,
   } = options
   return async (e: React.FormEvent) => {
     e.preventDefault()
@@ -483,6 +487,11 @@ function useProviderSubmit(options: {
           | "gemini"
           | "cohere",
         apiKey,
+      })
+      // Get provider name for the toast
+      const providerData = availableProviders.find((p) => p.id === selectedProvider)
+      toast.success(`${providerData?.name || selectedProvider} connected successfully`, {
+        icon: <CheckCircle className="h-4 w-4" />,
       })
       onSuccess()
       setSelectedProvider("")
@@ -534,6 +543,9 @@ function AddProviderForm({
           connectionMethod: config.connectionMethod,
         },
       })
+      toast.success("Ollama connected successfully", {
+        icon: <CheckCircle className="h-4 w-4" />,
+      })
       onSuccess()
       setSelectedProvider("")
       setApiKey("")
@@ -558,6 +570,7 @@ function AddProviderForm({
     setLoading,
     setSelectedProvider,
     setApiKey,
+    availableProviders,
   })
 
   return (
