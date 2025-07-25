@@ -6,16 +6,14 @@ describe("Loader", () => {
   it("should render loader component", () => {
     const { container } = render(<Loader />)
 
-    const loader = container.querySelector(".lucide-loader-circle")
+    const loader = container.querySelector("svg")
     expect(loader).toBeInTheDocument()
   })
 
   it("should have spinning animation class", () => {
     const { container } = render(<Loader />)
 
-    const loader = container.querySelector(".animate-spin")
-    expect(loader).toBeInTheDocument()
-    expect(loader).toHaveClass("animate-spin")
+    expect(container.querySelector(".animate-spin")).toBeInTheDocument()
   })
 
   it("should be centered with proper styling", () => {

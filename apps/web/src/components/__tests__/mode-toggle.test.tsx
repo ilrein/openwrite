@@ -59,24 +59,14 @@ describe("ModeToggle", () => {
     expect(screen.getByText("System")).toBeInTheDocument()
   })
 
-  it("should call setTheme with correct value when light theme is selected", () => {
+  it.each([
+    ["Light", "light"],
+    ["Dark", "dark"],
+    ["System", "system"],
+  ])("should call setTheme with correct value for %s theme", (themeName, themeValue) => {
     render(<ModeToggle />)
 
-    fireEvent.click(screen.getByText("Light"))
-    expect(mockSetTheme).toHaveBeenCalledWith("light")
-  })
-
-  it("should call setTheme with correct value when dark theme is selected", () => {
-    render(<ModeToggle />)
-
-    fireEvent.click(screen.getByText("Dark"))
-    expect(mockSetTheme).toHaveBeenCalledWith("dark")
-  })
-
-  it("should call setTheme with correct value when system theme is selected", () => {
-    render(<ModeToggle />)
-
-    fireEvent.click(screen.getByText("System"))
-    expect(mockSetTheme).toHaveBeenCalledWith("system")
+    fireEvent.click(screen.getByText(themeName))
+    expect(mockSetTheme).toHaveBeenCalledWith(themeValue)
   })
 })
