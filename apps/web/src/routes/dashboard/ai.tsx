@@ -225,18 +225,18 @@ function AIProvidersPage() {
   )
 
   return (
-    <div className="container mx-auto space-y-6 py-6">
+    <div className="container mx-auto space-y-6 p-6">
       <div className="space-y-2">
-        <h1 className="font-bold text-2xl">AI Providers</h1>
-        <p className="text-muted-foreground">
+        <h1 className="font-bold text-2xl sm:text-3xl">AI Providers</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Connect your AI providers to start generating content
         </p>
       </div>
 
       {providers && providers.length > 0 && (
         <div className="space-y-4">
-          <h2 className="font-semibold text-lg">Connected Providers</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <h2 className="font-semibold text-lg sm:text-xl">Connected Providers</h2>
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
             {providers.map((provider) => (
               <AiProviderCard
                 description={providersMap.get(provider.provider)?.description || "AI Provider"}
@@ -257,44 +257,69 @@ function AIProvidersPage() {
 
       {availableProviders.some((p) => p.enabled) && (
         <div className="space-y-4">
-          <h2 className="font-semibold text-lg">Available Providers</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {availableProviders.map((provider) => {
-              const connectedProvider = getConnectedProvider(provider.id)
-              const isConnected = !!connectedProvider
+          <h2 className="font-semibold text-lg sm:text-xl">Available Providers</h2>
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            {availableProviders
+              .filter((p) => p.enabled)
+              .sort((a, b) => {
+                const aConnected = !!getConnectedProvider(a.id)
+                const bConnected = !!getConnectedProvider(b.id)
 
-              return (
-                <AiProviderCard
-                  description={provider.description}
-                  enabled={provider.enabled}
-                  isConnected={isConnected}
-                  key={provider.id}
-                  name={provider.name}
-                  onConnect={() => {
-                    if (!isConnected) {
-                      setSelectedProviderId(provider.id)
-                    }
-                  }}
-                  onDelete={() => {
-                    if (connectedProvider) {
-                      deleteMutation.mutate(connectedProvider.id)
-                    }
-                  }}
-                  recommended={provider.recommended}
-                >
-                  {selectedProviderId === provider.id && (
-                    <AddProviderForm
-                      availableProviders={[provider].filter((p) => p.enabled)}
-                      onSuccess={() => {
-                        setSelectedProviderId(null)
-                        queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
-                      }}
-                      preSelectedProviderId={provider.id}
-                    />
-                  )}
-                </AiProviderCard>
-              )
-            })}
+                // Connected providers first
+                if (aConnected && !bConnected) {
+                  return -1
+                }
+                if (!aConnected && bConnected) {
+                  return 1
+                }
+
+                // Then by recommended status
+                if (a.recommended && !b.recommended) {
+                  return -1
+                }
+                if (!a.recommended && b.recommended) {
+                  return 1
+                }
+
+                // Finally alphabetically
+                return a.name.localeCompare(b.name)
+              })
+              .map((provider) => {
+                const connectedProvider = getConnectedProvider(provider.id)
+                const isConnected = !!connectedProvider
+
+                return (
+                  <AiProviderCard
+                    description={provider.description}
+                    enabled={provider.enabled}
+                    isConnected={isConnected}
+                    key={provider.id}
+                    name={provider.name}
+                    onConnect={() => {
+                      if (!isConnected) {
+                        setSelectedProviderId(provider.id)
+                      }
+                    }}
+                    onDelete={() => {
+                      if (connectedProvider) {
+                        deleteMutation.mutate(connectedProvider.id)
+                      }
+                    }}
+                    recommended={provider.recommended}
+                  >
+                    {selectedProviderId === provider.id && (
+                      <AddProviderForm
+                        availableProviders={[provider].filter((p) => p.enabled)}
+                        onSuccess={() => {
+                          setSelectedProviderId(null)
+                          queryClient.invalidateQueries({ queryKey: ["ai-providers"] })
+                        }}
+                        preSelectedProviderId={provider.id}
+                      />
+                    )}
+                  </AiProviderCard>
+                )
+              })}
           </div>
         </div>
       )}

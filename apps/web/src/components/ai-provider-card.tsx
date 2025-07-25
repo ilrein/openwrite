@@ -34,52 +34,70 @@ export function AiProviderCard({
   children,
 }: AiProviderCardProps) {
   return (
-    <Card className={enabled ? "" : "opacity-60"}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CardTitle className={enabled ? "" : "text-muted-foreground"}>{name}</CardTitle>
-            {recommended && <Badge variant="secondary">Recommended</Badge>}
-            {isConnected && <Badge variant="default">Connected</Badge>}
-            {!enabled && <Badge variant="outline">Coming Soon</Badge>}
+    <Card className={`${enabled ? "" : "opacity-60"} transition-all duration-200 hover:shadow-md`}>
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <CardTitle className={`text-base sm:text-lg ${enabled ? "" : "text-muted-foreground"}`}>
+              {name}
+            </CardTitle>
+            <div className="flex flex-wrap gap-1.5">
+              {recommended && (
+                <Badge className="text-xs" variant="secondary">
+                  Recommended
+                </Badge>
+              )}
+              {isConnected && (
+                <Badge className="text-xs" variant="default">
+                  Connected
+                </Badge>
+              )}
+              {!enabled && (
+                <Badge className="text-xs" variant="outline">
+                  Coming Soon
+                </Badge>
+              )}
+            </div>
           </div>
-          {isConnected ? (
-            onDelete ? (
-              <ConfirmDialog
-                confirmText="Delete"
-                description="Are you sure you want to delete this AI provider? This action cannot be undone."
-                onConfirm={onDelete}
-                title="Delete AI Provider"
-                variant="destructive"
-              >
-                <Button size="sm" variant="destructive">
+          <div className="flex w-full justify-end sm:w-auto">
+            {isConnected ? (
+              onDelete ? (
+                <ConfirmDialog
+                  confirmText="Delete"
+                  description="Are you sure you want to delete this AI provider? This action cannot be undone."
+                  onConfirm={onDelete}
+                  title="Delete AI Provider"
+                  variant="destructive"
+                >
+                  <Button size="sm" variant="destructive">
+                    Delete
+                  </Button>
+                </ConfirmDialog>
+              ) : (
+                <Button disabled size="sm" variant="destructive">
                   Delete
                 </Button>
-              </ConfirmDialog>
+              )
             ) : (
-              <Button disabled size="sm" variant="destructive">
-                Delete
-              </Button>
-            )
-          ) : (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button disabled={!enabled} onClick={onConnect}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {enabled ? "Connect" : "Coming Soon"}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Connect {name}</DialogTitle>
-                  <DialogDescription>Connect to {name} to access their models</DialogDescription>
-                </DialogHeader>
-                {children}
-              </DialogContent>
-            </Dialog>
-          )}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="w-full sm:w-auto" disabled={!enabled} onClick={onConnect}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    {enabled ? "Connect" : "Coming Soon"}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Connect {name}</DialogTitle>
+                    <DialogDescription>Connect to {name} to access their models</DialogDescription>
+                  </DialogHeader>
+                  <div className="max-h-[calc(90vh-8rem)] overflow-y-auto pr-2">{children}</div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
-        <CardDescription className={enabled ? "" : "text-muted-foreground/70"}>
+        <CardDescription className={`text-sm ${enabled ? "" : "text-muted-foreground/70"}`}>
           {description}
         </CardDescription>
       </CardHeader>
