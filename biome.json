@@ -33,6 +33,14 @@
       },
       "style": {
         "noNestedTernary": "warn"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 17
+          }
+        }
       }
     }
   },

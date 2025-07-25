@@ -6,9 +6,21 @@
 
 import { apiCall } from "./base"
 
+/**
+ * Centralized provider ID type - single source of truth for all supported providers
+ */
+export type ProviderId =
+  | "openrouter"
+  | "openai"
+  | "anthropic"
+  | "ollama"
+  | "groq"
+  | "gemini"
+  | "cohere"
+
 export interface AiProvider {
   id: string
-  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+  provider: ProviderId
   keyLabel: string | null
   keyHash: string | null
   isActive: boolean
@@ -28,7 +40,7 @@ export interface AiProviderDetails extends AiProvider {
 }
 
 export interface CreateAiProviderData {
-  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere"
+  provider: ProviderId
   apiKey?: string
   apiUrl?: string
   configuration?: Record<string, unknown>
@@ -54,6 +66,13 @@ export interface OpenRouterExchangeData {
   code: string
   codeVerifier?: string
   codeChallengeMethod?: "S256" | "plain"
+}
+
+export interface OAuthExchangeData {
+  code: string
+  codeVerifier: string
+  codeChallengeMethod: "S256" | "plain"
+  provider: ProviderId
 }
 
 /**
@@ -116,6 +135,16 @@ export const aiProvidersApi = {
     data: OpenRouterExchangeData
   ): Promise<{ success: boolean; id: string }> {
     return (await apiCall("/api/ai-providers/openrouter/exchange", {
+      method: "POST",
+      body: JSON.stringify(data),
+    })) as { success: boolean; id: string }
+  },
+
+  /**
+   * Exchange OAuth code for any supported provider
+   */
+  async exchangeOAuth(data: OAuthExchangeData): Promise<{ success: boolean; id: string }> {
+    return (await apiCall(`/api/ai-providers/${data.provider}/exchange`, {
       method: "POST",
       body: JSON.stringify(data),
     })) as { success: boolean; id: string }
