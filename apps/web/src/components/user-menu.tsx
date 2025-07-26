@@ -86,7 +86,9 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{session.user.name || "User"}</Button>
+        <Button className="w-full" variant="outline">
+          {session.user.name || "User"}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 bg-card">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>

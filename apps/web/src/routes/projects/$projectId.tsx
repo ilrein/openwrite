@@ -31,6 +31,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import UserMenu from "@/components/user-menu"
 import WriteHeader from "@/components/write-header"
 import { api } from "@/lib/api"
 
@@ -398,7 +399,8 @@ function WriteLayout() {
           </SidebarContent>
 
           <SidebarFooter>
-            <div className="p-4">
+            <div className="space-y-2 p-4">
+              <UserMenu />
               <Button className="w-full" size="sm">
                 <FileEdit className="mr-2 h-4 w-4" />
                 Quick Notes

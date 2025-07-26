@@ -14,6 +14,7 @@ import {
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
+import { AutocompleteToggle } from "@/components/autocomplete-toggle"
 import { CharacterSidebarSection } from "@/components/character-sidebar-section"
 import CodexModal from "@/components/codex-modal"
 import TiptapEditor from "@/components/tiptap-editor"
@@ -381,7 +382,11 @@ export function DualSidebarWritingInterface({
               </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter />
+            <SidebarFooter>
+              <div className="p-2">
+                <UserMenu />
+              </div>
+            </SidebarFooter>
           </Sidebar>
 
           {/* Main Content Area */}
@@ -435,23 +440,9 @@ export function DualSidebarWritingInterface({
               {/* Writing Stats Footer */}
               <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div
-                  className={`flex items-center justify-between py-3 ${rightSidebarOpen ? "px-4" : "px-6"}`}
+                  className={`flex items-center justify-start py-3 ${rightSidebarOpen ? "px-4" : "px-6"}`}
                 >
-                  {/* Left side - Session Stats */}
-                  <div
-                    className={`flex items-center text-muted-foreground text-sm ${rightSidebarOpen ? "gap-4" : "gap-6"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                      <span>Writing session: 23 min</span>
-                    </div>
-                    <div className="h-4 w-px bg-border" />
-                    <span>Today: +247 words</span>
-                    <div className="h-4 w-px bg-border" />
-                    <span>Streak: 12 days 🔥</span>
-                  </div>
-
-                  {/* Right side - Document Stats and User Menu */}
+                  {/* Document Stats and Autocomplete Toggle */}
                   <div
                     className={`flex items-center text-muted-foreground text-sm ${rightSidebarOpen ? "gap-4" : "gap-6"}`}
                   >
@@ -467,7 +458,7 @@ export function DualSidebarWritingInterface({
                       {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                     <div className="h-4 w-px bg-border" />
-                    <UserMenu />
+                    <AutocompleteToggle />
                   </div>
                 </div>
               </footer>

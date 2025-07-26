@@ -7,7 +7,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import UserMenu from "@/components/user-menu"
 
 interface BreadcrumbItemData {
   label: string
@@ -44,7 +43,7 @@ export default function WriteHeader({ breadcrumbs }: WriteHeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <UserMenu />
+        {/* UserMenu moved to sidebar footer for consistency */}
       </div>
     </header>
   )

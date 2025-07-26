@@ -1,12 +1,10 @@
 import type { QueryClient } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
   useRouterState,
 } from "@tanstack/react-router"
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import AppHeader from "@/components/app-header"
 import { CommandPalette } from "@/components/command-palette"
 import Loader from "@/components/loader"
@@ -75,8 +73,6 @@ function RootComponent() {
         <CommandPalette />
         <Toaster richColors />
       </ThemeProvider>
-      <TanStackRouterDevtools position="bottom-left" />
-      <ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />
     </>
   )
 }
