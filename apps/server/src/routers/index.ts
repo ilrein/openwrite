@@ -852,8 +852,30 @@ router.post(
     if (!body.title || typeof body.title !== "string" || body.title.trim().length === 0) {
       return c.json({ error: "Title is required and cannot be empty" }, 400)
     }
-    if (body.order === undefined || typeof body.order !== "number" || body.order < 1) {
-      return c.json({ error: "Order is required and must be a positive number" }, 400)
+    if (
+      body.order === undefined ||
+      typeof body.order !== "number" ||
+      !Number.isInteger(body.order) ||
+      body.order < 1
+    ) {
+      return c.json({ error: "Order is required and must be a positive integer" }, 400)
+    }
+
+    // Validate optional type field if provided
+    const validTypes = [
+      "inciting_incident",
+      "plot_point_1",
+      "midpoint",
+      "plot_point_2",
+      "climax",
+      "resolution",
+      "custom",
+    ]
+    if (
+      body.type !== undefined &&
+      (!body.type || typeof body.type !== "string" || !validTypes.includes(body.type))
+    ) {
+      return c.json({ error: `Type must be one of: ${validTypes.join(", ")}` }, 400)
     }
 
     const id = crypto.randomUUID()
