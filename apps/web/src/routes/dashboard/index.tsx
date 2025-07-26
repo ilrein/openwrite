@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { BookOpen, Clock, Plus, TrendingUp, Users } from "lucide-react"
-import { useEffect } from "react"
+import { BookOpen, Clock, Edit, FileText, Plus, TrendingUp, Users } from "lucide-react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { EditProjectDialog } from "@/components/edit-project-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +15,8 @@ export const Route = createFileRoute("/dashboard/")({
 })
 
 function DashboardHome() {
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
+
   // Fetch projects for overview
   const {
     data: projects,
@@ -135,29 +138,41 @@ function DashboardHome() {
             <CardContent>
               <div className="space-y-4">
                 {recentProjects.map((project: Project) => (
-                  <Link
-                    className="block"
+                  <div
+                    className="flex flex-col space-y-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:space-y-0"
                     key={project.id}
-                    params={{ projectId: project.id }}
-                    to="/write/$projectId"
                   >
-                    <div className="flex cursor-pointer flex-col space-y-3 rounded-lg p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                      <div className="flex items-center space-x-4">
-                        <BookOpen className="h-8 w-8 text-blue-600" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium">{project.title}</p>
-                          <p className="text-muted-foreground text-sm">
-                            {project.currentWordCount.toLocaleString()} words
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={project.status === "draft" ? "secondary" : "default"}>
-                          {project.status}
-                        </Badge>
+                    <div className="flex min-w-0 flex-1 items-center space-x-4">
+                      <BookOpen className="h-8 w-8 flex-shrink-0 text-blue-600" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{project.title}</p>
+                        <p className="truncate text-muted-foreground text-sm">
+                          {project.currentWordCount.toLocaleString()} words
+                        </p>
                       </div>
                     </div>
-                  </Link>
+                    <div className="flex flex-shrink-0 items-center space-x-2 sm:ml-4">
+                      <Badge variant={project.status === "draft" ? "secondary" : "default"}>
+                        {project.status}
+                      </Badge>
+                      <div className="flex space-x-1">
+                        <Button
+                          className="h-8 w-8 p-0"
+                          onClick={() => setEditingProject(project)}
+                          size="sm"
+                          variant="ghost"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button asChild className="h-8 px-3" size="sm" variant="default">
+                          <Link params={{ projectId: project.id }} to="/write/$projectId">
+                            <FileText className="mr-1 h-3 w-3" />
+                            Write
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
 
                 {recentProjects.length === 0 && (
@@ -213,6 +228,19 @@ function DashboardHome() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Edit Project Dialog */}
+        {editingProject && (
+          <EditProjectDialog
+            onOpenChange={(open) => {
+              if (!open) {
+                setEditingProject(null)
+              }
+            }}
+            open={!!editingProject}
+            project={editingProject}
+          />
+        )}
       </div>
     </div>
   )
