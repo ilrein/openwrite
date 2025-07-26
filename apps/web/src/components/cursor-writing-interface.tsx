@@ -15,7 +15,7 @@ interface CursorWritingInterfaceProps {
 export function CursorWritingInterface({
   content = "",
   onUpdate,
-  placeholder = "Start writing your story...",
+  placeholder = "Write something beautiful...",
 }: CursorWritingInterfaceProps) {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)

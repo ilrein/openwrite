@@ -52,7 +52,7 @@ export function DualSidebarWritingInterface({
   projectId,
   content = "",
   onUpdate,
-  placeholder = "Start writing your story...",
+  placeholder = "Write something beautiful...",
 }: DualSidebarWritingInterfaceProps) {
   const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
   const [codexModalConfig, setCodexModalConfig] = useState<{

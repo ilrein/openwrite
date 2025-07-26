@@ -13,7 +13,7 @@ interface SidebarWritingInterfaceProps {
 export function SidebarWritingInterface({
   content = "",
   onUpdate,
-  placeholder = "Start writing your story...",
+  placeholder = "Write something beautiful...",
   sidebarOpen = true,
   onSidebarOpenChange,
 }: SidebarWritingInterfaceProps) {

@@ -48,7 +48,7 @@ interface TiptapEditorProps {
 export default function TiptapEditor({
   content = "",
   onUpdate,
-  placeholder = "Start writing...",
+  placeholder = "Write something beautiful...",
 }: TiptapEditorProps) {
   const editor = useEditor({
     shouldRerenderOnTransaction: true,

@@ -259,3 +259,11 @@ body {
 .ProseMirror em {
   @apply italic;
 }
+
+/* Tiptap Placeholder Styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-muted-foreground pointer-events-none;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+}
