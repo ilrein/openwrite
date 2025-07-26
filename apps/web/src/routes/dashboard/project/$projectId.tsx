@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
-import { Edit3, FileText, Settings, Users } from "lucide-react"
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
+import { Edit3, FileText, MessageCircle, Settings, Users } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,14 +10,24 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { AISidebarProvider, useAISidebar } from "@/contexts/ai-sidebar-context"
 import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/dashboard/project/$projectId")({
-  component: ProjectLayout,
+  component: () => (
+    <AISidebarProvider>
+      <ProjectLayout />
+    </AISidebarProvider>
+  ),
 })
 
 function ProjectLayout() {
   const { projectId: id } = Route.useParams()
+  const location = useLocation()
+  const { isOpen: aiSidebarOpen, toggle: toggleAISidebar } = useAISidebar()
+
+  // Check if we're on the write page
+  const isWritePage = location.pathname.includes("/write")
 
   // Fetch project details
   const { data: project, isLoading } = useQuery({
@@ -76,9 +86,19 @@ function ProjectLayout() {
               {project.description && <p className="mt-1">{project.description}</p>}
             </div>
 
-            <div className="text-sm opacity-75">
-              {project.currentWordCount.toLocaleString()} /{" "}
-              {project.targetWordCount?.toLocaleString() || "∞"} words
+            <div className="flex items-center gap-4">
+              <div className="text-sm opacity-75">
+                {project.currentWordCount.toLocaleString()} /{" "}
+                {project.targetWordCount?.toLocaleString() || "∞"} words
+              </div>
+
+              {/* AI Assistant Toggle - Only show on write page */}
+              {isWritePage && (
+                <Button className="gap-2" onClick={toggleAISidebar} size="sm" variant="outline">
+                  <MessageCircle className="h-4 w-4" />
+                  {aiSidebarOpen ? "Hide AI" : "Show AI"}
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -89,7 +109,7 @@ function ProjectLayout() {
             activeProps={{ className: "text-blue-600 border-blue-600" }}
             className="flex items-center border-transparent border-b-2 px-3 py-2 font-medium text-sm [&.active]:border-blue-600 [&.active]:text-blue-600"
             params={{ projectId: id }}
-            to="/dashboard/project/$projectId/write"
+            to="/write/$projectId"
           >
             <Edit3 className="mr-2 h-4 w-4" />
             Write

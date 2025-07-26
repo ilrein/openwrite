@@ -48,7 +48,10 @@ function RootComponent() {
     select: (s) => s.location.pathname,
   })
 
-  const isDashboard = location.startsWith("/dashboard") || location.startsWith("/write")
+  const isDashboard =
+    location.startsWith("/dashboard") ||
+    location.startsWith("/write") ||
+    location.startsWith("/projects")
 
   return (
     <>

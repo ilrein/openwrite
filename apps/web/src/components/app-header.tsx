@@ -1,5 +1,4 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { PenTool } from "lucide-react"
 
 import {
   NavigationMenu,
@@ -9,6 +8,7 @@ import {
 
 import { ModeToggle } from "./mode-toggle"
 import { Button } from "./ui/button"
+import { Logo } from "./ui/logo"
 import UserMenu from "./user-menu"
 
 export default function AppHeader() {
@@ -27,10 +27,7 @@ export default function AppHeader() {
     <header className="sticky top-0 z-50 w-full border-border/40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center px-4">
         {/* Logo */}
-        <Link className="mr-4 flex items-center space-x-2 sm:mr-6 lg:mr-8" to="/">
-          <PenTool className="h-5 w-5 sm:h-6 sm:w-6" />
-          <span className="font-bold text-base sm:text-lg">OpenWrite</span>
-        </Link>
+        <Logo className="mr-4 sm:mr-6 lg:mr-8" size="md" to="/" />
 
         {/* Desktop Navigation */}
         <NavigationMenu className="hidden md:flex">
