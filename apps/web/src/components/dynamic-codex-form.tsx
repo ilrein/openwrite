@@ -250,16 +250,13 @@ const createDynamicSchema = (fields: CodexFormField[]) => {
 }
 
 // Get form configuration based on entry type
-const getFormConfig = (entryType: "characters" | "locations" | "lore" | "plot") => {
-  switch (entryType) {
-    case "characters":
-      return characterFormConfig
-    case "locations":
-      return locationFormConfig
-    case "lore":
-      return loreFormConfig
-    case "plot":
-      return plotFormConfig
+interface DynamicCodexFormProps {
+  entry: Character | Location | LoreEntry | PlotThread
+  projectId: string
+  entryType: "characters" | "locations" | "lore" | "plot"
+  onSave: () => void
+  onCancel: () => void
+}
     default:
       throw new Error(`Form configuration not implemented for ${entryType}`)
   }
