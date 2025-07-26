@@ -48,7 +48,7 @@ export interface UpdateCharacterData {
  */
 export const createCharacterApi = (
   projectId: string
-): ApiClient<Character, CreateCharacterData, UpdateCharacterData> => ({
+): Required<ApiClient<Character, CreateCharacterData, UpdateCharacterData>> => ({
   async list(): Promise<Character[]> {
     const response = await apiCall(`/api/projects/${projectId}/characters`)
     if (!response || typeof response !== "object") {
@@ -94,18 +94,8 @@ export const charactersApi = {
   get: (projectId: string, characterId: string) => createCharacterApi(projectId).get(characterId),
   create: (projectId: string, data: CreateCharacterData) =>
     createCharacterApi(projectId).create(data),
-  update: (projectId: string, characterId: string, data: UpdateCharacterData) => {
-    const api = createCharacterApi(projectId)
-    if (!api.update) {
-      throw new Error("Update method not available")
-    }
-    return api.update(characterId, data)
-  },
-  delete: (projectId: string, characterId: string) => {
-    const api = createCharacterApi(projectId)
-    if (!api.delete) {
-      throw new Error("Delete method not available")
-    }
-    return api.delete(characterId)
-  },
+  update: (projectId: string, characterId: string, data: UpdateCharacterData) =>
+    createCharacterApi(projectId).update(characterId, data),
+  delete: (projectId: string, characterId: string) =>
+    createCharacterApi(projectId).delete(characterId),
 }

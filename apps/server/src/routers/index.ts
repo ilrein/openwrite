@@ -76,6 +76,32 @@ const requireAuth = async (
   }
 }
 
+// Middleware to verify project access
+const verifyProjectAccess = async (
+  c: Context<{ Bindings: Env; Variables: Variables }>,
+  next: () => Promise<void>
+) => {
+  const projectId = c.req.param("projectId")
+  const activeOrganization = c.get("activeOrganization")
+
+  if (!activeOrganization) {
+    return c.json({ error: "No organization found" }, 400)
+  }
+
+  // Verify project belongs to user's organization
+  const projectData = await db
+    .select({ id: project.id })
+    .from(project)
+    .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
+    .get()
+
+  if (!projectData) {
+    return c.json({ error: "Project not found" }, 404)
+  }
+
+  await next()
+}
+
 // Create organization for new users (auto-created personal org)
 router.post(
   "/organization/create-personal",
@@ -323,24 +349,9 @@ router.delete(
 router.get(
   "/projects/:projectId/characters",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     const characters = await db
       .select({
@@ -375,25 +386,10 @@ router.get(
 router.get(
   "/projects/:projectId/characters/:characterId",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const characterId = c.req.param("characterId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     const characterData = await db
       .select()
@@ -419,24 +415,9 @@ router.get(
 router.post(
   "/projects/:projectId/characters",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     try {
       const body = await c.req.json()
@@ -487,35 +468,55 @@ router.post(
 router.put(
   "/projects/:projectId/characters/:characterId",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const characterId = c.req.param("characterId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     try {
-      const body = await c.req.json()
-      const updateData = { ...body, updatedAt: new Date() }
+      const {
+        name,
+        description,
+        role,
+        appearance,
+        personality,
+        backstory,
+        motivation,
+        image,
+        metadata,
+      } = await c.req.json()
 
-      // Remove fields that shouldn't be updated
-      updateData.id = undefined
-      updateData.projectId = undefined
-      updateData.workId = undefined
-      updateData.createdAt = undefined
+      const updateData: Record<string, string | Date | null> = {
+        updatedAt: new Date(),
+      }
+
+      if (name !== undefined) {
+        updateData.name = name
+      }
+      if (description !== undefined) {
+        updateData.description = description
+      }
+      if (role !== undefined) {
+        updateData.role = role
+      }
+      if (appearance !== undefined) {
+        updateData.appearance = appearance
+      }
+      if (personality !== undefined) {
+        updateData.personality = personality
+      }
+      if (backstory !== undefined) {
+        updateData.backstory = backstory
+      }
+      if (motivation !== undefined) {
+        updateData.motivation = motivation
+      }
+      if (image !== undefined) {
+        updateData.image = image
+      }
+      if (metadata !== undefined) {
+        updateData.metadata = metadata
+      }
 
       await db
         .update(character)
@@ -533,25 +534,10 @@ router.put(
 router.delete(
   "/projects/:projectId/characters/:characterId",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const characterId = c.req.param("characterId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     try {
       await db
