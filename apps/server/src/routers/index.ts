@@ -551,6 +551,11 @@ router.post(
     const projectId = c.req.param("projectId")
     const body = await c.req.json()
 
+    // Validate required fields
+    if (!body.name || typeof body.name !== "string" || body.name.trim().length === 0) {
+      return c.json({ error: "Name is required and cannot be empty" }, 400)
+    }
+
     const id = crypto.randomUUID()
     const now = new Date()
 
@@ -696,8 +701,9 @@ router.post(
     const projectId = c.req.param("projectId")
     const body = await c.req.json()
 
-    if (!body.name || body.name.trim().length === 0) {
-      return c.json({ error: "Name is required" }, 400)
+    // Validate required fields
+    if (!body.name || typeof body.name !== "string" || body.name.trim().length === 0) {
+      return c.json({ error: "Name is required and cannot be empty" }, 400)
     }
 
     const id = crypto.randomUUID()
@@ -841,6 +847,14 @@ router.post(
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const body = await c.req.json()
+
+    // Validate required fields
+    if (!body.title || typeof body.title !== "string" || body.title.trim().length === 0) {
+      return c.json({ error: "Title is required and cannot be empty" }, 400)
+    }
+    if (body.order === undefined || typeof body.order !== "number" || body.order < 1) {
+      return c.json({ error: "Order is required and must be a positive number" }, 400)
+    }
 
     const id = crypto.randomUUID()
     const now = new Date()
