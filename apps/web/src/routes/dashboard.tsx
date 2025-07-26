@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import UserMenu from "@/components/user-menu"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/dashboard")({
@@ -113,7 +114,7 @@ function DashboardLayout() {
 
           <SidebarFooter>
             <div className="p-4">
-              <div className="text-muted-foreground text-xs">© 2024 OpenWrite</div>
+              <UserMenu />
             </div>
           </SidebarFooter>
         </Sidebar>

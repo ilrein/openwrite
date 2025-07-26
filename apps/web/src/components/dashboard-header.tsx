@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import UserMenu from "@/components/user-menu"
 
 export default function DashboardHeader() {
   return (
@@ -49,7 +48,7 @@ export default function DashboardHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <UserMenu />
+        {/* UserMenu moved to sidebar footer for consistency */}
       </div>
     </header>
   )
