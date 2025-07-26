@@ -169,7 +169,7 @@ function WriteLayout() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link params={{ projectId }} to="/projects/$projectId/write">
+                      <Link params={{ projectId }} to="/write/$projectId">
                         <PenTool />
                         <span>Write</span>
                       </Link>

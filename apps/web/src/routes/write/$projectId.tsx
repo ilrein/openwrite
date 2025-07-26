@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { DualSidebarWritingInterface } from "@/components/dual-sidebar-writing-interface"
 
-export const Route = createFileRoute("/dashboard/project/$projectId/write")({
-  component: ProjectWritePage,
+export const Route = createFileRoute("/write/$projectId")({
+  component: WriteInterface,
 })
 
-function ProjectWritePage() {
+function WriteInterface() {
   const { projectId } = Route.useParams()
 
   return (

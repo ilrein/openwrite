@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import {
   ChevronDown,
   ChevronRight,
@@ -12,13 +13,14 @@ import {
   Users,
 } from "lucide-react"
 import { useState } from "react"
+import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
 import CodexModal from "@/components/codex-modal"
 import TiptapEditor from "@/components/tiptap-editor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Progress } from "@/components/ui/progress"
+import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
   SidebarContent,
@@ -34,7 +36,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { api } from "@/lib/api"
 
 interface DualSidebarWritingInterfaceProps {
@@ -62,6 +64,24 @@ export function DualSidebarWritingInterface({
     plot: false,
   })
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
+
+  // Keyboard shortcut to toggle AI assistant
+  useHotkeys(
+    "cmd+j, ctrl+j",
+    () => {
+      console.log("🤖 AI Assistant hotkey triggered! Toggling sidebar...")
+      console.log("Current rightSidebarOpen state:", rightSidebarOpen)
+      setRightSidebarOpen((prev) => {
+        console.log("Setting rightSidebarOpen to:", !prev)
+        return !prev
+      })
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: false, // Don't trigger when typing in inputs
+      enableOnContentEditable: false, // Don't trigger in editor
+    }
+  )
 
   // Fetch project details
   const { data: project, isLoading } = useQuery({
@@ -150,24 +170,11 @@ export function DualSidebarWritingInterface({
     <TooltipProvider>
       <SidebarProvider>
         <div className="flex h-screen w-full">
-          {/* Left Sidebar - Project Structure & Codex */}
+          {/* Left Sidebar - OpenWrite Logo & Navigation */}
           <Sidebar side="left" variant="sidebar">
             <SidebarHeader>
-              <div className="px-4 py-2">
-                <div className="space-y-2">
-                  <p className="text-muted-foreground text-sm">
-                    {project.currentWordCount.toLocaleString()} words
-                  </p>
-                  {project.targetWordCount && (
-                    <div>
-                      <Progress className="h-2" value={progressPercentage} />
-                      <p className="mt-1 text-muted-foreground text-xs">
-                        {Math.round(progressPercentage)}% of{" "}
-                        {project.targetWordCount.toLocaleString()} word goal
-                      </p>
-                    </div>
-                  )}
-                </div>
+              <div className="px-4 py-3">
+                <Logo size="md" to="/dashboard" />
               </div>
             </SidebarHeader>
 
@@ -340,7 +347,13 @@ export function DualSidebarWritingInterface({
               <div className="flex items-center gap-4">
                 <SidebarTrigger />
                 <div className="flex items-center gap-2">
-                  <h1 className="font-semibold text-lg">{project.title}</h1>
+                  <Link
+                    className="hover:underline"
+                    params={{ projectId }}
+                    to="/projects/$projectId"
+                  >
+                    <h1 className="font-semibold text-lg">{project.title}</h1>
+                  </Link>
                 </div>
               </div>
 
@@ -349,23 +362,69 @@ export function DualSidebarWritingInterface({
                   {project.currentWordCount.toLocaleString()} /{" "}
                   {project.targetWordCount?.toLocaleString() || "∞"} words
                 </div>
-                <Button
-                  className="gap-2"
-                  onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-                  size="sm"
-                  variant="outline"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  {rightSidebarOpen ? "Hide AI" : "Show AI"}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="h-9 w-9 p-0 transition-colors"
+                      onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+                      size="sm"
+                      variant={rightSidebarOpen ? "default" : "outline"}
+                    >
+                      <Sparkles
+                        className={`h-4 w-4 ${rightSidebarOpen ? "text-primary-foreground" : "text-muted-foreground"}`}
+                      />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>AI Assistant {rightSidebarOpen ? "(Active)" : ""} • Cmd+J</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </header>
 
             {/* Editor Content */}
-            <div className="flex flex-1 overflow-hidden">
-              <div className="flex-1">
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <div className="flex-1 overflow-auto">
                 <TiptapEditor content={content} onUpdate={onUpdate} placeholder={placeholder} />
               </div>
+
+              {/* Writing Stats Footer */}
+              <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div
+                  className={`flex items-center justify-between py-3 ${rightSidebarOpen ? "px-4" : "px-6"}`}
+                >
+                  {/* Left side - Session Stats */}
+                  <div
+                    className={`flex items-center text-muted-foreground text-sm ${rightSidebarOpen ? "gap-4" : "gap-6"}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                      <span>Writing session: 23 min</span>
+                    </div>
+                    <div className="h-4 w-px bg-border" />
+                    <span>Today: +247 words</span>
+                    <div className="h-4 w-px bg-border" />
+                    <span>Streak: 12 days 🔥</span>
+                  </div>
+
+                  {/* Right side - Document Stats */}
+                  <div
+                    className={`flex items-center text-muted-foreground text-sm ${rightSidebarOpen ? "gap-4" : "gap-6"}`}
+                  >
+                    <span>{content.split(" ").filter((word) => word.length > 0).length} words</span>
+                    <div className="h-4 w-px bg-border" />
+                    <span>
+                      {Math.ceil(content.split(" ").filter((word) => word.length > 0).length / 200)}{" "}
+                      min read
+                    </span>
+                    <div className="h-4 w-px bg-border" />
+                    <span>
+                      Auto-saved{" "}
+                      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                </div>
+              </footer>
             </div>
           </SidebarInset>
 

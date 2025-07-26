@@ -277,11 +277,7 @@ function ProjectsPage() {
         {projects && projects.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((project: Project) => (
-              <Link
-                key={project.id}
-                params={{ projectId: project.id }}
-                to="/projects/$projectId/write"
-              >
+              <Link key={project.id} params={{ projectId: project.id }} to="/write/$projectId">
                 <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                   <CardHeader>
                     <div className="flex items-start justify-between">
