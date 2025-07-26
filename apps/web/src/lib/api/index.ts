@@ -24,6 +24,20 @@ export type {
 // Characters API
 export { charactersApi, createCharacterApi } from "./characters"
 export type {
+  CreateLocationData,
+  Location,
+  UpdateLocationData,
+} from "./locations"
+// Locations API
+export { createLocationApi, locationsApi } from "./locations"
+export type {
+  CreateLoreData,
+  LoreEntry,
+  UpdateLoreData,
+} from "./lore"
+// Lore API
+export { createLoreApi, loreApi } from "./lore"
+export type {
   CreateNovelData,
   CreateProjectData,
   Novel,
@@ -37,6 +51,8 @@ export { novelApi, projectApi } from "./projects"
 
 import { aiProvidersApi } from "./ai-providers"
 import { charactersApi } from "./characters"
+import { locationsApi } from "./locations"
+import { loreApi } from "./lore"
 import { novelApi, projectApi } from "./projects"
 
 // Future API clients will be exported here:
@@ -51,6 +67,8 @@ export const api = {
   novels: novelApi, // Legacy support
   aiProviders: aiProvidersApi,
   characters: charactersApi,
+  locations: locationsApi,
+  lore: loreApi,
   // chapters: chapterApi,
   // organizations: organizationApi,
 }
