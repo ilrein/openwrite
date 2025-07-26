@@ -688,7 +688,6 @@ router.get(
   }
 )
 
-// Create a new lore entry
 router.post(
   "/projects/:projectId/lore",
   requireAuth,
@@ -696,6 +695,10 @@ router.post(
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const body = await c.req.json()
+
+    if (!body.name || body.name.trim().length === 0) {
+      return c.json({ error: "Name is required" }, 400)
+    }
 
     const id = crypto.randomUUID()
     const now = new Date()
