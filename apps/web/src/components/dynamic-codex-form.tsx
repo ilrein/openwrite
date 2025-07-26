@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { api, type Character, type Location, type LoreEntry } from "@/lib/api"
+import { api, type Character, type Location, type LoreEntry, type PlotThread } from "@/lib/api"
 
 // Define field types for dynamic form generation
 type FieldType = "text" | "textarea" | "select" | "number"
@@ -35,14 +35,6 @@ interface CodexFormField {
   placeholder?: string
   options?: { value: string; label: string }[]
   validation?: z.ZodSchema<unknown>
-}
-
-interface DynamicCodexFormProps {
-  entry: Character | Location | LoreEntry
-  projectId: string
-  entryType: "characters" | "locations" | "lore"
-  onSave: () => void
-  onCancel: () => void
 }
 
 // Character form configuration based on database schema
@@ -180,6 +172,60 @@ const loreFormConfig: CodexFormField[] = [
   },
 ]
 
+// Plot form configuration - for story structure and narrative threads
+const plotFormConfig: CodexFormField[] = [
+  {
+    name: "title",
+    label: "Title",
+    type: "text",
+    required: true,
+    placeholder: "Plot thread title",
+    validation: z.string().min(1, "Title is required").max(100, "Title is too long"),
+  },
+  {
+    name: "type",
+    label: "Type",
+    type: "select",
+    placeholder: "Select a type",
+    options: [
+      { value: "inciting_incident", label: "Inciting Incident" },
+      { value: "plot_point_1", label: "Plot Point 1" },
+      { value: "midpoint", label: "Midpoint" },
+      { value: "plot_point_2", label: "Plot Point 2" },
+      { value: "climax", label: "Climax" },
+      { value: "resolution", label: "Resolution" },
+      { value: "custom", label: "Custom" },
+    ],
+    validation: z.string().optional(),
+  },
+  {
+    name: "order",
+    label: "Order",
+    type: "number",
+    placeholder: "Order in story (1, 2, 3...)",
+    validation: z.number().int().positive("Order must be a positive number"),
+  },
+  {
+    name: "status",
+    label: "Status",
+    type: "select",
+    placeholder: "Select status",
+    options: [
+      { value: "planned", label: "Planned" },
+      { value: "in_progress", label: "In Progress" },
+      { value: "completed", label: "Completed" },
+    ],
+    validation: z.string().optional(),
+  },
+  {
+    name: "description",
+    label: "Description",
+    type: "textarea",
+    placeholder: "Describe this plot thread in detail",
+    validation: z.string().optional(),
+  },
+]
+
 // Create dynamic schema from form config
 const createDynamicSchema = (fields: CodexFormField[]) => {
   const schemaFields: Record<string, z.ZodSchema<unknown>> = {}
@@ -196,7 +242,7 @@ const createDynamicSchema = (fields: CodexFormField[]) => {
 }
 
 // Get form configuration based on entry type
-const getFormConfig = (entryType: "characters" | "locations" | "lore") => {
+const getFormConfig = (entryType: "characters" | "locations" | "lore" | "plot") => {
   switch (entryType) {
     case "characters":
       return characterFormConfig
@@ -204,14 +250,24 @@ const getFormConfig = (entryType: "characters" | "locations" | "lore") => {
       return locationFormConfig
     case "lore":
       return loreFormConfig
+    case "plot":
+      return plotFormConfig
     default:
       throw new Error(`Form configuration not implemented for ${entryType}`)
   }
 }
 
+interface DynamicCodexFormProps {
+  entry: Character | Location | LoreEntry | PlotThread
+  projectId: string
+  entryType: "characters" | "locations" | "lore" | "plot"
+  onSave: () => void
+  onCancel: () => void
+}
+
 // Create default values from entry data
 const createDefaultValues = (
-  entryData: Character | Location | LoreEntry,
+  entryData: Character | Location | LoreEntry | PlotThread,
   fields: CodexFormField[]
 ) => {
   const defaults: Record<string, unknown> = {}
@@ -251,6 +307,9 @@ export function DynamicCodexForm({
       }
       if (entryType === "lore") {
         return api.lore.update(projectId, entry.id, data)
+      }
+      if (entryType === "plot") {
+        return api.plot.update(projectId, entry.id, data)
       }
       throw new Error(`Update not implemented for ${entryType}`)
     },

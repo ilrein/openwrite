@@ -47,6 +47,16 @@ export const plotPointTypeEnum = [
   "custom",
 ] as const
 export const plotPointStatusEnum = ["planned", "in_progress", "completed"] as const
+export const loreTypeEnum = [
+  "core_rule",
+  "history",
+  "culture",
+  "magic_system",
+  "technology",
+  "religion",
+  "politics",
+  "custom",
+] as const
 export const collaboratorRoleEnum = ["editor", "co_author", "reviewer", "viewer"] as const
 
 // Project table - the main creative project container
@@ -229,6 +239,32 @@ export const plotPoint = sqliteTable(
       "plot_point_association",
       sql`(project_id IS NULL) IS NOT (work_id IS NULL)`
     ),
+  })
+)
+
+// Lore/World-building table - knowledge base for story worlds
+export const lore = sqliteTable(
+  "lore",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    type: text("type", { enum: loreTypeEnum }),
+
+    // Relationships - can be shared across project or specific to a work
+    projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared lore
+    workId: text("work_id").references(() => work.id, { onDelete: "cascade" }), // For work-specific lore
+
+    // Metadata
+    metadata: text("metadata"), // JSON for additional lore data
+
+    // Timestamps
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (_table) => ({
+    // CHECK constraint to ensure lore is associated with either project or work (mutually exclusive)
+    loreAssociation: check("lore_association", sql`(project_id IS NULL) IS NOT (work_id IS NULL)`),
   })
 )
 
