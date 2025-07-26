@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -72,6 +73,19 @@ export function CharacterDialog({
       motivation: character?.motivation || "",
     },
   })
+
+  // Reset form when character or mode changes
+  useEffect(() => {
+    form.reset({
+      name: character?.name || "",
+      description: character?.description || "",
+      role: character?.role || undefined,
+      appearance: character?.appearance || "",
+      personality: character?.personality || "",
+      backstory: character?.backstory || "",
+      motivation: character?.motivation || "",
+    })
+  }, [character, form])
 
   const createCharacterMutation = useMutation({
     mutationFn: (data: CharacterFormData) => api.characters.create(projectId, data),

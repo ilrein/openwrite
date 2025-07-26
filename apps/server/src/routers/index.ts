@@ -2,7 +2,7 @@ import { and, desc, eq } from "drizzle-orm"
 import { type Context, Hono } from "hono"
 import { db } from "../db"
 import { character, member, organization, project } from "../db/schema"
-import { getAuth } from "../lib/auth"
+import { requireAuth, verifyProjectAccess } from "../middleware/auth"
 import { aiProvidersRouter } from "./ai-providers"
 
 interface Env {
@@ -29,52 +29,6 @@ interface Variables {
 }
 
 const router = new Hono<{ Bindings: Env; Variables: Variables }>()
-
-// Middleware to get authenticated user and active organization
-const requireAuth = async (
-  c: Context<{ Bindings: Env; Variables: Variables }>,
-  next: () => Promise<void>
-) => {
-  try {
-    const auth = getAuth(c.env)
-    const session = await auth.api.getSession({
-      headers: c.req.raw.headers,
-    })
-
-    if (!session?.user) {
-      return c.json({ error: "Unauthorized" }, 401)
-    }
-
-    c.set("user", session.user)
-    c.set("session", session.session)
-
-    // Get user's active organization (first organization they're a member of for now)
-    const userMembership = await db
-      .select({
-        organization: {
-          id: organization.id,
-          name: organization.name,
-          slug: organization.slug,
-        },
-      })
-      .from(member)
-      .innerJoin(organization, eq(member.organizationId, organization.id))
-      .where(eq(member.userId, session.user.id))
-      .limit(1)
-      .get()
-
-    if (userMembership) {
-      c.set("activeOrganization", userMembership.organization)
-    } else {
-      // For certain endpoints, we allow requests without an organization
-      // The dashboard can handle the case where user needs to create an organization
-      c.set("activeOrganization", null)
-    }
-    await next()
-  } catch (_error) {
-    return c.json({ error: "Authentication failed" }, 401)
-  }
-}
 
 // Create organization for new users (auto-created personal org)
 router.post(
@@ -323,24 +277,9 @@ router.delete(
 router.get(
   "/projects/:projectId/characters",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     const characters = await db
       .select({
@@ -375,25 +314,10 @@ router.get(
 router.get(
   "/projects/:projectId/characters/:characterId",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const characterId = c.req.param("characterId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     const characterData = await db
       .select()
@@ -419,24 +343,9 @@ router.get(
 router.post(
   "/projects/:projectId/characters",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     try {
       const body = await c.req.json()
@@ -487,35 +396,55 @@ router.post(
 router.put(
   "/projects/:projectId/characters/:characterId",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const characterId = c.req.param("characterId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     try {
-      const body = await c.req.json()
-      const updateData = { ...body, updatedAt: new Date() }
+      const {
+        name,
+        description,
+        role,
+        appearance,
+        personality,
+        backstory,
+        motivation,
+        image,
+        metadata,
+      } = await c.req.json()
 
-      // Remove fields that shouldn't be updated
-      updateData.id = undefined
-      updateData.projectId = undefined
-      updateData.workId = undefined
-      updateData.createdAt = undefined
+      const updateData: Record<string, string | Date | null> = {
+        updatedAt: new Date(),
+      }
+
+      if (name !== undefined) {
+        updateData.name = name
+      }
+      if (description !== undefined) {
+        updateData.description = description
+      }
+      if (role !== undefined) {
+        updateData.role = role
+      }
+      if (appearance !== undefined) {
+        updateData.appearance = appearance
+      }
+      if (personality !== undefined) {
+        updateData.personality = personality
+      }
+      if (backstory !== undefined) {
+        updateData.backstory = backstory
+      }
+      if (motivation !== undefined) {
+        updateData.motivation = motivation
+      }
+      if (image !== undefined) {
+        updateData.image = image
+      }
+      if (metadata !== undefined) {
+        updateData.metadata = metadata
+      }
 
       await db
         .update(character)
@@ -533,25 +462,10 @@ router.put(
 router.delete(
   "/projects/:projectId/characters/:characterId",
   requireAuth,
+  verifyProjectAccess,
   async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
     const projectId = c.req.param("projectId")
     const characterId = c.req.param("characterId")
-    const activeOrganization = c.get("activeOrganization")
-
-    if (!activeOrganization) {
-      return c.json({ error: "No organization found" }, 400)
-    }
-
-    // Verify project belongs to user's organization
-    const projectData = await db
-      .select({ id: project.id })
-      .from(project)
-      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
-      .get()
-
-    if (!projectData) {
-      return c.json({ error: "Project not found" }, 404)
-    }
 
     try {
       await db
