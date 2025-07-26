@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { FileText, MapPin, Plus, Scroll, Users } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { api, type Character } from "@/lib/api"
+import { api, type Character, type Location, type LoreEntry } from "@/lib/api"
+import { DynamicCodexForm } from "./dynamic-codex-form"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
@@ -13,7 +14,7 @@ interface CodexEntry {
   description: string
 }
 
-type CodexCharacterEntry = Character | CodexEntry
+type CodexAnyEntry = Character | Location | LoreEntry | CodexEntry
 
 interface CodexModalProps {
   isOpen: boolean
@@ -31,7 +32,8 @@ export default function CodexModal({
   initialEntry = null,
 }: CodexModalProps) {
   const [selectedType, setSelectedType] = useState<string | null>(initialType)
-  const [selectedEntry, setSelectedEntry] = useState<CodexCharacterEntry | null>(null)
+  const [selectedEntry, setSelectedEntry] = useState<CodexAnyEntry | null>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   // Fetch characters from API
   const { data: characters = [] } = useQuery({
@@ -39,6 +41,94 @@ export default function CodexModal({
     queryFn: async () => {
       const result = await api.characters.list(projectId)
       return result
+    },
+    enabled: isOpen, // Only fetch when modal is open
+  })
+
+  // Fetch locations from API (will use mock data until backend is ready)
+  const { data: locations = [] } = useQuery({
+    queryKey: ["locations", projectId],
+    queryFn: () => {
+      // TODO: Implement when backend API is ready
+      // return api.locations.list(projectId)
+
+      // Mock data for now
+      return [
+        {
+          id: "1",
+          name: "The Dark Forest",
+          type: "fantasy_realm" as const,
+          description:
+            "An ancient forest filled with magical creatures and hidden dangers. The trees themselves seem alive, and the deeper one ventures, the more the magic affects reality itself.",
+          projectId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "2",
+          name: "Crystal Cave",
+          type: "building" as const,
+          description:
+            "Hidden cavern containing the ancient crystal that holds the power to reshape the world. The cave is protected by ancient wards and magical traps.",
+          projectId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "3",
+          name: "Village of Elderbrook",
+          type: "city" as const,
+          description:
+            "Aria's peaceful hometown nestled in a valley surrounded by rolling hills. This quiet farming community has been untouched by the magical conflicts of the wider world.",
+          projectId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ] as Location[]
+    },
+    enabled: isOpen, // Only fetch when modal is open
+  })
+
+  // Fetch lore entries from API (will use mock data until backend is ready)
+  const { data: loreEntries = [] } = useQuery({
+    queryKey: ["lore", projectId],
+    queryFn: () => {
+      // TODO: Implement when backend API is ready
+      // return api.lore.list(projectId)
+
+      // Mock data for now
+      return [
+        {
+          id: "1",
+          name: "Magic System",
+          type: "core_rule",
+          description:
+            "Elemental magic drawn from nature's energy requires emotional balance and physical gestures. Overuse can lead to magical exhaustion or even permanent damage to the caster's connection to magic.",
+          projectId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "2",
+          name: "The Ancient Prophecy",
+          type: "history",
+          description:
+            "Foretells the coming of a chosen one who will either restore balance to the world or bring about its destruction. The prophecy speaks in riddles that have been interpreted differently throughout history.",
+          projectId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "3",
+          name: "The Great War",
+          type: "history",
+          description:
+            "A conflict that shaped the modern world, pitting those who would use magic freely against those who feared its power. The war ended with magical restrictions that still influence society today.",
+          projectId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ] as LoreEntry[]
     },
     enabled: isOpen, // Only fetch when modal is open
   })
@@ -62,52 +152,22 @@ export default function CodexModal({
             title: "Locations",
             description: "Track your story's places and settings",
             icon: MapPin,
-            entries: [
-              {
-                name: "The Dark Forest",
-                role: "Setting",
-                description:
-                  "An ancient forest filled with magical creatures and hidden dangers. The trees themselves seem alive, and the deeper one ventures, the more the magic affects reality itself.",
-              },
-              {
-                name: "Crystal Cave",
-                role: "Key Location",
-                description:
-                  "Hidden cavern containing the ancient crystal that holds the power to reshape the world. The cave is protected by ancient wards and magical traps.",
-              },
-              {
-                name: "Village of Elderbrook",
-                role: "Starting Point",
-                description:
-                  "Aria's peaceful hometown nestled in a valley surrounded by rolling hills. This quiet farming community has been untouched by the magical conflicts of the wider world.",
-              },
-            ],
+            entries: locations.map((location) => ({
+              ...location,
+              role: location.type || "Location",
+              description: location.description || "No description available",
+            })),
           }
         case "lore":
           return {
             title: "Lore & World-building",
             description: "Document your world's history and rules",
             icon: Scroll,
-            entries: [
-              {
-                name: "Magic System",
-                role: "Core Rule",
-                description:
-                  "Elemental magic drawn from nature's energy requires emotional balance and physical gestures. Overuse can lead to magical exhaustion or even permanent damage to the caster's connection to magic.",
-              },
-              {
-                name: "The Ancient Prophecy",
-                role: "Plot Device",
-                description:
-                  "Foretells the coming of a chosen one who will either restore balance to the world or bring about its destruction. The prophecy speaks in riddles that have been interpreted differently throughout history.",
-              },
-              {
-                name: "The Great War",
-                role: "History",
-                description:
-                  "A conflict that shaped the modern world, pitting those who would use magic freely against those who feared its power. The war ended with magical restrictions that still influence society today.",
-              },
-            ],
+            entries: loreEntries.map((lore) => ({
+              ...lore,
+              role: lore.type || "Lore",
+              description: lore.description || "No description available",
+            })),
           }
         case "plot":
           return {
@@ -144,7 +204,7 @@ export default function CodexModal({
           }
       }
     },
-    [characters]
+    [characters, locations, loreEntries]
   )
 
   const codexTypes = [
@@ -172,17 +232,27 @@ export default function CodexModal({
     }
   }, [isOpen, initialType, initialEntry, getTypeConfig])
 
-  const handleEntryClick = (entry: CodexCharacterEntry) => {
+  const handleEntryClick = (entry: CodexAnyEntry) => {
     setSelectedEntry(entry)
   }
 
   const handleBackToType = () => {
     setSelectedEntry(null)
+    setIsEditMode(false)
   }
 
   const handleBackToOverview = () => {
     setSelectedType(null)
     setSelectedEntry(null)
+    setIsEditMode(false)
+  }
+
+  const handleEditToggle = () => {
+    setIsEditMode(!isEditMode)
+  }
+
+  const handleSaveComplete = () => {
+    setIsEditMode(false)
   }
 
   const renderOverview = () => (
@@ -296,34 +366,60 @@ export default function CodexModal({
   }
 
   // Helper function to check if entry is a Character object
-  const isCharacter = (entry: CodexCharacterEntry): entry is Character => {
-    return "id" in entry
+  const isCharacter = (entry: CodexAnyEntry): entry is Character => {
+    return "id" in entry && "role" in entry && entry.role !== undefined
+  }
+
+  // Helper function to check if entry is a Location object
+  const isLocation = (entry: CodexAnyEntry): entry is Location => {
+    return "id" in entry && "type" in entry && (entry as Location).type !== undefined
+  }
+
+  // Helper function to check if entry is a LoreEntry object
+  const isLoreEntry = (entry: CodexAnyEntry): entry is LoreEntry => {
+    return "id" in entry && !isCharacter(entry) && !isLocation(entry)
   }
 
   // Helper function to get display role
-  const getDisplayRole = (entry: CodexCharacterEntry): string => {
+  const getDisplayRole = (entry: CodexAnyEntry): string => {
     if (isCharacter(entry)) {
       return entry.role || "Character"
     }
-    return entry.role
+    if (isLocation(entry)) {
+      return entry.type || "Location"
+    }
+    if (isLoreEntry(entry)) {
+      return entry.type || "Lore"
+    }
+    return (entry as CodexEntry).role
   }
 
   // Helper function to get display description
-  const getDisplayDescription = (entry: CodexCharacterEntry): string => {
-    if (isCharacter(entry)) {
+  const getDisplayDescription = (entry: CodexAnyEntry): string => {
+    if (isCharacter(entry) || isLocation(entry) || isLoreEntry(entry)) {
       return entry.description || "No description available"
     }
-    return entry.description
+    return (entry as CodexEntry).description
   }
 
-  const renderEntryDetail = () => {
-    if (!(selectedEntry && selectedType)) {
-      return null
+  // Helper to determine entry type and title for editing
+  const getEntryEditInfo = (entry: Character | Location | LoreEntry) => {
+    if (isCharacter(entry)) {
+      return { entryType: "characters" as const, cardTitle: "Character Details" }
     }
+    if (isLocation(entry)) {
+      return { entryType: "locations" as const, cardTitle: "Location Details" }
+    }
+    return { entryType: "lore" as const, cardTitle: "Lore Details" }
+  }
 
-    const config = getTypeConfig(selectedType)
+  // Render edit mode view
+  const renderEditMode = (
+    entry: Character | Location | LoreEntry,
+    config: ReturnType<typeof getTypeConfig>
+  ) => {
+    const { entryType, cardTitle } = getEntryEditInfo(entry)
     const IconComponent = config.icon
-    const isCharacterEntry = isCharacter(selectedEntry)
 
     return (
       <div className="space-y-6">
@@ -336,16 +432,61 @@ export default function CodexModal({
         <div className="space-y-6">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <h2 className="font-bold text-2xl">{selectedEntry.name}</h2>
+              <h2 className="font-bold text-2xl">Edit {entry.name}</h2>
               <div className="flex items-center gap-2">
                 <IconComponent className="h-4 w-4" />
-                <Badge variant="secondary">{getDisplayRole(selectedEntry)}</Badge>
+                <Badge variant="secondary">{getDisplayRole(entry)}</Badge>
+              </div>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{cardTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DynamicCodexForm
+                entry={entry}
+                entryType={entryType}
+                onCancel={() => setIsEditMode(false)}
+                onSave={handleSaveComplete}
+                projectId={projectId}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Render read-only mode view
+  const renderReadOnlyMode = (entry: CodexAnyEntry, config: ReturnType<typeof getTypeConfig>) => {
+    const IconComponent = config.icon
+    const isCharacterEntry = isCharacter(entry)
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button onClick={handleBackToType} size="sm" variant="ghost">
+            ← Back to {config.title}
+          </Button>
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <h2 className="font-bold text-2xl">{entry.name}</h2>
+              <div className="flex items-center gap-2">
+                <IconComponent className="h-4 w-4" />
+                <Badge variant="secondary">{getDisplayRole(entry)}</Badge>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline">
-                Edit
-              </Button>
+              {(isCharacterEntry || isLocation(entry) || isLoreEntry(entry)) && (
+                <Button onClick={handleEditToggle} size="sm" variant="outline">
+                  Edit
+                </Button>
+              )}
               <Button size="sm" variant="outline">
                 Delete
               </Button>
@@ -357,52 +498,52 @@ export default function CodexModal({
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="leading-relaxed">{getDisplayDescription(selectedEntry)}</p>
+              <p className="leading-relaxed">{getDisplayDescription(entry)}</p>
             </CardContent>
           </Card>
 
           {isCharacterEntry && (
             <>
-              {selectedEntry.appearance && (
+              {entry.appearance && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Appearance</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="leading-relaxed">{selectedEntry.appearance}</p>
+                    <p className="leading-relaxed">{entry.appearance}</p>
                   </CardContent>
                 </Card>
               )}
 
-              {selectedEntry.personality && (
+              {entry.personality && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Personality</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="leading-relaxed">{selectedEntry.personality}</p>
+                    <p className="leading-relaxed">{entry.personality}</p>
                   </CardContent>
                 </Card>
               )}
 
-              {selectedEntry.backstory && (
+              {entry.backstory && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Backstory</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="leading-relaxed">{selectedEntry.backstory}</p>
+                    <p className="leading-relaxed">{entry.backstory}</p>
                   </CardContent>
                 </Card>
               )}
 
-              {selectedEntry.motivation && (
+              {entry.motivation && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Motivation</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="leading-relaxed">{selectedEntry.motivation}</p>
+                    <p className="leading-relaxed">{entry.motivation}</p>
                   </CardContent>
                 </Card>
               )}
@@ -424,6 +565,24 @@ export default function CodexModal({
         </div>
       </div>
     )
+  }
+
+  const renderEntryDetail = () => {
+    if (!(selectedEntry && selectedType)) {
+      return null
+    }
+
+    const config = getTypeConfig(selectedType)
+    const canEdit =
+      isCharacter(selectedEntry) || isLocation(selectedEntry) || isLoreEntry(selectedEntry)
+
+    // Show edit mode if editing and entry can be edited
+    if (isEditMode && canEdit) {
+      return renderEditMode(selectedEntry as Character | Location | LoreEntry, config)
+    }
+
+    // Show read-only mode
+    return renderReadOnlyMode(selectedEntry, config)
   }
 
   return (
