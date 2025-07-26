@@ -37,6 +37,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import UserMenu from "@/components/user-menu"
 import { api } from "@/lib/api"
 
 interface DualSidebarWritingInterfaceProps {
@@ -62,6 +63,7 @@ export function DualSidebarWritingInterface({
     locations: false,
     lore: false,
     plot: false,
+    notes: false,
   })
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
 
@@ -158,6 +160,11 @@ export function DualSidebarWritingInterface({
       { name: "Quest for the Crystal", role: "Main Plot" },
       { name: "Kellan's Secret Past", role: "Subplot" },
       { name: "The Prophecy Unfolds", role: "Subplot" },
+    ],
+    notes: [
+      { name: "Character Development Ideas", role: "Creative Note" },
+      { name: "Plot Holes to Fix", role: "Revision Note" },
+      { name: "Research: Medieval Weapons", role: "Research Note" },
     ],
   }
 
@@ -287,19 +294,94 @@ export function DualSidebarWritingInterface({
                         </CollapsibleContent>
                       </Collapsible>
                     </SidebarMenuItem>
+
+                    {/* Plot */}
+                    <SidebarMenuItem>
+                      <Collapsible
+                        onOpenChange={() => toggleCodexSection("plot")}
+                        open={expandedCodexSections.plot}
+                      >
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton>
+                            {expandedCodexSections.plot ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <FileText className="h-4 w-4" />
+                            <span>Plot</span>
+                            <Badge className="ml-auto" variant="secondary">
+                              {codexData.plot.length}
+                            </Badge>
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="ml-6 space-y-1">
+                            {codexData.plot.map((plotItem) => (
+                              <Button
+                                className="w-full justify-start"
+                                key={plotItem.name}
+                                onClick={() => openCodexModal("plot", plotItem.name)}
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <span className="truncate">{plotItem.name}</span>
+                                <span className="ml-auto text-muted-foreground text-xs">
+                                  {plotItem.role}
+                                </span>
+                              </Button>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </SidebarMenuItem>
+
+                    {/* Notes */}
+                    <SidebarMenuItem>
+                      <Collapsible
+                        onOpenChange={() => toggleCodexSection("notes")}
+                        open={expandedCodexSections.notes}
+                      >
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton>
+                            {expandedCodexSections.notes ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <FileEdit className="h-4 w-4" />
+                            <span>Notes</span>
+                            <Badge className="ml-auto" variant="secondary">
+                              {codexData.notes.length}
+                            </Badge>
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="ml-6 space-y-1">
+                            {codexData.notes.map((note) => (
+                              <Button
+                                className="w-full justify-start"
+                                key={note.name}
+                                onClick={() => openCodexModal("notes", note.name)}
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <span className="truncate">{note.name}</span>
+                                <span className="ml-auto text-muted-foreground text-xs">
+                                  {note.role}
+                                </span>
+                              </Button>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter>
-              <div className="p-4">
-                <Button className="w-full" size="sm">
-                  <FileEdit className="mr-2 h-4 w-4" />
-                  Quick Notes
-                </Button>
-              </div>
-            </SidebarFooter>
+            <SidebarFooter />
           </Sidebar>
 
           {/* Main Content Area */}
@@ -369,7 +451,7 @@ export function DualSidebarWritingInterface({
                     <span>Streak: 12 days 🔥</span>
                   </div>
 
-                  {/* Right side - Document Stats */}
+                  {/* Right side - Document Stats and User Menu */}
                   <div
                     className={`flex items-center text-muted-foreground text-sm ${rightSidebarOpen ? "gap-4" : "gap-6"}`}
                   >
@@ -384,6 +466,8 @@ export function DualSidebarWritingInterface({
                       Auto-saved{" "}
                       {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
+                    <div className="h-4 w-px bg-border" />
+                    <UserMenu />
                   </div>
                 </div>
               </footer>
