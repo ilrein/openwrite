@@ -372,7 +372,14 @@ export default function CodexModal({
 
   // Helper function to check if entry is a Location object
   const isLocation = (entry: CodexAnyEntry): entry is Location => {
-    return "id" in entry && "type" in entry && (entry as Location).type !== undefined
+    return (
+      "id" in entry &&
+      "type" in entry &&
+      typeof (entry as Location).type === "string" &&
+      ["city", "country", "building", "room", "fantasy_realm", "planet", "dimension"].includes(
+        (entry as Location).type as string
+      )
+    )
   }
 
   // Helper function to check if entry is a LoreEntry object

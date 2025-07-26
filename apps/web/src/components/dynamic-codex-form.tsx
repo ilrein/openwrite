@@ -211,7 +211,7 @@ export function DynamicCodexForm({
       case "lore":
         return loreFormConfig
       default:
-        return characterFormConfig
+        throw new Error(`Form configuration not implemented for ${entryType}`)
     }
   }
 
@@ -360,7 +360,11 @@ export function DynamicCodexForm({
                     placeholder={field.placeholder}
                     type="number"
                     {...formField}
-                    onChange={(e) => formField.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Allow clearing the input, otherwise parse as a number.
+                      formField.onChange(value === "" ? null : Number.parseInt(value, 10))
+                    }}
                     value={formField.value as string}
                   />
                 </FormControl>
