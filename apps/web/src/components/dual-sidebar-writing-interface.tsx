@@ -69,12 +69,7 @@ export function DualSidebarWritingInterface({
   useHotkeys(
     "cmd+j, ctrl+j",
     () => {
-      console.log("🤖 AI Assistant hotkey triggered! Toggling sidebar...")
-      console.log("Current rightSidebarOpen state:", rightSidebarOpen)
-      setRightSidebarOpen((prev) => {
-        console.log("Setting rightSidebarOpen to:", !prev)
-        return !prev
-      })
+      setRightSidebarOpen((prev) => !prev)
     },
     {
       preventDefault: true,
@@ -111,7 +106,7 @@ export function DualSidebarWritingInterface({
   }
 
   const targetWordCount = project.targetWordCount || 0
-  const progressPercentage = targetWordCount
+  const _progressPercentage = targetWordCount
     ? Math.min((project.currentWordCount / targetWordCount) * 100, 100)
     : 0
 
