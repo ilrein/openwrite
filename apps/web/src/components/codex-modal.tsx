@@ -214,23 +214,43 @@ export default function CodexModal({
     { key: "plot", title: "Plot Threads", icon: FileText },
   ]
 
+  // Find entry by name from the appropriate data array
+  const findEntryByName = useCallback(
+    (type: string, name: string): CodexAnyEntry | null => {
+      switch (type) {
+        case "characters":
+          return characters.find((char) => char.name === name) || null
+        case "locations":
+          return locations.find((location) => location.name === name) || null
+        case "lore":
+          return loreEntries.find((lore) => lore.name === name) || null
+        default:
+          return null
+      }
+    },
+    [characters, locations, loreEntries]
+  )
+
   // Handle initial navigation when modal opens
   useEffect(() => {
-    if (isOpen && initialType && initialEntry) {
+    if (!isOpen) {
+      setSelectedType(null)
+      setSelectedEntry(null)
+      return
+    }
+
+    if (initialType && initialEntry) {
       setSelectedType(initialType)
-      const typeConfig = getTypeConfig(initialType)
-      const entry = typeConfig.entries.find((e) => e.name === initialEntry)
-      if (entry) {
-        setSelectedEntry(entry)
-      }
-    } else if (isOpen && initialType) {
+      const foundEntry = findEntryByName(initialType, initialEntry)
+      setSelectedEntry(foundEntry)
+    } else if (initialType) {
       setSelectedType(initialType)
       setSelectedEntry(null)
-    } else if (isOpen) {
+    } else {
       setSelectedType(null)
       setSelectedEntry(null)
     }
-  }, [isOpen, initialType, initialEntry, getTypeConfig])
+  }, [isOpen, initialType, initialEntry, findEntryByName])
 
   const handleEntryClick = (entry: CodexAnyEntry) => {
     setSelectedEntry(entry)
@@ -594,10 +614,10 @@ export default function CodexModal({
 
   return (
     <Dialog onOpenChange={onClose} open={isOpen}>
-      <DialogContent className="h-screen min-w-full overflow-hidden p-0">
-        <div className="flex h-full">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0">
+        <div className="flex max-h-[90vh] flex-col">
           {/* Main Content */}
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6">
             {(() => {
               if (selectedEntry) {
                 return renderEntryDetail()

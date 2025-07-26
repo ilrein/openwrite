@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -65,7 +66,9 @@ const characterFormConfig: CodexFormField[] = [
       { value: "supporting", label: "Supporting" },
       { value: "minor", label: "Minor" },
     ],
-    validation: z.enum(["protagonist", "antagonist", "supporting", "minor"]).optional(),
+    validation: z
+      .union([z.enum(["protagonist", "antagonist", "supporting", "minor"]), z.literal("")])
+      .optional(),
   },
   {
     name: "description",
@@ -192,6 +195,34 @@ const createDynamicSchema = (fields: CodexFormField[]) => {
   return z.object(schemaFields)
 }
 
+// Get form configuration based on entry type
+const getFormConfig = (entryType: "characters" | "locations" | "lore") => {
+  switch (entryType) {
+    case "characters":
+      return characterFormConfig
+    case "locations":
+      return locationFormConfig
+    case "lore":
+      return loreFormConfig
+    default:
+      throw new Error(`Form configuration not implemented for ${entryType}`)
+  }
+}
+
+// Create default values from entry data
+const createDefaultValues = (
+  entryData: Character | Location | LoreEntry,
+  fields: CodexFormField[]
+) => {
+  const defaults: Record<string, unknown> = {}
+  for (const field of fields) {
+    const value = (entryData as unknown as Record<string, unknown>)[field.name]
+    // For select fields, preserve null/undefined as empty string to allow clearing
+    defaults[field.name] = value ?? ""
+  }
+  return defaults
+}
+
 export function DynamicCodexForm({
   entry,
   projectId,
@@ -201,38 +232,13 @@ export function DynamicCodexForm({
 }: DynamicCodexFormProps) {
   const queryClient = useQueryClient()
 
-  // Get form configuration based on entry type
-  const getFormConfig = () => {
-    switch (entryType) {
-      case "characters":
-        return characterFormConfig
-      case "locations":
-        return locationFormConfig
-      case "lore":
-        return loreFormConfig
-      default:
-        throw new Error(`Form configuration not implemented for ${entryType}`)
-    }
-  }
-
-  const formConfig = getFormConfig()
-  const schema = createDynamicSchema(formConfig)
-
-  // Create default values from entry data
-  const createDefaultValues = (
-    entryData: Character | Location | LoreEntry,
-    fields: CodexFormField[]
-  ) => {
-    const defaults: Record<string, unknown> = {}
-    for (const field of fields) {
-      defaults[field.name] = (entryData as unknown as Record<string, unknown>)[field.name] || ""
-    }
-    return defaults
-  }
+  const formConfig = useMemo(() => getFormConfig(entryType), [entryType])
+  const schema = useMemo(() => createDynamicSchema(formConfig), [formConfig])
+  const defaultValues = useMemo(() => createDefaultValues(entry, formConfig), [entry, formConfig])
 
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: createDefaultValues(entry, formConfig),
+    defaultValues,
   })
 
   const updateMutation = useMutation({
@@ -324,13 +330,25 @@ export function DynamicCodexForm({
                 <FormLabel>
                   {field.label} {field.required && "*"}
                 </FormLabel>
-                <Select defaultValue={formField.value as string} onValueChange={formField.onChange}>
+                <Select
+                  onValueChange={(value) => {
+                    // Allow clearing the value by passing empty string
+                    formField.onChange(value === "clear" ? "" : value)
+                  }}
+                  value={(formField.value as string) || ""}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={field.placeholder} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    {/* Add clear option if field is not required */}
+                    {!field.required && (
+                      <SelectItem value="clear">
+                        <span className="text-muted-foreground italic">Clear selection</span>
+                      </SelectItem>
+                    )}
                     {field.options?.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
