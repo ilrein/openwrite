@@ -150,13 +150,11 @@ export function AutocompleteToggle({
         <span className="text-muted-foreground text-sm">Autocomplete</span>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div>
-              <Switch
-                checked={autocompleteEnabled}
-                disabled={!hasActiveProviders || isLoading}
-                onCheckedChange={handleToggle}
-              />
-            </div>
+            <Switch
+              checked={autocompleteEnabled}
+              disabled={!hasActiveProviders || isLoading}
+              onCheckedChange={handleToggle}
+            />
           </TooltipTrigger>
           <TooltipContent side="top">{getTooltipMessage()}</TooltipContent>
         </Tooltip>
