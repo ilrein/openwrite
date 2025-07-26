@@ -14,7 +14,7 @@ import { StarterKit } from "@tiptap/starter-kit"
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
-import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
+// import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
 // COMMENTED OUT - ColorHighlightPopover causing popover close issues
 // import {
 //   ColorHighlightPopover,
@@ -24,8 +24,8 @@ import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
 
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
-import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
-import { LinkPopover } from "@/components/tiptap-ui/link-popover"
+// import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
+// import { LinkPopover } from "@/components/tiptap-ui/link-popover"
 // COMMENTED OUT - ListDropdownMenu causing dropdown close issues
 // import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
 import { ListButton } from "@/components/tiptap-ui/list-button"
@@ -163,15 +163,15 @@ export default function TiptapEditor({
             <ListButton type="orderedList" />
             <ListButton type="taskList" />
             <BlockquoteButton />
-            <CodeBlockButton />
+            {/* <CodeBlockButton /> */}
           </ToolbarGroup>
 
-          <ToolbarSeparator />
+          {/* <ToolbarSeparator />
 
           <ToolbarGroup>
             <LinkPopover />
             <ImageUploadButton />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
 
           <Spacer />
         </Toolbar>
