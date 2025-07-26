@@ -512,12 +512,12 @@ router.put(
       const updateData = { ...body, updatedAt: new Date() }
 
       // Remove fields that shouldn't be updated
-      delete updateData.id
-      delete updateData.projectId
-      delete updateData.workId
-      delete updateData.createdAt
+      updateData.id = undefined
+      updateData.projectId = undefined
+      updateData.workId = undefined
+      updateData.createdAt = undefined
 
-      const result = await db
+      await db
         .update(character)
         .set(updateData)
         .where(and(eq(character.id, characterId), eq(character.projectId, projectId)))
