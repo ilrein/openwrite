@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm"
 import { type Context, Hono } from "hono"
 import { db } from "../db"
-import { member, organization, project } from "../db/schema"
+import { character, member, organization, project } from "../db/schema"
 import { getAuth } from "../lib/auth"
 import { aiProvidersRouter } from "./ai-providers"
 
@@ -315,6 +315,252 @@ router.delete(
       return c.json({ success: true })
     } catch (_error) {
       return c.json({ error: "Failed to delete project" }, 500)
+    }
+  }
+)
+
+// List characters for a project
+router.get(
+  "/projects/:projectId/characters",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const activeOrganization = c.get("activeOrganization")
+
+    if (!activeOrganization) {
+      return c.json({ error: "No organization found" }, 400)
+    }
+
+    // Verify project belongs to user's organization
+    const projectData = await db
+      .select({ id: project.id })
+      .from(project)
+      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
+      .get()
+
+    if (!projectData) {
+      return c.json({ error: "Project not found" }, 404)
+    }
+
+    const characters = await db
+      .select({
+        id: character.id,
+        name: character.name,
+        description: character.description,
+        role: character.role,
+        appearance: character.appearance,
+        personality: character.personality,
+        backstory: character.backstory,
+        motivation: character.motivation,
+        image: character.image,
+        metadata: character.metadata,
+        createdAt: character.createdAt,
+        updatedAt: character.updatedAt,
+      })
+      .from(character)
+      .where(eq(character.projectId, projectId))
+      .orderBy(character.name)
+
+    return c.json({
+      characters: characters.map((char) => ({
+        ...char,
+        createdAt: char.createdAt.toISOString(),
+        updatedAt: char.updatedAt.toISOString(),
+      })),
+    })
+  }
+)
+
+// Get a specific character
+router.get(
+  "/projects/:projectId/characters/:characterId",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const characterId = c.req.param("characterId")
+    const activeOrganization = c.get("activeOrganization")
+
+    if (!activeOrganization) {
+      return c.json({ error: "No organization found" }, 400)
+    }
+
+    // Verify project belongs to user's organization
+    const projectData = await db
+      .select({ id: project.id })
+      .from(project)
+      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
+      .get()
+
+    if (!projectData) {
+      return c.json({ error: "Project not found" }, 404)
+    }
+
+    const characterData = await db
+      .select()
+      .from(character)
+      .where(and(eq(character.id, characterId), eq(character.projectId, projectId)))
+      .get()
+
+    if (!characterData) {
+      return c.json({ error: "Character not found" }, 404)
+    }
+
+    return c.json({
+      character: {
+        ...characterData,
+        createdAt: characterData.createdAt.toISOString(),
+        updatedAt: characterData.updatedAt.toISOString(),
+      },
+    })
+  }
+)
+
+// Create a new character
+router.post(
+  "/projects/:projectId/characters",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const activeOrganization = c.get("activeOrganization")
+
+    if (!activeOrganization) {
+      return c.json({ error: "No organization found" }, 400)
+    }
+
+    // Verify project belongs to user's organization
+    const projectData = await db
+      .select({ id: project.id })
+      .from(project)
+      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
+      .get()
+
+    if (!projectData) {
+      return c.json({ error: "Project not found" }, 404)
+    }
+
+    try {
+      const body = await c.req.json()
+      const {
+        name,
+        description,
+        role,
+        appearance,
+        personality,
+        backstory,
+        motivation,
+        image,
+        metadata,
+      } = body
+
+      if (!name || name.trim().length === 0) {
+        return c.json({ error: "Name is required" }, 400)
+      }
+
+      const id = crypto.randomUUID()
+      const now = new Date()
+
+      await db.insert(character).values({
+        id,
+        name: name.trim(),
+        description: description?.trim() || null,
+        role: role || null,
+        appearance: appearance?.trim() || null,
+        personality: personality?.trim() || null,
+        backstory: backstory?.trim() || null,
+        motivation: motivation?.trim() || null,
+        projectId,
+        workId: null, // Project-level character
+        image: image || null,
+        metadata: metadata || null,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return c.json({ success: true, id })
+    } catch (_error) {
+      return c.json({ error: "Failed to create character" }, 500)
+    }
+  }
+)
+
+// Update a character
+router.put(
+  "/projects/:projectId/characters/:characterId",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const characterId = c.req.param("characterId")
+    const activeOrganization = c.get("activeOrganization")
+
+    if (!activeOrganization) {
+      return c.json({ error: "No organization found" }, 400)
+    }
+
+    // Verify project belongs to user's organization
+    const projectData = await db
+      .select({ id: project.id })
+      .from(project)
+      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
+      .get()
+
+    if (!projectData) {
+      return c.json({ error: "Project not found" }, 404)
+    }
+
+    try {
+      const body = await c.req.json()
+      const updateData = { ...body, updatedAt: new Date() }
+
+      // Remove fields that shouldn't be updated
+      delete updateData.id
+      delete updateData.projectId
+      delete updateData.workId
+      delete updateData.createdAt
+
+      const result = await db
+        .update(character)
+        .set(updateData)
+        .where(and(eq(character.id, characterId), eq(character.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to update character" }, 500)
+    }
+  }
+)
+
+// Delete a character
+router.delete(
+  "/projects/:projectId/characters/:characterId",
+  requireAuth,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const characterId = c.req.param("characterId")
+    const activeOrganization = c.get("activeOrganization")
+
+    if (!activeOrganization) {
+      return c.json({ error: "No organization found" }, 400)
+    }
+
+    // Verify project belongs to user's organization
+    const projectData = await db
+      .select({ id: project.id })
+      .from(project)
+      .where(and(eq(project.id, projectId), eq(project.organizationId, activeOrganization.id)))
+      .get()
+
+    if (!projectData) {
+      return c.json({ error: "Project not found" }, 404)
+    }
+
+    try {
+      await db
+        .delete(character)
+        .where(and(eq(character.id, characterId), eq(character.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to delete character" }, 500)
     }
   }
 )

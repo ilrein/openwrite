@@ -3,23 +3,35 @@ import { Link } from "@tanstack/react-router"
 import {
   ChevronDown,
   ChevronRight,
+  Edit,
   FileEdit,
   FileText,
   MapPin,
   MessageCircle,
   PenTool,
+  Plus,
   Scroll,
   Sparkles,
+  Trash2,
   Users,
 } from "lucide-react"
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
+import { CharacterDialog } from "@/components/character-dialog"
 import CodexModal from "@/components/codex-modal"
+import { DeleteCharacterDialog } from "@/components/delete-character-dialog"
 import TiptapEditor from "@/components/tiptap-editor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
 import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
@@ -37,7 +49,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { api } from "@/lib/api"
+import { api, type Character } from "@/lib/api"
 
 interface DualSidebarWritingInterfaceProps {
   projectId: string
@@ -64,6 +76,10 @@ export function DualSidebarWritingInterface({
     plot: false,
   })
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
+  const [characterDialogOpen, setCharacterDialogOpen] = useState(false)
+  const [characterDialogMode, setCharacterDialogMode] = useState<"create" | "edit">("create")
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
+  const [deleteCharacterDialogOpen, setDeleteCharacterDialogOpen] = useState(false)
 
   // Keyboard shortcut to toggle AI assistant
   useHotkeys(
@@ -83,6 +99,15 @@ export function DualSidebarWritingInterface({
     queryKey: ["project", projectId],
     queryFn: async () => {
       const result = await api.projects.get(projectId)
+      return result
+    },
+  })
+
+  // Fetch characters
+  const { data: characters = [] } = useQuery({
+    queryKey: ["characters", projectId],
+    queryFn: async () => {
+      const result = await api.characters.list(projectId)
       return result
     },
   })
@@ -136,6 +161,23 @@ export function DualSidebarWritingInterface({
     // editor.commands.insertContent(text)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _unused = text
+  }
+
+  const handleCreateCharacter = () => {
+    setSelectedCharacter(null)
+    setCharacterDialogMode("create")
+    setCharacterDialogOpen(true)
+  }
+
+  const handleEditCharacter = (character: Character) => {
+    setSelectedCharacter(character)
+    setCharacterDialogMode("edit")
+    setCharacterDialogOpen(true)
+  }
+
+  const handleDeleteCharacter = (character: Character) => {
+    setSelectedCharacter(character)
+    setDeleteCharacterDialogOpen(true)
   }
 
   const codexData = {
@@ -214,25 +256,57 @@ export function DualSidebarWritingInterface({
                             <Users className="h-4 w-4" />
                             <span>Characters</span>
                             <Badge className="ml-auto" variant="secondary">
-                              {codexData.characters.length}
+                              {characters.length}
                             </Badge>
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <div className="ml-6 space-y-1">
-                            {codexData.characters.map((character) => (
-                              <Button
-                                className="w-full justify-start"
-                                key={character.name}
-                                onClick={() => openCodexModal("characters", character.name)}
-                                size="sm"
-                                variant="ghost"
-                              >
-                                <span className="truncate">{character.name}</span>
-                                <span className="ml-auto text-muted-foreground text-xs">
-                                  {character.role}
-                                </span>
-                              </Button>
+                            <Button
+                              className="w-full justify-start text-muted-foreground"
+                              onClick={handleCreateCharacter}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              <Plus className="h-4 w-4" />
+                              <span>Create New Character</span>
+                            </Button>
+                            {characters.map((character) => (
+                              <ContextMenu key={character.id}>
+                                <ContextMenuTrigger asChild>
+                                  <Button
+                                    className="w-full justify-start"
+                                    onClick={() => openCodexModal("characters", character.name)}
+                                    size="sm"
+                                    variant="ghost"
+                                  >
+                                    <span className="truncate">{character.name}</span>
+                                    <span className="ml-auto text-muted-foreground text-xs">
+                                      {character.role}
+                                    </span>
+                                  </Button>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                  <ContextMenuItem
+                                    onClick={() => openCodexModal("characters", character.name)}
+                                  >
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    View Details
+                                  </ContextMenuItem>
+                                  <ContextMenuItem onClick={() => handleEditCharacter(character)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit Character
+                                  </ContextMenuItem>
+                                  <ContextMenuSeparator />
+                                  <ContextMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() => handleDeleteCharacter(character)}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Character
+                                  </ContextMenuItem>
+                                </ContextMenuContent>
+                              </ContextMenu>
                             ))}
                           </div>
                         </CollapsibleContent>
@@ -455,6 +529,25 @@ export function DualSidebarWritingInterface({
           onClose={closeCodexModal}
           projectId={projectId}
         />
+
+        {/* Character Dialog */}
+        <CharacterDialog
+          character={selectedCharacter}
+          mode={characterDialogMode}
+          onOpenChange={setCharacterDialogOpen}
+          open={characterDialogOpen}
+          projectId={projectId}
+        />
+
+        {/* Delete Character Dialog */}
+        {selectedCharacter && (
+          <DeleteCharacterDialog
+            character={selectedCharacter}
+            onOpenChange={setDeleteCharacterDialogOpen}
+            open={deleteCharacterDialogOpen}
+            projectId={projectId}
+          />
+        )}
       </SidebarProvider>
     </TooltipProvider>
   )
