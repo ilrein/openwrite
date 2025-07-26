@@ -4,6 +4,7 @@ import type {
   chapter,
   character,
   location,
+  lore,
   plotPoint,
   project,
   projectCollaborator,
@@ -29,6 +30,9 @@ export type NewLocation = InferInsertModel<typeof location>
 
 export type PlotPoint = InferSelectModel<typeof plotPoint>
 export type NewPlotPoint = InferInsertModel<typeof plotPoint>
+
+export type Lore = InferSelectModel<typeof lore>
+export type NewLore = InferInsertModel<typeof lore>
 
 export type ProjectCollaborator = InferSelectModel<typeof projectCollaborator>
 export type NewProjectCollaborator = InferInsertModel<typeof projectCollaborator>

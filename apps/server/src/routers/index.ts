@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm"
 import { type Context, Hono } from "hono"
 import { db } from "../db"
-import { character, member, organization, project } from "../db/schema"
+import { character, location, lore, member, organization, plotPoint, project } from "../db/schema"
 import { requireAuth, verifyProjectAccess } from "../middleware/auth"
 import { aiProvidersRouter } from "./ai-providers"
 
@@ -475,6 +475,442 @@ router.delete(
       return c.json({ success: true })
     } catch (_error) {
       return c.json({ error: "Failed to delete character" }, 500)
+    }
+  }
+)
+
+// List locations for a project
+router.get(
+  "/projects/:projectId/locations",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+
+    const locations = await db
+      .select({
+        id: location.id,
+        name: location.name,
+        description: location.description,
+        type: location.type,
+        parentLocationId: location.parentLocationId,
+        image: location.image,
+        metadata: location.metadata,
+        createdAt: location.createdAt,
+        updatedAt: location.updatedAt,
+      })
+      .from(location)
+      .where(eq(location.projectId, projectId))
+      .orderBy(location.name)
+
+    return c.json({
+      locations: locations.map((loc) => ({
+        ...loc,
+        createdAt: loc.createdAt.toISOString(),
+        updatedAt: loc.updatedAt.toISOString(),
+      })),
+    })
+  }
+)
+
+// Get a specific location
+router.get(
+  "/projects/:projectId/locations/:locationId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const locationId = c.req.param("locationId")
+
+    const locationData = await db
+      .select()
+      .from(location)
+      .where(and(eq(location.id, locationId), eq(location.projectId, projectId)))
+      .get()
+
+    if (!locationData) {
+      return c.json({ error: "Location not found" }, 404)
+    }
+
+    return c.json({
+      location: {
+        ...locationData,
+        createdAt: locationData.createdAt.toISOString(),
+        updatedAt: locationData.updatedAt.toISOString(),
+      },
+    })
+  }
+)
+
+// Create a new location
+router.post(
+  "/projects/:projectId/locations",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const body = await c.req.json()
+
+    const id = crypto.randomUUID()
+    const now = new Date()
+
+    try {
+      await db.insert(location).values({
+        id,
+        name: body.name,
+        description: body.description,
+        type: body.type,
+        parentLocationId: body.parentLocationId,
+        image: body.image,
+        metadata: body.metadata,
+        projectId,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return c.json({ success: true, id })
+    } catch (_error) {
+      return c.json({ error: "Failed to create location" }, 500)
+    }
+  }
+)
+
+// Update a location
+router.put(
+  "/projects/:projectId/locations/:locationId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const locationId = c.req.param("locationId")
+    const body = await c.req.json()
+
+    try {
+      await db
+        .update(location)
+        .set({
+          name: body.name,
+          description: body.description,
+          type: body.type,
+          parentLocationId: body.parentLocationId,
+          image: body.image,
+          metadata: body.metadata,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(location.id, locationId), eq(location.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to update location" }, 500)
+    }
+  }
+)
+
+// Delete a location
+router.delete(
+  "/projects/:projectId/locations/:locationId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const locationId = c.req.param("locationId")
+
+    try {
+      await db
+        .delete(location)
+        .where(and(eq(location.id, locationId), eq(location.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to delete location" }, 500)
+    }
+  }
+)
+
+// List lore entries for a project
+router.get(
+  "/projects/:projectId/lore",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+
+    const loreEntries = await db
+      .select({
+        id: lore.id,
+        name: lore.name,
+        description: lore.description,
+        type: lore.type,
+        metadata: lore.metadata,
+        createdAt: lore.createdAt,
+        updatedAt: lore.updatedAt,
+      })
+      .from(lore)
+      .where(eq(lore.projectId, projectId))
+      .orderBy(lore.name)
+
+    return c.json({
+      lore: loreEntries.map((entry) => ({
+        ...entry,
+        createdAt: entry.createdAt.toISOString(),
+        updatedAt: entry.updatedAt.toISOString(),
+      })),
+    })
+  }
+)
+
+// Get a specific lore entry
+router.get(
+  "/projects/:projectId/lore/:loreId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const loreId = c.req.param("loreId")
+
+    const loreData = await db
+      .select()
+      .from(lore)
+      .where(and(eq(lore.id, loreId), eq(lore.projectId, projectId)))
+      .get()
+
+    if (!loreData) {
+      return c.json({ error: "Lore entry not found" }, 404)
+    }
+
+    return c.json({
+      lore: {
+        ...loreData,
+        createdAt: loreData.createdAt.toISOString(),
+        updatedAt: loreData.updatedAt.toISOString(),
+      },
+    })
+  }
+)
+
+// Create a new lore entry
+router.post(
+  "/projects/:projectId/lore",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const body = await c.req.json()
+
+    const id = crypto.randomUUID()
+    const now = new Date()
+
+    try {
+      await db.insert(lore).values({
+        id,
+        name: body.name,
+        description: body.description,
+        type: body.type,
+        metadata: body.metadata,
+        projectId,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return c.json({ success: true, id })
+    } catch (_error) {
+      return c.json({ error: "Failed to create lore entry" }, 500)
+    }
+  }
+)
+
+// Update a lore entry
+router.put(
+  "/projects/:projectId/lore/:loreId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const loreId = c.req.param("loreId")
+    const body = await c.req.json()
+
+    try {
+      await db
+        .update(lore)
+        .set({
+          name: body.name,
+          description: body.description,
+          type: body.type,
+          metadata: body.metadata,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(lore.id, loreId), eq(lore.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to update lore entry" }, 500)
+    }
+  }
+)
+
+// Delete a lore entry
+router.delete(
+  "/projects/:projectId/lore/:loreId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const loreId = c.req.param("loreId")
+
+    try {
+      await db.delete(lore).where(and(eq(lore.id, loreId), eq(lore.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to delete lore entry" }, 500)
+    }
+  }
+)
+
+// List plot points for a project
+router.get(
+  "/projects/:projectId/plot-points",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+
+    const plotPoints = await db
+      .select({
+        id: plotPoint.id,
+        title: plotPoint.title,
+        description: plotPoint.description,
+        type: plotPoint.type,
+        order: plotPoint.order,
+        status: plotPoint.status,
+        chapterId: plotPoint.chapterId,
+        createdAt: plotPoint.createdAt,
+        updatedAt: plotPoint.updatedAt,
+      })
+      .from(plotPoint)
+      .where(eq(plotPoint.projectId, projectId))
+      .orderBy(plotPoint.order)
+
+    return c.json({
+      plotPoints: plotPoints.map((point) => ({
+        ...point,
+        createdAt: point.createdAt.toISOString(),
+        updatedAt: point.updatedAt.toISOString(),
+      })),
+    })
+  }
+)
+
+// Get a specific plot point
+router.get(
+  "/projects/:projectId/plot-points/:plotPointId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const plotPointId = c.req.param("plotPointId")
+
+    const plotPointData = await db
+      .select()
+      .from(plotPoint)
+      .where(and(eq(plotPoint.id, plotPointId), eq(plotPoint.projectId, projectId)))
+      .get()
+
+    if (!plotPointData) {
+      return c.json({ error: "Plot point not found" }, 404)
+    }
+
+    return c.json({
+      plotPoint: {
+        ...plotPointData,
+        createdAt: plotPointData.createdAt.toISOString(),
+        updatedAt: plotPointData.updatedAt.toISOString(),
+      },
+    })
+  }
+)
+
+// Create a new plot point
+router.post(
+  "/projects/:projectId/plot-points",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const body = await c.req.json()
+
+    const id = crypto.randomUUID()
+    const now = new Date()
+
+    try {
+      await db.insert(plotPoint).values({
+        id,
+        title: body.title,
+        description: body.description,
+        type: body.type,
+        order: body.order,
+        status: body.status || "planned",
+        chapterId: body.chapterId,
+        projectId,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return c.json({ success: true, id })
+    } catch (_error) {
+      return c.json({ error: "Failed to create plot point" }, 500)
+    }
+  }
+)
+
+// Update a plot point
+router.put(
+  "/projects/:projectId/plot-points/:plotPointId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const plotPointId = c.req.param("plotPointId")
+    const body = await c.req.json()
+
+    try {
+      await db
+        .update(plotPoint)
+        .set({
+          title: body.title,
+          description: body.description,
+          type: body.type,
+          order: body.order,
+          status: body.status,
+          chapterId: body.chapterId,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(plotPoint.id, plotPointId), eq(plotPoint.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to update plot point" }, 500)
+    }
+  }
+)
+
+// Delete a plot point
+router.delete(
+  "/projects/:projectId/plot-points/:plotPointId",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: Context<{ Bindings: Env; Variables: Variables }>) => {
+    const projectId = c.req.param("projectId")
+    const plotPointId = c.req.param("plotPointId")
+
+    try {
+      await db
+        .delete(plotPoint)
+        .where(and(eq(plotPoint.id, plotPointId), eq(plotPoint.projectId, projectId)))
+
+      return c.json({ success: true })
+    } catch (_error) {
+      return c.json({ error: "Failed to delete plot point" }, 500)
     }
   }
 )

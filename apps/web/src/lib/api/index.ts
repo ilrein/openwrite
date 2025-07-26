@@ -38,6 +38,13 @@ export type {
 // Lore API
 export { createLoreApi, loreApi } from "./lore"
 export type {
+  CreatePlotData,
+  PlotThread,
+  UpdatePlotData,
+} from "./plot"
+// Plot API
+export { createPlotApi, plotApi } from "./plot"
+export type {
   CreateNovelData,
   CreateProjectData,
   Novel,
@@ -53,6 +60,7 @@ import { aiProvidersApi } from "./ai-providers"
 import { charactersApi } from "./characters"
 import { locationsApi } from "./locations"
 import { loreApi } from "./lore"
+import { plotApi } from "./plot"
 import { novelApi, projectApi } from "./projects"
 
 // Future API clients will be exported here:
@@ -69,6 +77,7 @@ export const api = {
   characters: charactersApi,
   locations: locationsApi,
   lore: loreApi,
+  plot: plotApi,
   // chapters: chapterApi,
   // organizations: organizationApi,
 }

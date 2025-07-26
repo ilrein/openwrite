@@ -45,91 +45,24 @@ export default function CodexModal({
     enabled: isOpen, // Only fetch when modal is open
   })
 
-  // Fetch locations from API (will use mock data until backend is ready)
+  // Fetch locations from API
   const { data: locations = [] } = useQuery({
     queryKey: ["locations", projectId],
-    queryFn: () => {
-      // TODO: Implement when backend API is ready
-      // return api.locations.list(projectId)
-
-      // Mock data for now
-      return [
-        {
-          id: "1",
-          name: "The Dark Forest",
-          type: "fantasy_realm" as const,
-          description:
-            "An ancient forest filled with magical creatures and hidden dangers. The trees themselves seem alive, and the deeper one ventures, the more the magic affects reality itself.",
-          projectId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "2",
-          name: "Crystal Cave",
-          type: "building" as const,
-          description:
-            "Hidden cavern containing the ancient crystal that holds the power to reshape the world. The cave is protected by ancient wards and magical traps.",
-          projectId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "3",
-          name: "Village of Elderbrook",
-          type: "city" as const,
-          description:
-            "Aria's peaceful hometown nestled in a valley surrounded by rolling hills. This quiet farming community has been untouched by the magical conflicts of the wider world.",
-          projectId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ] as Location[]
-    },
+    queryFn: () => api.locations.list(projectId),
     enabled: isOpen, // Only fetch when modal is open
   })
 
-  // Fetch lore entries from API (will use mock data until backend is ready)
+  // Fetch lore entries from API
   const { data: loreEntries = [] } = useQuery({
     queryKey: ["lore", projectId],
-    queryFn: () => {
-      // TODO: Implement when backend API is ready
-      // return api.lore.list(projectId)
+    queryFn: () => api.lore.list(projectId),
+    enabled: isOpen, // Only fetch when modal is open
+  })
 
-      // Mock data for now
-      return [
-        {
-          id: "1",
-          name: "Magic System",
-          type: "core_rule",
-          description:
-            "Elemental magic drawn from nature's energy requires emotional balance and physical gestures. Overuse can lead to magical exhaustion or even permanent damage to the caster's connection to magic.",
-          projectId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "2",
-          name: "The Ancient Prophecy",
-          type: "history",
-          description:
-            "Foretells the coming of a chosen one who will either restore balance to the world or bring about its destruction. The prophecy speaks in riddles that have been interpreted differently throughout history.",
-          projectId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "3",
-          name: "The Great War",
-          type: "history",
-          description:
-            "A conflict that shaped the modern world, pitting those who would use magic freely against those who feared its power. The war ended with magical restrictions that still influence society today.",
-          projectId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ] as LoreEntry[]
-    },
+  // Fetch plot threads from API
+  const { data: plotThreads = [] } = useQuery({
+    queryKey: ["plot", projectId],
+    queryFn: () => api.plot.list(projectId),
     enabled: isOpen, // Only fetch when modal is open
   })
 
@@ -174,26 +107,12 @@ export default function CodexModal({
             title: "Plot Threads",
             description: "Track your story's narrative threads and arcs",
             icon: FileText,
-            entries: [
-              {
-                name: "Quest for the Crystal",
-                role: "Main Plot",
-                description:
-                  "The primary journey driving the story as Aria seeks the legendary crystal that could restore balance to magic itself. This quest will test her abilities and force difficult choices.",
-              },
-              {
-                name: "Kellan's Secret Past",
-                role: "Subplot",
-                description:
-                  "Mysteries surrounding the mentor's history gradually reveal his connection to the Great War and the true reason he's helping Aria on her quest.",
-              },
-              {
-                name: "The Prophecy Unfolds",
-                role: "Subplot",
-                description:
-                  "Gradual revelation of Aria's destiny and the true meaning of the ancient prophecy, which may not be what anyone expected.",
-              },
-            ],
+            entries: plotThreads.map((thread) => ({
+              ...thread,
+              name: thread.title,
+              role: thread.type || "Plot Thread",
+              description: thread.description || "No description available",
+            })),
           }
         default:
           return {
@@ -204,7 +123,7 @@ export default function CodexModal({
           }
       }
     },
-    [characters, locations, loreEntries]
+    [characters, locations, loreEntries, plotThreads]
   )
 
   const codexTypes = [
