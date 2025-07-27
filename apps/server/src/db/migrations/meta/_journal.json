@@ -15,6 +15,13 @@
       "when": 1753537477308,
       "tag": "0001_cold_thaddeus_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1753627033755,
+      "tag": "0002_overconfident_living_tribunal",
+      "breakpoints": true
     }
   ]
 }
