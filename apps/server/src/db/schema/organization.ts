@@ -17,10 +17,10 @@ export const member = sqliteTable("member", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id),
+    .references(() => organization.id, { onDelete: "cascade" }),
   role: text("role").notNull(), // "owner", "admin", "member"
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
@@ -31,10 +31,10 @@ export const invitation = sqliteTable("invitation", {
   email: text("email").notNull(),
   inviterId: text("inviter_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organization.id),
+    .references(() => organization.id, { onDelete: "cascade" }),
   role: text("role").notNull(),
   status: text("status").notNull(), // "pending", "accepted", "rejected", "expired"
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
@@ -57,9 +57,9 @@ export const teamMember = sqliteTable("team_member", {
   id: text("id").primaryKey(),
   teamId: text("team_id")
     .notNull()
-    .references(() => team.id),
+    .references(() => team.id, { onDelete: "cascade" }),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
