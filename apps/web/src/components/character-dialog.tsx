@@ -22,20 +22,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { api, type Character } from "@/lib/api"
 
 const characterSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   description: z.string().optional(),
-  role: z.enum(["protagonist", "antagonist", "supporting", "minor"]).optional(),
+  // role field removed - users can describe character roles freely in description
   appearance: z.string().optional(),
   personality: z.string().optional(),
   backstory: z.string().optional(),
@@ -66,7 +59,7 @@ export function CharacterDialog({
     defaultValues: {
       name: character?.name || "",
       description: character?.description || "",
-      role: character?.role || undefined,
+      // role field removed
       appearance: character?.appearance || "",
       personality: character?.personality || "",
       backstory: character?.backstory || "",
@@ -79,7 +72,7 @@ export function CharacterDialog({
     form.reset({
       name: character?.name || "",
       description: character?.description || "",
-      role: character?.role || undefined,
+      // role field removed
       appearance: character?.appearance || "",
       personality: character?.personality || "",
       backstory: character?.backstory || "",
@@ -143,45 +136,19 @@ export function CharacterDialog({
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Character name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select defaultValue={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="protagonist">Protagonist</SelectItem>
-                        <SelectItem value="antagonist">Antagonist</SelectItem>
-                        <SelectItem value="supporting">Supporting</SelectItem>
-                        <SelectItem value="minor">Minor</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Character name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -192,7 +159,7 @@ export function CharacterDialog({
                   <FormControl>
                     <Textarea
                       className="min-h-[80px]"
-                      placeholder="Brief description of the character"
+                      placeholder="Brief description of the character, including their role in the story"
                       {...field}
                     />
                   </FormControl>

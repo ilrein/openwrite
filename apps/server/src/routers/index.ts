@@ -286,7 +286,6 @@ router.get(
         id: character.id,
         name: character.name,
         description: character.description,
-        role: character.role,
         appearance: character.appearance,
         personality: character.personality,
         backstory: character.backstory,
@@ -349,17 +348,8 @@ router.post(
 
     try {
       const body = await c.req.json()
-      const {
-        name,
-        description,
-        role,
-        appearance,
-        personality,
-        backstory,
-        motivation,
-        image,
-        metadata,
-      } = body
+      const { name, description, appearance, personality, backstory, motivation, image, metadata } =
+        body
 
       if (!name || name.trim().length === 0) {
         return c.json({ error: "Name is required" }, 400)
@@ -372,7 +362,6 @@ router.post(
         id,
         name: name.trim(),
         description: description?.trim() || null,
-        role: role || null,
         appearance: appearance?.trim() || null,
         personality: personality?.trim() || null,
         backstory: backstory?.trim() || null,
@@ -402,17 +391,8 @@ router.put(
     const characterId = c.req.param("characterId")
 
     try {
-      const {
-        name,
-        description,
-        role,
-        appearance,
-        personality,
-        backstory,
-        motivation,
-        image,
-        metadata,
-      } = await c.req.json()
+      const { name, description, appearance, personality, backstory, motivation, image, metadata } =
+        await c.req.json()
 
       const updateData: Record<string, string | Date | null> = {
         updatedAt: new Date(),
@@ -423,9 +403,6 @@ router.put(
       }
       if (description !== undefined) {
         updateData.description = description
-      }
-      if (role !== undefined) {
-        updateData.role = role
       }
       if (appearance !== undefined) {
         updateData.appearance = appearance
@@ -492,7 +469,6 @@ router.get(
         id: location.id,
         name: location.name,
         description: location.description,
-        type: location.type,
         parentLocationId: location.parentLocationId,
         image: location.image,
         metadata: location.metadata,
@@ -564,7 +540,6 @@ router.post(
         id,
         name: body.name,
         description: body.description,
-        type: body.type,
         parentLocationId: body.parentLocationId,
         image: body.image,
         metadata: body.metadata,
@@ -596,7 +571,6 @@ router.put(
         .set({
           name: body.name,
           description: body.description,
-          type: body.type,
           parentLocationId: body.parentLocationId,
           image: body.image,
           metadata: body.metadata,

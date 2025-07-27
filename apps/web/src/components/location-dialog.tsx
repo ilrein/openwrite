@@ -22,22 +22,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { api, type Location } from "@/lib/api"
 
 const locationSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   description: z.string().optional(),
-  type: z
-    .enum(["city", "country", "building", "room", "fantasy_realm", "planet", "dimension"])
-    .optional(),
+  // type field removed - users can describe location types freely in description
   parentLocationId: z.string().optional(),
   image: z.string().optional(),
 })
@@ -66,7 +57,7 @@ export function LocationDialog({
     defaultValues: {
       name: location?.name || "",
       description: location?.description || "",
-      type: location?.type || undefined,
+      // type field removed
       parentLocationId: location?.parentLocationId || "",
       image: location?.image || "",
     },
@@ -77,7 +68,7 @@ export function LocationDialog({
     form.reset({
       name: location?.name || "",
       description: location?.description || "",
-      type: location?.type || undefined,
+      // type field removed
       parentLocationId: location?.parentLocationId || "",
       image: location?.image || "",
     })
@@ -139,48 +130,19 @@ export function LocationDialog({
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Location name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <Select defaultValue={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="city">City</SelectItem>
-                        <SelectItem value="country">Country</SelectItem>
-                        <SelectItem value="building">Building</SelectItem>
-                        <SelectItem value="room">Room</SelectItem>
-                        <SelectItem value="fantasy_realm">Fantasy Realm</SelectItem>
-                        <SelectItem value="planet">Planet</SelectItem>
-                        <SelectItem value="dimension">Dimension</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Location name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -191,7 +153,7 @@ export function LocationDialog({
                   <FormControl>
                     <Textarea
                       className="min-h-[100px]"
-                      placeholder="Describe this location, its atmosphere, key features..."
+                      placeholder="Describe this location, its atmosphere, key features, and what type of place it is..."
                       {...field}
                     />
                   </FormControl>

@@ -99,7 +99,7 @@ export function LocationSidebarSection({
                       variant="ghost"
                     >
                       <span className="truncate">{location.name}</span>
-                      <span className="ml-auto text-muted-foreground text-xs">{location.type}</span>
+                      {/* Type display removed - no longer showing location.type */}
                     </Button>
                   </ContextMenuTrigger>
                   <ContextMenuContent>

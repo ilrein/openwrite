@@ -99,9 +99,7 @@ export function CharacterSidebarSection({
                       variant="ghost"
                     >
                       <span className="truncate">{character.name}</span>
-                      <span className="ml-auto text-muted-foreground text-xs">
-                        {character.role}
-                      </span>
+                      {/* Role display removed - no longer showing character.role */}
                     </Button>
                   </ContextMenuTrigger>
                   <ContextMenuContent>

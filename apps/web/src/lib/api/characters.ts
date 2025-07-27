@@ -1,50 +1,46 @@
-import type { ApiClient } from "./base"
-import { apiCall } from "./base"
-
 /**
- * Character data types
+ * Character API client
+ *
+ * This module handles all character-related API operations
+ * for the OpenWrite application.
  */
+
+import { type ApiClient, apiCall } from "./base"
+
 export interface Character {
   id: string
   name: string
-  description: string | null
-  role: "protagonist" | "antagonist" | "supporting" | "minor" | null
-  appearance: string | null
-  personality: string | null
-  backstory: string | null
-  motivation: string | null
-  image: string | null
-  metadata: string | null
-  createdAt: string
-  updatedAt: string
+  description?: string
+  // role field removed - users can describe character roles freely in description
+  appearance?: string
+  personality?: string
+  backstory?: string
+  motivation?: string
+  projectId?: string
+  workId?: string
+  image?: string
+  metadata?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface CreateCharacterData {
   name: string
-  description?: string | null
-  role?: "protagonist" | "antagonist" | "supporting" | "minor" | null
-  appearance?: string | null
-  personality?: string | null
-  backstory?: string | null
-  motivation?: string | null
-  image?: string | null
-  metadata?: string | null
+  description?: string
+  // role field removed
+  appearance?: string
+  personality?: string
+  backstory?: string
+  motivation?: string
+  image?: string
+  metadata?: string
 }
 
-export interface UpdateCharacterData {
-  name?: string
-  description?: string | null
-  role?: "protagonist" | "antagonist" | "supporting" | "minor" | null
-  appearance?: string | null
-  personality?: string | null
-  backstory?: string | null
-  motivation?: string | null
-  image?: string | null
-  metadata?: string | null
-}
+export interface UpdateCharacterData extends Partial<CreateCharacterData> {}
 
 /**
- * Character API client implementation with project context
+ * Character API client factory
+ * Creates a character API client for a specific project
  */
 export const createCharacterApi = (
   projectId: string
@@ -87,9 +83,13 @@ export const createCharacterApi = (
 })
 
 /**
- * Simple character API for direct usage (requires projectId parameter)
+ * Global characters API (project-agnostic operations)
  */
 export const charactersApi = {
+  // Create a character API client for a specific project
+  forProject: (projectId: string) => createCharacterApi(projectId),
+
+  // Convenience methods that require projectId
   list: (projectId: string) => createCharacterApi(projectId).list(),
   get: (projectId: string, characterId: string) => createCharacterApi(projectId).get(characterId),
   create: (projectId: string, data: CreateCharacterData) =>
