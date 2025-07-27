@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react"
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
-import { AutocompleteToggle } from "@/components/autocomplete-toggle"
+
 import { ProjectSidebar } from "@/components/project-sidebar"
 import TiptapEditor from "@/components/tiptap-editor"
 import { Button } from "@/components/ui/button"
@@ -140,27 +140,6 @@ function DualSidebarWritingInterfaceInner({
           <div className="flex-1 overflow-auto">
             <TiptapEditor content={content} onUpdate={onUpdate} placeholder={placeholder} />
           </div>
-
-          {/* Writing Stats Footer */}
-          <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex items-center justify-start px-4 py-3">
-              <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                <span>{content.split(" ").filter((word) => word.length > 0).length} words</span>
-                <div className="h-4 w-px bg-border" />
-                <span>
-                  {Math.ceil(content.split(" ").filter((word) => word.length > 0).length / 200)} min
-                  read
-                </span>
-                <div className="h-4 w-px bg-border" />
-                <span>
-                  Auto-saved{" "}
-                  {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </span>
-                <div className="h-4 w-px bg-border" />
-                <AutocompleteToggle />
-              </div>
-            </div>
-          </footer>
         </div>
       </SidebarInset>
 

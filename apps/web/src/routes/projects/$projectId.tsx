@@ -4,11 +4,11 @@ import { Sparkles } from "lucide-react"
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
-import { AutocompleteToggle } from "@/components/autocomplete-toggle"
+
 import { ProjectSidebar } from "@/components/project-sidebar"
 
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+
 import {
   Sheet,
   SheetContent,
@@ -113,24 +113,6 @@ function WriteLayout() {
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
-
-          {/* Status Bar */}
-          <footer className="border-t px-6 py-2">
-            <div className="flex items-center justify-between text-muted-foreground text-sm">
-              <div className="flex items-center gap-4">
-                <span>Words: {project.currentWordCount.toLocaleString()}</span>
-                <Separator className="h-4" orientation="vertical" />
-                <span>Last saved: 2 minutes ago</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span>
-                  {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </span>
-                <div className="h-4 w-px bg-border" />
-                <AutocompleteToggle />
-              </div>
-            </div>
-          </footer>
         </SidebarInset>
 
         {/* Right Sidebar - AI Assistant */}
