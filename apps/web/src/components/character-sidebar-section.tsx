@@ -63,9 +63,17 @@ export function CharacterSidebarSection({
   return (
     <>
       <SidebarMenuItem>
-        <Collapsible onOpenChange={onToggle} open={isExpanded}>
+        <Collapsible
+          onOpenChange={(open) => {
+            console.log("CharacterSidebarSection Collapsible onOpenChange:", open)
+            onToggle()
+          }}
+          open={isExpanded}
+        >
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton>
+            <SidebarMenuButton
+              onClick={() => console.log("CharacterSidebarSection button clicked")}
+            >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (

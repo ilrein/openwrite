@@ -117,6 +117,12 @@ function DualSidebarWritingInterfaceInner({
     : 0
 
   const toggleCodexSection = (section: string) => {
+    console.log(
+      `🎯 toggleCodexSection("${section}"):`,
+      expandedCodexSections[section],
+      "->",
+      !expandedCodexSections[section]
+    )
     setExpandedCodexSections((prev) => ({
       ...prev,
       [section]: !prev[section],
@@ -206,6 +212,7 @@ function DualSidebarWritingInterfaceInner({
                 {/* Characters */}
                 <CharacterSidebarSection
                   isExpanded={expandedCodexSections.characters}
+                  key="characters-section"
                   onOpenCodexModal={openCodexModal}
                   onToggle={() => toggleCodexSection("characters")}
                   projectId={projectId}
@@ -214,6 +221,7 @@ function DualSidebarWritingInterfaceInner({
                 {/* Locations */}
                 <LocationSidebarSection
                   isExpanded={expandedCodexSections.locations}
+                  key="locations-section"
                   onOpenCodexModal={openCodexModal}
                   onToggle={() => toggleCodexSection("locations")}
                   projectId={projectId}
