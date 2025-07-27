@@ -56,10 +56,7 @@ function WriteLayout() {
   // Fetch project details
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
-    queryFn: async () => {
-      const result = await api.projects.get(projectId)
-      return result
-    },
+    queryFn: async () => await api.projects.get(projectId),
   })
 
   if (isLoading) {
@@ -108,27 +105,12 @@ function WriteLayout() {
     setCodexModalConfig({})
   }
 
+  // Codex data will be fetched from API
   const codexData = {
-    characters: [
-      { name: "Aria", role: "Protagonist" },
-      { name: "Kellan", role: "Mentor" },
-      { name: "The Guardian", role: "Antagonist" },
-    ],
-    locations: [
-      { name: "The Dark Forest", role: "Setting" },
-      { name: "Crystal Cave", role: "Key Location" },
-      { name: "Village of Elderbrook", role: "Starting Point" },
-    ],
-    lore: [
-      { name: "Magic System", role: "Core Rule" },
-      { name: "The Ancient Prophecy", role: "Plot Device" },
-      { name: "The Great War", role: "History" },
-    ],
-    plot: [
-      { name: "Quest for the Crystal", role: "Main Plot" },
-      { name: "Kellan's Secret Past", role: "Subplot" },
-      { name: "The Prophecy Unfolds", role: "Subplot" },
-    ],
+    characters: [] as Array<{ name: string; role: string }>,
+    locations: [] as Array<{ name: string; role: string }>,
+    lore: [] as Array<{ name: string; role: string }>,
+    plot: [] as Array<{ name: string; role: string }>,
   }
 
   return (

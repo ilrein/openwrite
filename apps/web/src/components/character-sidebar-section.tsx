@@ -87,7 +87,7 @@ export function CharacterSidebarSection({
                 variant="ghost"
               >
                 <Plus className="h-4 w-4" />
-                <span>Create New Character</span>
+                <span>New</span>
               </Button>
               {characters.map((character) => (
                 <ContextMenu key={character.id}>
