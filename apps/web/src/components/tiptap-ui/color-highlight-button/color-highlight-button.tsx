@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 // --- Tiptap UI ---
 import type { UseColorHighlightConfig } from "@/components/tiptap-ui/color-highlight-button"

@@ -600,7 +600,7 @@ export default function CodexModal({
                       className={`cursor-pointer transition-all hover:bg-accent/50 ${
                         selectedEntry === entry.name ? "bg-accent" : ""
                       }`}
-                      key={entry.name}
+                      key={entry.id}
                       onClick={() => handleEntryClick(entry.name)}
                     >
                       <CardHeader className="pb-2">

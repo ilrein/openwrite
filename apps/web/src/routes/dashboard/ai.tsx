@@ -1,5 +1,3 @@
-"use client"
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { CheckCircle, Plus, Trash2 } from "lucide-react"
