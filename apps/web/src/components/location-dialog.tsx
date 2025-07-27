@@ -137,7 +137,7 @@ export function LocationDialog({
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Location name" {...field} />
+                    <Input {...field} name="location_name" placeholder="Location name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

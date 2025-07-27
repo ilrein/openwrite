@@ -143,7 +143,7 @@ export function CharacterDialog({
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Character name" {...field} />
+                    <Input {...field} name="character_name" placeholder="Character name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
