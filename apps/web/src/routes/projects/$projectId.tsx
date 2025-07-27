@@ -1,38 +1,25 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
-import {
-  ChevronDown,
-  ChevronRight,
-  FileEdit,
-  FileText,
-  MapPin,
-  PenTool,
-  Scroll,
-} from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { useState } from "react"
-import { CharacterSidebarSection } from "@/components/character-sidebar-section"
-import CodexModal from "@/components/codex-modal"
-import { Badge } from "@/components/ui/badge"
+import { useHotkeys } from "react-hotkeys-hook"
+import { AIChatContent } from "@/components/ai-chat-content"
+import { AutocompleteToggle } from "@/components/autocomplete-toggle"
+import { ProjectSidebar } from "@/components/project-sidebar"
+
 import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import UserMenu from "@/components/user-menu"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import WriteHeader from "@/components/write-header"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { api } from "@/lib/api"
 
 export const Route = createFileRoute("/projects/$projectId")({
@@ -41,17 +28,27 @@ export const Route = createFileRoute("/projects/$projectId")({
 
 function WriteLayout() {
   const { projectId } = Route.useParams()
-  const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
-  const [codexModalConfig, setCodexModalConfig] = useState<{
-    initialType?: string | null
-    initialEntry?: string | null
-  }>({})
-  const [expandedCodexSections, setExpandedCodexSections] = useState<Record<string, boolean>>({
-    characters: false,
-    locations: false,
-    lore: false,
-    plot: false,
-  })
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
+  const isMobile = useIsMobile()
+
+  // Keyboard shortcut to toggle AI assistant
+  useHotkeys(
+    "cmd+j, ctrl+j",
+    () => {
+      setRightSidebarOpen((prev) => !prev)
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: false,
+      enableOnContentEditable: false,
+    }
+  )
+
+  const handleInsertText = (text: string) => {
+    // This would integrate with the TiptapEditor to insert text at cursor position
+    // TODO: Implement text insertion at cursor position
+    console.log("Insert text:", text)
+  }
 
   // Fetch project details
   const { data: project, isLoading } = useQuery({
@@ -72,334 +69,46 @@ function WriteLayout() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="mb-2 font-semibold text-2xl">Project not found</h2>
-          <Link to="/dashboard/projects">
-            <Button variant="outline">Back to Projects</Button>
-          </Link>
+          <Link to="/dashboard/projects">Back to Projects</Link>
         </div>
       </div>
     )
   }
 
-  const targetWordCount = project.targetWordCount || 0
-  const progressPercentage = targetWordCount
-    ? Math.min((project.currentWordCount / targetWordCount) * 100, 100)
-    : 0
-
-  const toggleCodexSection = (section: string) => {
-    setExpandedCodexSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
-
-  const openCodexModal = (type?: string, entry?: string) => {
-    setCodexModalConfig({
-      initialType: type || null,
-      initialEntry: entry || null,
-    })
-    setIsCodexModalOpen(true)
-  }
-
-  const closeCodexModal = () => {
-    setIsCodexModalOpen(false)
-    setCodexModalConfig({})
-  }
-
-  // Codex data will be fetched from API
-  const codexData = {
-    characters: [] as Array<{ name: string; role: string }>,
-    locations: [] as Array<{ name: string; role: string }>,
-    lore: [] as Array<{ name: string; role: string }>,
-    plot: [] as Array<{ name: string; role: string }>,
-  }
-
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        {/* Writing Sidebar */}
-        <Sidebar>
-          <SidebarHeader>
-            <div className="px-4 py-2">
-              <div className="space-y-2">
-                <p className="text-muted-foreground text-sm">
-                  {project.currentWordCount.toLocaleString()} words
-                </p>
-                {project.targetWordCount && (
-                  <div>
-                    <Progress className="h-2" value={progressPercentage} />
-                    <p className="mt-1 text-muted-foreground text-xs">
-                      {Math.round(progressPercentage)}% of{" "}
-                      {project.targetWordCount.toLocaleString()} word goal
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </SidebarHeader>
-
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Structure</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link params={{ projectId }} to="/projects/$projectId/canvas">
-                        <FileText />
-                        <span>Canvas</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link params={{ projectId }} to="/write/$projectId">
-                        <PenTool />
-                        <span>Write</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Codex</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {/* Characters */}
-                  <CharacterSidebarSection
-                    isExpanded={expandedCodexSections.characters}
-                    onOpenCodexModal={openCodexModal}
-                    onToggle={() => toggleCodexSection("characters")}
-                    projectId={projectId}
-                  />
-
-                  {/* Locations */}
-                  <SidebarMenuItem>
-                    <Collapsible
-                      onOpenChange={() => toggleCodexSection("locations")}
-                      open={expandedCodexSections.locations}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
-                          {expandedCodexSections.locations ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          <MapPin className="h-4 w-4" />
-                          <span>Locations</span>
-                          <Badge className="ml-auto" variant="secondary">
-                            {codexData.locations.length}
-                          </Badge>
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="ml-6 space-y-1">
-                          {codexData.locations.map((location) => (
-                            <Button
-                              className="w-full justify-start"
-                              key={location.name}
-                              onClick={() => openCodexModal("locations", location.name)}
-                              size="sm"
-                              variant="ghost"
-                            >
-                              <span className="truncate">{location.name}</span>
-                              <span className="ml-auto text-muted-foreground text-xs">
-                                {location.role}
-                              </span>
-                            </Button>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenuItem>
-
-                  {/* Lore */}
-                  <SidebarMenuItem>
-                    <Collapsible
-                      onOpenChange={() => toggleCodexSection("lore")}
-                      open={expandedCodexSections.lore}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
-                          {expandedCodexSections.lore ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          <Scroll className="h-4 w-4" />
-                          <span>Lore</span>
-                          <Badge className="ml-auto" variant="secondary">
-                            {codexData.lore.length}
-                          </Badge>
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="ml-6 space-y-1">
-                          {codexData.lore.map((loreItem) => (
-                            <Button
-                              className="w-full justify-start"
-                              key={loreItem.name}
-                              onClick={() => openCodexModal("lore", loreItem.name)}
-                              size="sm"
-                              variant="ghost"
-                            >
-                              <span className="truncate">{loreItem.name}</span>
-                              <span className="ml-auto text-muted-foreground text-xs">
-                                {loreItem.role}
-                              </span>
-                            </Button>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenuItem>
-
-                  {/* Plot Threads */}
-                  <SidebarMenuItem>
-                    <Collapsible
-                      onOpenChange={() => toggleCodexSection("plot")}
-                      open={expandedCodexSections.plot}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
-                          {expandedCodexSections.plot ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          <FileText className="h-4 w-4" />
-                          <span>Plot Threads</span>
-                          <Badge className="ml-auto" variant="secondary">
-                            {codexData.plot.length}
-                          </Badge>
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="ml-6 space-y-1">
-                          {codexData.plot.map((plotItem) => (
-                            <Button
-                              className="w-full justify-start"
-                              key={plotItem.name}
-                              onClick={() => openCodexModal("plot", plotItem.name)}
-                              size="sm"
-                              variant="ghost"
-                            >
-                              <span className="truncate">{plotItem.name}</span>
-                              <span className="ml-auto text-muted-foreground text-xs">
-                                {plotItem.role}
-                              </span>
-                            </Button>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Chapters</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <Collapsible>
-                      <CollapsibleTrigger asChild>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <SidebarMenuButton>
-                                <ChevronRight className="h-4 w-4" />
-                                <span className="truncate">
-                                  Chapter 1: The Beginning and the Call to Adventure
-                                </span>
-                                <Badge className="ml-auto" variant="secondary">
-                                  3
-                                </Badge>
-                              </SidebarMenuButton>
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                              <p>Chapter 1: The Beginning and the Call to Adventure</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="ml-6 space-y-1">
-                          <Button className="w-full justify-start" size="sm" variant="ghost">
-                            Scene 1: Opening
-                          </Button>
-                          <Button className="w-full justify-start" size="sm" variant="ghost">
-                            Scene 2: Conflict
-                          </Button>
-                          <Button className="w-full justify-start" size="sm" variant="ghost">
-                            Scene 3: Resolution
-                          </Button>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Collapsible>
-                      <CollapsibleTrigger asChild>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <SidebarMenuButton>
-                                <ChevronRight className="h-4 w-4" />
-                                <span className="truncate">
-                                  Chapter 2: The Journey Through the Dark Forest
-                                </span>
-                                <Badge className="ml-auto" variant="secondary">
-                                  2
-                                </Badge>
-                              </SidebarMenuButton>
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                              <p>Chapter 2: The Journey Through the Dark Forest</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="ml-6 space-y-1">
-                          <Button className="w-full justify-start" size="sm" variant="ghost">
-                            Scene 1: Departure
-                          </Button>
-                          <Button className="w-full justify-start" size="sm" variant="ghost">
-                            Scene 2: Discovery
-                          </Button>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <div className="space-y-2 p-4">
-              <UserMenu />
-              <Button className="w-full" size="sm">
-                <FileEdit className="mr-2 h-4 w-4" />
-                Quick Notes
-              </Button>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
+        {/* Project Sidebar */}
+        <ProjectSidebar projectId={projectId} />
 
         {/* Main Content Area */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <WriteHeader
-            breadcrumbs={[
-              { label: "Dashboard", to: "/dashboard" },
-              { label: "Projects", to: "/dashboard/projects" },
-              { label: project.title },
-            ]}
-          />
+        <SidebarInset className="flex flex-1 flex-col">
+          {/* Header */}
+          <div className="flex h-16 items-center justify-between border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <WriteHeader
+              breadcrumbs={[
+                { label: "Projects", to: "/dashboard/projects" },
+                { label: project.title },
+              ]}
+            />
+
+            {/* AI Assistant Toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => setRightSidebarOpen((prev) => !prev)}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span className="sr-only">Toggle AI Assistant</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>AI Assistant (⌘J)</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
           {/* Page Content */}
           <main className="flex-1 overflow-auto">
@@ -410,27 +119,40 @@ function WriteLayout() {
           <footer className="border-t px-6 py-2">
             <div className="flex items-center justify-between text-muted-foreground text-sm">
               <div className="flex items-center gap-4">
-                <span>Current Scene: Chapter 1, Scene 2</span>
+                <span>Words: {project.currentWordCount.toLocaleString()}</span>
                 <Separator className="h-4" orientation="vertical" />
                 <span>Last saved: 2 minutes ago</span>
               </div>
               <div className="flex items-center gap-4">
-                <Badge variant="secondary">Auto-save: On</Badge>
-                <span>Writing session: 45 minutes</span>
+                <span>
+                  {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <div className="h-4 w-px bg-border" />
+                <AutocompleteToggle />
               </div>
             </div>
           </footer>
-        </div>
-      </div>
+        </SidebarInset>
 
-      {/* Codex Modal */}
-      <CodexModal
-        initialEntry={codexModalConfig.initialEntry}
-        initialType={codexModalConfig.initialType}
-        isOpen={isCodexModalOpen}
-        onClose={closeCodexModal}
-        projectId={projectId}
-      />
+        {/* Right Sidebar - AI Assistant */}
+        {isMobile ? (
+          <Sheet onOpenChange={setRightSidebarOpen} open={rightSidebarOpen}>
+            <SheetContent className="w-[18rem] bg-background p-0" side="right">
+              <SheetHeader className="sr-only">
+                <SheetTitle>AI Writing Assistant</SheetTitle>
+                <SheetDescription>AI-powered writing help and suggestions</SheetDescription>
+              </SheetHeader>
+              <AIChatContent onInsertText={handleInsertText} />
+            </SheetContent>
+          </Sheet>
+        ) : (
+          rightSidebarOpen && (
+            <div className="w-[18rem] border-l bg-background">
+              <AIChatContent onInsertText={handleInsertText} />
+            </div>
+          )
+        )}
+      </div>
     </SidebarProvider>
   )
 }
