@@ -26,6 +26,76 @@ interface ProjectSidebarProps {
   projectId: string
 }
 
+interface CollapsibleSectionProps {
+  sectionKey: string
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  items: Array<{ id: string; name: string; role?: string; type?: string }>
+  isExpanded: boolean
+  onToggle: () => void
+  onOpenModal: (type: string, entry?: string) => void
+  secondaryField: "role" | "type"
+}
+
+function CollapsibleSection({
+  sectionKey,
+  icon: Icon,
+  title,
+  items,
+  isExpanded,
+  onToggle,
+  onOpenModal,
+  secondaryField,
+}: CollapsibleSectionProps) {
+  return (
+    <SidebarMenuItem>
+      <Collapsible onOpenChange={onToggle} open={isExpanded}>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton>
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+            <Icon className="h-4 w-4" />
+            <span>{title}</span>
+            <Badge className="ml-auto" variant="secondary">
+              {items.length}
+            </Badge>
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="ml-6 space-y-1">
+            <Button
+              className="w-full justify-start text-muted-foreground"
+              onClick={() => onOpenModal(sectionKey)}
+              size="sm"
+              variant="ghost"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New</span>
+            </Button>
+            {items.map((item) => (
+              <Button
+                className="w-full justify-start"
+                key={item.id}
+                onClick={() => onOpenModal(sectionKey, item.name)}
+                size="sm"
+                variant="ghost"
+              >
+                <span className="truncate">{item.name}</span>
+                <span className="ml-auto text-muted-foreground text-xs">
+                  {item[secondaryField]}
+                </span>
+              </Button>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </SidebarMenuItem>
+  )
+}
+
 export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
   const [codexModalConfig, setCodexModalConfig] = useState<{
@@ -128,154 +198,40 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                 />
 
                 {/* Lore */}
-                <SidebarMenuItem>
-                  <Collapsible
-                    onOpenChange={() => toggleCodexSection("lore")}
-                    open={expandedCodexSections.lore}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
-                        {expandedCodexSections.lore ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                        <Scroll className="h-4 w-4" />
-                        <span>Lore</span>
-                        <Badge className="ml-auto" variant="secondary">
-                          {loreEntries.length}
-                        </Badge>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="ml-6 space-y-1">
-                        <Button
-                          className="w-full justify-start text-muted-foreground"
-                          onClick={() => openCodexModal("lore")}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span>New</span>
-                        </Button>
-                        {loreEntries.map((loreItem) => (
-                          <Button
-                            className="w-full justify-start"
-                            key={loreItem.id}
-                            onClick={() => openCodexModal("lore", loreItem.name)}
-                            size="sm"
-                            variant="ghost"
-                          >
-                            <span className="truncate">{loreItem.name}</span>
-                            <span className="ml-auto text-muted-foreground text-xs">
-                              {loreItem.type}
-                            </span>
-                          </Button>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
+                <CollapsibleSection
+                  icon={Scroll}
+                  isExpanded={expandedCodexSections.lore}
+                  items={loreEntries}
+                  onOpenModal={openCodexModal}
+                  onToggle={() => toggleCodexSection("lore")}
+                  secondaryField="type"
+                  sectionKey="lore"
+                  title="Lore"
+                />
 
                 {/* Plot Threads */}
-                <SidebarMenuItem>
-                  <Collapsible
-                    onOpenChange={() => toggleCodexSection("plot")}
-                    open={expandedCodexSections.plot}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
-                        {expandedCodexSections.plot ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                        <FileText className="h-4 w-4" />
-                        <span>Plot Threads</span>
-                        <Badge className="ml-auto" variant="secondary">
-                          {plotThreads.length}
-                        </Badge>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="ml-6 space-y-1">
-                        <Button
-                          className="w-full justify-start text-muted-foreground"
-                          onClick={() => openCodexModal("plot")}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span>New</span>
-                        </Button>
-                        {plotThreads.map((plotItem) => (
-                          <Button
-                            className="w-full justify-start"
-                            key={plotItem.id}
-                            onClick={() => openCodexModal("plot", plotItem.name)}
-                            size="sm"
-                            variant="ghost"
-                          >
-                            <span className="truncate">{plotItem.name}</span>
-                            <span className="ml-auto text-muted-foreground text-xs">
-                              {plotItem.role}
-                            </span>
-                          </Button>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
+                <CollapsibleSection
+                  icon={FileText}
+                  isExpanded={expandedCodexSections.plot}
+                  items={plotThreads}
+                  onOpenModal={openCodexModal}
+                  onToggle={() => toggleCodexSection("plot")}
+                  secondaryField="role"
+                  sectionKey="plot"
+                  title="Plot Threads"
+                />
 
                 {/* Notes */}
-                <SidebarMenuItem>
-                  <Collapsible
-                    onOpenChange={() => toggleCodexSection("notes")}
-                    open={expandedCodexSections.notes}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
-                        {expandedCodexSections.notes ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                        <FileText className="h-4 w-4" />
-                        <span>Notes & Ideas</span>
-                        <Badge className="ml-auto" variant="secondary">
-                          {notes.length}
-                        </Badge>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="ml-6 space-y-1">
-                        <Button
-                          className="w-full justify-start text-muted-foreground"
-                          onClick={() => openCodexModal("notes")}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span>New</span>
-                        </Button>
-                        {notes.map((note) => (
-                          <Button
-                            className="w-full justify-start"
-                            key={note.id}
-                            onClick={() => openCodexModal("notes", note.name)}
-                            size="sm"
-                            variant="ghost"
-                          >
-                            <span className="truncate">{note.name}</span>
-                            <span className="ml-auto text-muted-foreground text-xs">
-                              {note.role}
-                            </span>
-                          </Button>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
+                <CollapsibleSection
+                  icon={FileText}
+                  isExpanded={expandedCodexSections.notes}
+                  items={notes}
+                  onOpenModal={openCodexModal}
+                  onToggle={() => toggleCodexSection("notes")}
+                  secondaryField="role"
+                  sectionKey="notes"
+                  title="Notes & Ideas"
+                />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
