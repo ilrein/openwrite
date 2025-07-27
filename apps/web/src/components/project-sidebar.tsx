@@ -47,13 +47,13 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   ]
 
   const plotThreads = [
-    { name: "Hero's Journey", role: "Main Plot" },
-    { name: "Romance Subplot", role: "Secondary" },
+    { id: "1", name: "Hero's Journey", role: "Main Plot" },
+    { id: "2", name: "Romance Subplot", role: "Secondary" },
   ]
 
   const notes = [
-    { name: "Chapter Ideas", role: "Planning" },
-    { name: "Research Notes", role: "Reference" },
+    { id: "1", name: "Chapter Ideas", role: "Planning" },
+    { id: "2", name: "Research Notes", role: "Reference" },
   ]
 
   const toggleCodexSection = (section: string) => {
@@ -211,7 +211,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                         {plotThreads.map((plotItem) => (
                           <Button
                             className="w-full justify-start"
-                            key={plotItem.name}
+                            key={plotItem.id}
                             onClick={() => openCodexModal("plot", plotItem.name)}
                             size="sm"
                             variant="ghost"
@@ -261,7 +261,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                         {notes.map((note) => (
                           <Button
                             className="w-full justify-start"
-                            key={note.name}
+                            key={note.id}
                             onClick={() => openCodexModal("notes", note.name)}
                             size="sm"
                             variant="ghost"
@@ -295,7 +295,10 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
         initialEntry={codexModalConfig.initialEntry}
         initialType={codexModalConfig.initialType}
         isOpen={isCodexModalOpen}
-        onClose={() => setIsCodexModalOpen(false)}
+        onClose={() => {
+          setIsCodexModalOpen(false)
+          setCodexModalConfig({})
+        }}
         projectId={projectId}
       />
     </>

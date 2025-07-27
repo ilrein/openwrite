@@ -259,7 +259,7 @@ function StoryCanvas() {
       })
 
       const newNode: StoryNode = {
-        id: `${elementType}-${Date.now()}`,
+        id: `${elementType}-${crypto.randomUUID()}`,
         type: "storyNode",
         position,
         data: {

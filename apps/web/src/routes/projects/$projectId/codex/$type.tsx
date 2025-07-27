@@ -30,28 +30,28 @@ function CodexTypeInterface() {
           title: "Characters",
           description: "Manage your story's characters",
           icon: Users,
-          entries: [] as Array<{ name: string; role: string; description: string }>,
+          entries: [] as Array<{ id: string; name: string; role: string; description: string }>,
         }
       case "locations":
         return {
           title: "Locations",
           description: "Track your story's places and settings",
           icon: MapPin,
-          entries: [] as Array<{ name: string; role: string; description: string }>,
+          entries: [] as Array<{ id: string; name: string; role: string; description: string }>,
         }
       case "lore":
         return {
           title: "Lore & World-building",
           description: "Document your world's history and rules",
           icon: Scroll,
-          entries: [] as Array<{ name: string; role: string; description: string }>,
+          entries: [] as Array<{ id: string; name: string; role: string; description: string }>,
         }
       case "plot":
         return {
           title: "Plot Threads",
           description: "Track your story's narrative threads and arcs",
           icon: FileText,
-          entries: [] as Array<{ name: string; role: string; description: string }>,
+          entries: [] as Array<{ id: string; name: string; role: string; description: string }>,
         }
       default:
         return {
@@ -85,7 +85,7 @@ function CodexTypeInterface() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {config.entries.map((entry) => (
-            <Card className="cursor-pointer transition-shadow hover:shadow-lg" key={entry.name}>
+            <Card className="cursor-pointer transition-shadow hover:shadow-lg" key={entry.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
