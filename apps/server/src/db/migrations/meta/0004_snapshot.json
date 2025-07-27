@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "821c854d-01ae-4fa5-873e-38b3a1aa4a8f",
-  "prevId": "9ff066b2-0bdb-435f-9446-9a425ea82f4a",
+  "id": "dbe0b1d6-9fd0-4e0a-b958-0a23506cbb6c",
+  "prevId": "821c854d-01ae-4fa5-873e-38b3a1aa4a8f",
   "tables": {
     "ai_provider": {
       "name": "ai_provider",
@@ -574,7 +574,7 @@
           "tableTo": "organization",
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -638,7 +638,7 @@
           "tableTo": "organization",
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -806,7 +806,7 @@
           "tableTo": "team",
           "columnsFrom": ["team_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "team_member_user_id_user_id_fk": {
