@@ -1,10 +1,8 @@
 name: Deploy OpenWrite
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-  # Only deploy after CI passes
+  # Only deploy after CI passes - removed immediate push trigger to prevent double deployments
   workflow_run:
     workflows: ["CI"]
     types: [completed]
@@ -15,10 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Server & Docs
     environment: production
-    # Only run if CI workflow succeeded or if manually triggered/pushed to main
+    # Only run if CI workflow succeeded or if manually triggered
     if: |
       github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'push' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     permissions:
       contents: read
