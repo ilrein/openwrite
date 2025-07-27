@@ -54,12 +54,7 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        disableTransitionOnChange
-        storageKey="vite-ui-theme"
-      >
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem storageKey="vite-ui-theme">
         {isDashboard ? (
           // Dashboard and write pages use their own layouts with sidebars
           <div className="h-svh">{isFetching ? <Loader /> : <Outlet />}</div>
@@ -71,7 +66,7 @@ function RootComponent() {
           </div>
         )}
         <CommandPalette />
-        <Toaster richColors />
+        <Toaster />
       </ThemeProvider>
     </>
   )

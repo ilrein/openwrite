@@ -24,6 +24,61 @@ body {
   }
 }
 
+/* Sonner toast custom styling and animations */
+.toaster[data-sonner-toaster] {
+  --normal-bg: var(--background);
+  --normal-border: var(--border);
+  --normal-text: var(--foreground);
+  --success-bg: var(--background);
+  --success-border: var(--border);
+  --success-text: var(--foreground);
+  --error-bg: var(--background);
+  --error-border: var(--border);
+  --error-text: var(--foreground);
+}
+
+/* Custom slide animations */
+@keyframes sonner-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes sonner-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Apply animations with higher specificity */
+.toaster[data-sonner-toaster] [data-sonner-toast] {
+  animation: sonner-slide-in 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.toaster[data-sonner-toaster] [data-sonner-toast][data-removed="true"] {
+  animation: sonner-slide-out 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .toaster[data-sonner-toaster] [data-sonner-toast] {
+    animation: none;
+    transition: opacity 0.2s ease-in-out;
+  }
+}
+
 :root {
   --background: oklch(0.9777 0.0041 301.4256);
   --foreground: oklch(0.3651 0.0325 287.0807);
