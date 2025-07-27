@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Code2, GitFork, Github, Heart, Star, Users } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +26,73 @@ const TITLE_TEXT = `
  ╚███╔███╔╝██║  ██║██║   ██║   ███████╗
   ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝
  `
+
+// Typewriter animation component
+function TypewriterText({ text }: { text: string }) {
+  const [displayedText, setDisplayedText] = useState("")
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [showCursor, setShowCursor] = useState(true)
+  const [isComplete, setIsComplete] = useState(false)
+
+  useEffect(() => {
+    if (!isComplete && currentIndex < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText(text.slice(0, currentIndex + 1))
+        setCurrentIndex(currentIndex + 1)
+
+        // Mark as complete when finished
+        if (currentIndex + 1 >= text.length) {
+          setIsComplete(true)
+          setShowCursor(false) // Hide cursor when done
+        }
+      }, 2.5) // ULTRA FAST typing speed!
+
+      return () => clearTimeout(timer)
+    }
+  }, [currentIndex, text, isComplete])
+
+  // Blinking cursor effect (only while typing)
+  useEffect(() => {
+    if (!isComplete) {
+      const cursorTimer = setInterval(() => {
+        setShowCursor((prev) => !prev)
+      }, 500)
+
+      return () => clearInterval(cursorTimer)
+    }
+  }, [isComplete])
+
+  return (
+    <div className="typewriter-container">
+      <style>{`
+        .typewriter-container {
+          font-family: monospace;
+          white-space: pre;
+          overflow-x: auto;
+          position: relative;
+        }
+        
+        .typewriter-cursor {
+          display: inline-block;
+          background-color: currentColor;
+          width: 2px;
+          animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+      `}</style>
+      <span>{displayedText}</span>
+      {currentIndex <= text.length && (
+        <span className="typewriter-cursor" style={{ opacity: showCursor ? 1 : 0 }}>
+          |
+        </span>
+      )}
+    </div>
+  )
+}
 
 async function checkApiHealth() {
   // In development, use VITE_SERVER_URL. In production, use same origin
@@ -82,7 +149,9 @@ function HomeComponent() {
     <div className="container mx-auto max-w-4xl px-4 py-2">
       {/* Hero Section */}
       <div className="mb-8 text-center">
-        <pre className="mb-6 overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
+        <div className="mb-6 text-sm">
+          <TypewriterText text={TITLE_TEXT} />
+        </div>
         <p className="mx-auto mb-6 max-w-2xl text-lg text-muted-foreground">
           A modern, AI-powered writing platform built with the latest web technologies. Create,
           edit, and collaborate with intelligent assistance.
