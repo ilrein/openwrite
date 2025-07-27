@@ -27,16 +27,7 @@ export const workTypeEnum = [
   "graphic_novel",
   "screenplay",
 ] as const
-export const roleEnum = ["protagonist", "antagonist", "supporting", "minor"] as const
-export const locationTypeEnum = [
-  "city",
-  "country",
-  "building",
-  "room",
-  "fantasy_realm",
-  "planet",
-  "dimension",
-] as const
+// Role and type enums removed - no longer constraining users to predefined categories
 export const plotPointTypeEnum = [
   "inciting_incident",
   "plot_point_1",
@@ -147,13 +138,9 @@ export const character = sqliteTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     description: text("description"),
-    role: text("role", { enum: roleEnum }),
+    // role field removed - users can describe character roles freely in description
 
-    // Physical and personality traits
-    appearance: text("appearance"), // Physical description
-    personality: text("personality"), // Personality traits
-    backstory: text("backstory"), // Character history
-    motivation: text("motivation"), // What drives the character
+    // Simplified character - just name, description, and core metadata
 
     // Relationships - can be shared across project or specific to a work
     projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared characters
@@ -185,7 +172,7 @@ export const location = sqliteTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     description: text("description"),
-    type: text("type", { enum: locationTypeEnum }),
+    // type field removed - users can describe location types freely in description
 
     // Relationships - can be shared across project or specific to a work
     projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared locations

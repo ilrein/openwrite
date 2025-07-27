@@ -11,7 +11,7 @@ export interface Location {
   id: string
   name: string
   description?: string
-  type?: "city" | "country" | "building" | "room" | "fantasy_realm" | "planet" | "dimension"
+  // type field removed - users can describe location types freely in description
   projectId?: string
   workId?: string
   parentLocationId?: string | null
@@ -24,7 +24,7 @@ export interface Location {
 export interface CreateLocationData {
   name: string
   description?: string
-  type?: Location["type"]
+  // type field removed
   parentLocationId?: string | null
   image?: string
   metadata?: string

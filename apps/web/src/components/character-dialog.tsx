@@ -22,24 +22,14 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { api, type Character } from "@/lib/api"
 
 const characterSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   description: z.string().optional(),
-  role: z.enum(["protagonist", "antagonist", "supporting", "minor"]).optional(),
-  appearance: z.string().optional(),
-  personality: z.string().optional(),
-  backstory: z.string().optional(),
-  motivation: z.string().optional(),
+  // role field removed - users can describe character roles freely in description
+  // appearance, personality, backstory, motivation removed - simplified to just name and description
 })
 
 type CharacterFormData = z.infer<typeof characterSchema>
@@ -66,11 +56,8 @@ export function CharacterDialog({
     defaultValues: {
       name: character?.name || "",
       description: character?.description || "",
-      role: character?.role || undefined,
-      appearance: character?.appearance || "",
-      personality: character?.personality || "",
-      backstory: character?.backstory || "",
-      motivation: character?.motivation || "",
+      // role field removed
+      // appearance, personality, backstory, motivation removed - simplified to just name and description
     },
   })
 
@@ -79,11 +66,8 @@ export function CharacterDialog({
     form.reset({
       name: character?.name || "",
       description: character?.description || "",
-      role: character?.role || undefined,
-      appearance: character?.appearance || "",
-      personality: character?.personality || "",
-      backstory: character?.backstory || "",
-      motivation: character?.motivation || "",
+      // role field removed
+      // appearance, personality, backstory, motivation removed - simplified to just name and description
     })
   }, [character, form])
 
@@ -143,45 +127,19 @@ export function CharacterDialog({
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Character name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select defaultValue={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="protagonist">Protagonist</SelectItem>
-                        <SelectItem value="antagonist">Antagonist</SelectItem>
-                        <SelectItem value="supporting">Supporting</SelectItem>
-                        <SelectItem value="minor">Minor</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name *</FormLabel>
+                  <FormControl>
+                    <Input {...field} name="character_name" placeholder="Character name" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -192,7 +150,7 @@ export function CharacterDialog({
                   <FormControl>
                     <Textarea
                       className="min-h-[80px]"
-                      placeholder="Brief description of the character"
+                      placeholder="Brief description of the character, including their role in the story"
                       {...field}
                     />
                   </FormControl>
@@ -201,77 +159,7 @@ export function CharacterDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="appearance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Appearance</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="Physical description, clothing, distinguishing features"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="personality"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Personality</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="Personality traits, quirks, mannerisms"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="backstory"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Backstory</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="Character's history, upbringing, past events"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="motivation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Motivation</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="What drives this character? Goals, fears, desires"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Appearance, personality, backstory, motivation fields removed - simplified to just name and description */}
 
             <DialogFooter>
               <Button

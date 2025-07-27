@@ -30,92 +30,28 @@ function CodexTypeInterface() {
           title: "Characters",
           description: "Manage your story's characters",
           icon: Users,
-          entries: [
-            {
-              name: "Aria",
-              role: "Protagonist",
-              description: "A young mage discovering her powers",
-            },
-            {
-              name: "Kellan",
-              role: "Mentor",
-              description: "An experienced warrior with a mysterious past",
-            },
-            {
-              name: "The Guardian",
-              role: "Antagonist",
-              description: "Ancient protector of the crystal",
-            },
-          ],
+          entries: [] as Array<{ name: string; role: string; description: string }>,
         }
       case "locations":
         return {
           title: "Locations",
           description: "Track your story's places and settings",
           icon: MapPin,
-          entries: [
-            {
-              name: "The Dark Forest",
-              role: "Setting",
-              description: "An ancient forest filled with magical creatures",
-            },
-            {
-              name: "Crystal Cave",
-              role: "Key Location",
-              description: "Hidden cavern containing the ancient crystal",
-            },
-            {
-              name: "Village of Elderbrook",
-              role: "Starting Point",
-              description: "Aria's peaceful hometown",
-            },
-          ],
+          entries: [] as Array<{ name: string; role: string; description: string }>,
         }
       case "lore":
         return {
           title: "Lore & World-building",
           description: "Document your world's history and rules",
           icon: Scroll,
-          entries: [
-            {
-              name: "Magic System",
-              role: "Core Rule",
-              description: "Elemental magic drawn from nature's energy",
-            },
-            {
-              name: "The Ancient Prophecy",
-              role: "Plot Device",
-              description: "Foretells the coming of a chosen one",
-            },
-            {
-              name: "The Great War",
-              role: "History",
-              description: "A conflict that shaped the modern world",
-            },
-          ],
+          entries: [] as Array<{ name: string; role: string; description: string }>,
         }
       case "plot":
         return {
           title: "Plot Threads",
           description: "Track your story's narrative threads and arcs",
           icon: FileText,
-          entries: [
-            {
-              name: "Quest for the Crystal",
-              role: "Main Plot",
-              description: "The primary journey driving the story",
-            },
-            {
-              name: "Kellan's Secret Past",
-              role: "Subplot",
-              description: "Mysteries surrounding the mentor's history",
-            },
-            {
-              name: "The Prophecy Unfolds",
-              role: "Subplot",
-              description: "Gradual revelation of Aria's destiny",
-            },
-          ],
+          entries: [] as Array<{ name: string; role: string; description: string }>,
         }
       default:
         return {

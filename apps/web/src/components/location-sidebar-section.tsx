@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { ChevronDown, ChevronRight, Edit, FileText, Plus, Trash2, Users } from "lucide-react"
+import { ChevronDown, ChevronRight, Edit, FileText, MapPin, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { CharacterDialog } from "@/components/character-dialog"
-import { DeleteCharacterDialog } from "@/components/delete-character-dialog"
+import { DeleteLocationDialog } from "@/components/delete-location-dialog"
+import { LocationDialog } from "@/components/location-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -14,50 +14,50 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { api, type Character } from "@/lib/api"
+import { api, type Location } from "@/lib/api"
 
-interface CharacterSidebarSectionProps {
+interface LocationSidebarSectionProps {
   projectId: string
   isExpanded: boolean
   onToggle: () => void
   onOpenCodexModal: (type: string, entry: string) => void
 }
 
-export function CharacterSidebarSection({
+export function LocationSidebarSection({
   projectId,
   isExpanded,
   onToggle,
   onOpenCodexModal,
-}: CharacterSidebarSectionProps) {
-  const [characterDialogOpen, setCharacterDialogOpen] = useState(false)
-  const [characterDialogMode, setCharacterDialogMode] = useState<"create" | "edit">("create")
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
-  const [deleteCharacterDialogOpen, setDeleteCharacterDialogOpen] = useState(false)
+}: LocationSidebarSectionProps) {
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false)
+  const [locationDialogMode, setLocationDialogMode] = useState<"create" | "edit">("create")
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+  const [deleteLocationDialogOpen, setDeleteLocationDialogOpen] = useState(false)
 
-  // Fetch characters
-  const { data: characters = [] } = useQuery({
-    queryKey: ["characters", projectId],
+  // Fetch locations
+  const { data: locations = [] } = useQuery({
+    queryKey: ["locations", projectId],
     queryFn: async () => {
-      const result = await api.characters.list(projectId)
+      const result = await api.locations.list(projectId)
       return result
     },
   })
 
-  const handleCreateCharacter = () => {
-    setSelectedCharacter(null)
-    setCharacterDialogMode("create")
-    setCharacterDialogOpen(true)
+  const handleCreateLocation = () => {
+    setSelectedLocation(null)
+    setLocationDialogMode("create")
+    setLocationDialogOpen(true)
   }
 
-  const handleEditCharacter = (character: Character) => {
-    setSelectedCharacter(character)
-    setCharacterDialogMode("edit")
-    setCharacterDialogOpen(true)
+  const handleEditLocation = (location: Location) => {
+    setSelectedLocation(location)
+    setLocationDialogMode("edit")
+    setLocationDialogOpen(true)
   }
 
-  const handleDeleteCharacter = (character: Character) => {
-    setSelectedCharacter(character)
-    setDeleteCharacterDialogOpen(true)
+  const handleDeleteLocation = (location: Location) => {
+    setSelectedLocation(location)
+    setDeleteLocationDialogOpen(true)
   }
 
   return (
@@ -71,10 +71,10 @@ export function CharacterSidebarSection({
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-              <Users className="h-4 w-4" />
-              <span>Characters</span>
+              <MapPin className="h-4 w-4" />
+              <span>Locations</span>
               <Badge className="ml-auto" variant="secondary">
-                {characters.length}
+                {locations.length}
               </Badge>
             </SidebarMenuButton>
           </CollapsibleTrigger>
@@ -82,42 +82,42 @@ export function CharacterSidebarSection({
             <div className="ml-6 space-y-1">
               <Button
                 className="w-full justify-start text-muted-foreground"
-                onClick={handleCreateCharacter}
+                onClick={handleCreateLocation}
                 size="sm"
                 variant="ghost"
               >
                 <Plus className="h-4 w-4" />
                 <span>New</span>
               </Button>
-              {characters.map((character) => (
-                <ContextMenu key={character.id}>
+              {locations.map((location) => (
+                <ContextMenu key={location.id}>
                   <ContextMenuTrigger asChild>
                     <Button
                       className="w-full justify-start"
-                      onClick={() => onOpenCodexModal("characters", character.name)}
+                      onClick={() => onOpenCodexModal("locations", location.name)}
                       size="sm"
                       variant="ghost"
                     >
-                      <span className="truncate">{character.name}</span>
-                      {/* Role display removed - no longer showing character.role */}
+                      <span className="truncate">{location.name}</span>
+                      {/* Type display removed - no longer showing location.type */}
                     </Button>
                   </ContextMenuTrigger>
                   <ContextMenuContent>
-                    <ContextMenuItem onClick={() => onOpenCodexModal("characters", character.name)}>
+                    <ContextMenuItem onClick={() => onOpenCodexModal("locations", location.name)}>
                       <FileText className="mr-2 h-4 w-4" />
                       View Details
                     </ContextMenuItem>
-                    <ContextMenuItem onClick={() => handleEditCharacter(character)}>
+                    <ContextMenuItem onClick={() => handleEditLocation(location)}>
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit Character
+                      Edit Location
                     </ContextMenuItem>
                     <ContextMenuSeparator />
                     <ContextMenuItem
                       className="text-destructive focus:text-destructive"
-                      onClick={() => handleDeleteCharacter(character)}
+                      onClick={() => handleDeleteLocation(location)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Character
+                      Delete Location
                     </ContextMenuItem>
                   </ContextMenuContent>
                 </ContextMenu>
@@ -127,21 +127,21 @@ export function CharacterSidebarSection({
         </Collapsible>
       </SidebarMenuItem>
 
-      {/* Character Dialog */}
-      <CharacterDialog
-        character={selectedCharacter}
-        mode={characterDialogMode}
-        onOpenChange={setCharacterDialogOpen}
-        open={characterDialogOpen}
+      {/* Location Dialog */}
+      <LocationDialog
+        location={selectedLocation}
+        mode={locationDialogMode}
+        onOpenChange={setLocationDialogOpen}
+        open={locationDialogOpen}
         projectId={projectId}
       />
 
-      {/* Delete Character Dialog */}
-      {selectedCharacter && (
-        <DeleteCharacterDialog
-          character={selectedCharacter}
-          onOpenChange={setDeleteCharacterDialogOpen}
-          open={deleteCharacterDialogOpen}
+      {/* Delete Location Dialog */}
+      {selectedLocation && (
+        <DeleteLocationDialog
+          location={selectedLocation}
+          onOpenChange={setDeleteLocationDialogOpen}
+          open={deleteLocationDialogOpen}
           projectId={projectId}
         />
       )}

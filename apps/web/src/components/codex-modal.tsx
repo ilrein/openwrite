@@ -1,20 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
-import { FileText, MapPin, Plus, Scroll, Users } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
-import { api, type Character, type Location, type LoreEntry } from "@/lib/api"
-import { DynamicCodexForm } from "./dynamic-codex-form"
-import { Badge } from "./ui/badge"
-import { Button } from "./ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
-import { Dialog, DialogContent } from "./ui/dialog"
-
-interface CodexEntry {
-  name: string
-  role: string
-  description: string
-}
-
-type CodexAnyEntry = Character | Location | LoreEntry | CodexEntry
+import { FileText, MapPin, Scroll, Settings, Sparkles, Star, Users, X, Zap } from "lucide-react"
+import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { api, type Character } from "@/lib/api"
 
 interface CodexModalProps {
   isOpen: boolean
@@ -24,6 +25,8 @@ interface CodexModalProps {
   initialEntry?: string | null
 }
 
+type CodexEntry = Character | { id: string; name: string; description?: string }
+
 export default function CodexModal({
   isOpen,
   onClose,
@@ -31,522 +34,442 @@ export default function CodexModal({
   initialType = null,
   initialEntry = null,
 }: CodexModalProps) {
-  const [selectedType, setSelectedType] = useState<string | null>(initialType)
-  const [selectedEntry, setSelectedEntry] = useState<CodexAnyEntry | null>(null)
-  const [isEditMode, setIsEditMode] = useState(false)
+  const [selectedType, setSelectedType] = useState(initialType || "characters")
+  const [selectedEntry, setSelectedEntry] = useState<string | null>(initialEntry)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isCreating, setIsCreating] = useState(false)
 
-  // Fetch characters from API
+  // Fetch characters
   const { data: characters = [] } = useQuery({
     queryKey: ["characters", projectId],
     queryFn: async () => {
       const result = await api.characters.list(projectId)
       return result
     },
-    enabled: isOpen, // Only fetch when modal is open
   })
 
-  // Fetch locations from API
+  // Fetch locations
   const { data: locations = [] } = useQuery({
     queryKey: ["locations", projectId],
-    queryFn: () => api.locations.list(projectId),
-    enabled: isOpen, // Only fetch when modal is open
-  })
-
-  // Fetch lore entries from API
-  const { data: loreEntries = [] } = useQuery({
-    queryKey: ["lore", projectId],
-    queryFn: () => api.lore.list(projectId),
-    enabled: isOpen, // Only fetch when modal is open
-  })
-
-  // Fetch plot threads from API
-  const { data: plotThreads = [] } = useQuery({
-    queryKey: ["plot", projectId],
-    queryFn: () => api.plot.list(projectId),
-    enabled: isOpen, // Only fetch when modal is open
-  })
-
-  const getTypeConfig = useCallback(
-    (typeParam: string) => {
-      switch (typeParam) {
-        case "characters":
-          return {
-            title: "Characters",
-            description: "Manage your story's characters",
-            icon: Users,
-            entries: characters.map((char) => ({
-              ...char,
-              role: char.role || "Character",
-              description: char.description || "No description available",
-            })),
-          }
-        case "locations":
-          return {
-            title: "Locations",
-            description: "Track your story's places and settings",
-            icon: MapPin,
-            entries: locations.map((location) => ({
-              ...location,
-              role: location.type || "Location",
-              description: location.description || "No description available",
-            })),
-          }
-        case "lore":
-          return {
-            title: "Lore & World-building",
-            description: "Document your world's history and rules",
-            icon: Scroll,
-            entries: loreEntries.map((lore) => ({
-              ...lore,
-              role: lore.type || "Lore",
-              description: lore.description || "No description available",
-            })),
-          }
-        case "plot":
-          return {
-            title: "Plot Threads",
-            description: "Track your story's narrative threads and arcs",
-            icon: FileText,
-            entries: plotThreads.map((thread) => ({
-              ...thread,
-              name: thread.title,
-              role: thread.type || "Plot Thread",
-              description: thread.description || "No description available",
-            })),
-          }
-        default:
-          return {
-            title: "Codex",
-            description: "Manage your story elements",
-            icon: FileText,
-            entries: [],
-          }
-      }
+    queryFn: async () => {
+      const result = await api.locations.list(projectId)
+      return result
     },
-    [characters, locations, loreEntries, plotThreads]
-  )
+  })
 
-  const codexTypes = [
-    { key: "characters", title: "Characters", icon: Users },
-    { key: "locations", title: "Locations", icon: MapPin },
-    { key: "lore", title: "Lore", icon: Scroll },
-    { key: "plot", title: "Plot Threads", icon: FileText },
-  ]
+  // Mock data for lore entries and plot threads - will be replaced with real API calls later
+  const loreEntries: Array<{ id: string; name: string; description: string }> = []
+  const plotThreads: Array<{ id: string; name: string; description: string }> = []
+  const notes: Array<{ id: string; name: string; description: string }> = []
 
-  // Find entry by name from the appropriate data array
-  const findEntryByName = useCallback(
-    (type: string, name: string): CodexAnyEntry | null => {
-      switch (type) {
-        case "characters":
-          return characters.find((char) => char.name === name) || null
-        case "locations":
-          return locations.find((location) => location.name === name) || null
-        case "lore":
-          return loreEntries.find((lore) => lore.name === name) || null
-        default:
-          return null
-      }
-    },
-    [characters, locations, loreEntries]
-  )
-
-  // Handle initial navigation when modal opens
-  useEffect(() => {
-    if (!isOpen) {
-      setSelectedType(null)
-      setSelectedEntry(null)
-      return
+  const getTypeConfig = (typeParam: string) => {
+    switch (typeParam) {
+      case "characters":
+        return {
+          title: "Characters",
+          description: "Manage your story's characters",
+          icon: Users,
+          entries: characters.map((char) => ({
+            ...char,
+            description: char.description || "No description available",
+          })),
+        }
+      case "locations":
+        return {
+          title: "Locations",
+          description: "Track your story's places and settings",
+          icon: MapPin,
+          entries: locations.map((location) => ({
+            ...location,
+            description: location.description || "No description available",
+          })),
+        }
+      case "lore":
+        return {
+          title: "Lore & World-building",
+          description: "Document your world's history and rules",
+          icon: Scroll,
+          entries: loreEntries.map((lore) => ({
+            ...lore,
+            description: lore.description || "No description available",
+          })),
+        }
+      case "plot":
+        return {
+          title: "Plot Threads",
+          description: "Track your story's narrative threads and arcs",
+          icon: FileText,
+          entries: plotThreads.map((plot) => ({
+            ...plot,
+            description: plot.description || "No description available",
+          })),
+        }
+      case "notes":
+        return {
+          title: "Notes & Ideas",
+          description: "Quick notes and ideas for your story",
+          icon: Zap,
+          entries: notes.map((note) => ({
+            ...note,
+            description: note.description || "No description available",
+          })),
+        }
+      default:
+        return {
+          title: "Codex",
+          description: "Manage your story elements",
+          icon: FileText,
+          entries: [],
+        }
     }
-
-    if (initialType && initialEntry) {
-      setSelectedType(initialType)
-      const foundEntry = findEntryByName(initialType, initialEntry)
-      setSelectedEntry(foundEntry)
-    } else if (initialType) {
-      setSelectedType(initialType)
-      setSelectedEntry(null)
-    } else {
-      setSelectedType(null)
-      setSelectedEntry(null)
-    }
-  }, [isOpen, initialType, initialEntry, findEntryByName])
-
-  const handleEntryClick = (entry: CodexAnyEntry) => {
-    setSelectedEntry(entry)
   }
 
-  const handleBackToType = () => {
-    setSelectedEntry(null)
-    setIsEditMode(false)
-  }
+  const config = getTypeConfig(selectedType)
+  const IconComponent = config.icon
 
-  const handleBackToOverview = () => {
-    setSelectedType(null)
-    setSelectedEntry(null)
-    setIsEditMode(false)
-  }
-
-  const handleEditToggle = () => {
-    setIsEditMode(!isEditMode)
-  }
-
-  const handleSaveComplete = () => {
-    setIsEditMode(false)
-  }
-
-  const renderOverview = () => (
-    <div className="space-y-6">
-      <div className="mb-8 text-center">
-        <h2 className="mb-2 font-bold text-2xl">Project Codex</h2>
-        <p className="text-muted-foreground">Manage all aspects of your story world</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {codexTypes.map((type) => {
-          const config = getTypeConfig(type.key)
-          const IconComponent = type.icon
-
-          return (
-            <Card
-              className="cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg"
-              key={type.key}
-              onClick={() => setSelectedType(type.key)}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <IconComponent className="h-6 w-6" />
-                  {type.title}
-                </CardTitle>
-                <CardDescription>{config.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-sm">
-                    {config.entries.length} items
-                  </span>
-                  <Badge variant="outline">View All</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-    </div>
+  const filteredEntries = config.entries.filter((entry) =>
+    entry.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const renderTypeView = () => {
-    if (!selectedType) {
+  const handleEntryClick = (entryName: string) => {
+    setSelectedEntry(entryName)
+    setIsCreating(false)
+  }
+
+  const handleCreateNew = () => {
+    setSelectedEntry(null)
+    setIsCreating(true)
+  }
+
+  const handleClose = () => {
+    setSelectedEntry(null)
+    setIsCreating(false)
+    onClose()
+  }
+
+  const getSelectedEntryData = () => {
+    if (!selectedEntry) {
       return null
     }
-
-    const config = getTypeConfig(selectedType)
-    const IconComponent = config.icon
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button onClick={handleBackToOverview} size="sm" variant="ghost">
-            ← Back to Codex
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="flex items-center gap-3 font-bold text-2xl">
-              <IconComponent className="h-7 w-7" />
-              {config.title}
-            </h2>
-            <p className="mt-1 text-muted-foreground">{config.description}</p>
-          </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add New
-          </Button>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {config.entries.map((entry) => (
-            <Card
-              className="cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg"
-              key={entry.name}
-              onClick={() => handleEntryClick(entry)}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{entry.name}</CardTitle>
-                    <CardDescription>{entry.role}</CardDescription>
-                  </div>
-                  <Badge variant="outline">Active</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="line-clamp-3 text-sm">{entry.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {config.entries.length === 0 && (
-          <div className="py-16 text-center">
-            <IconComponent className="mx-auto mb-4 h-16 w-16 opacity-50" />
-            <h3 className="mb-2 font-medium text-xl">No {config.title.toLowerCase()} yet</h3>
-            <p className="mb-6 text-muted-foreground">
-              Create your first item to start building your story world.
-            </p>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add New
-            </Button>
-          </div>
-        )}
-      </div>
-    )
+    return config.entries.find((entry) => entry.name === selectedEntry)
   }
 
-  // Helper function to check if entry is a Character object
-  const isCharacter = (entry: CodexAnyEntry): entry is Character => {
-    return "id" in entry && "role" in entry && entry.role !== undefined
-  }
+  const selectedEntryData = getSelectedEntryData()
 
-  // Helper function to check if entry is a Location object
-  const isLocation = (entry: CodexAnyEntry): entry is Location => {
-    return (
-      "id" in entry &&
-      "type" in entry &&
-      typeof (entry as Location).type === "string" &&
-      ["city", "country", "building", "room", "fantasy_realm", "planet", "dimension"].includes(
-        (entry as Location).type as string
-      )
-    )
-  }
-
-  // Helper function to check if entry is a LoreEntry object
-  const isLoreEntry = (entry: CodexAnyEntry): entry is LoreEntry => {
-    return "id" in entry && !isCharacter(entry) && !isLocation(entry)
-  }
-
-  // Helper function to get display role
-  const getDisplayRole = (entry: CodexAnyEntry): string => {
-    if (isCharacter(entry)) {
-      return entry.role || "Character"
+  const getEntryIcon = (_entry: CodexEntry, type: string) => {
+    switch (type) {
+      case "characters":
+        return <Users className="h-4 w-4" />
+      case "locations":
+        return <MapPin className="h-4 w-4" />
+      case "lore":
+        return <Scroll className="h-4 w-4" />
+      case "plot":
+        return <FileText className="h-4 w-4" />
+      case "notes":
+        return <Zap className="h-4 w-4" />
+      default:
+        return <FileText className="h-4 w-4" />
     }
-    if (isLocation(entry)) {
-      return entry.type || "Location"
-    }
-    if (isLoreEntry(entry)) {
-      return entry.type || "Lore"
-    }
-    return (entry as CodexEntry).role
   }
 
-  // Helper function to get display description
-  const getDisplayDescription = (entry: CodexAnyEntry): string => {
-    if (isCharacter(entry) || isLocation(entry) || isLoreEntry(entry)) {
-      return entry.description || "No description available"
-    }
-    return (entry as CodexEntry).description
+  const getStarredIcon = () => {
+    return <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
   }
 
-  // Helper to determine entry type and title for editing
-  const getEntryEditInfo = (entry: Character | Location | LoreEntry) => {
-    if (isCharacter(entry)) {
-      return { entryType: "characters" as const, cardTitle: "Character Details" }
+  const _getEntryTypeFromEntry = (entry: CodexEntry): string => {
+    // Since role and type fields are removed, we'll use generic labels
+    if ("appearance" in entry || "personality" in entry || "backstory" in entry) {
+      return "Character"
     }
-    if (isLocation(entry)) {
-      return { entryType: "locations" as const, cardTitle: "Location Details" }
+    if ("parentLocationId" in entry || "image" in entry) {
+      return "Location"
     }
-    return { entryType: "lore" as const, cardTitle: "Lore Details" }
+    return "Entry"
   }
 
-  // Render edit mode view
-  const renderEditMode = (
-    entry: Character | Location | LoreEntry,
-    config: ReturnType<typeof getTypeConfig>
-  ) => {
-    const { entryType, cardTitle } = getEntryEditInfo(entry)
-    const IconComponent = config.icon
+  const getEntryRole = (_entry: CodexEntry, type: string): string => {
+    // Return generic role based on type since specific role/type fields are removed
+    switch (type) {
+      case "characters":
+        return "Character"
+      case "locations":
+        return "Location"
+      case "lore":
+        return "Lore Entry"
+      case "plot":
+        return "Plot Thread"
+      case "notes":
+        return "Note"
+      default:
+        return "Entry"
+    }
+  }
 
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button onClick={handleBackToType} size="sm" variant="ghost">
-            ← Back to {config.title}
-          </Button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <h2 className="font-bold text-2xl">Edit {entry.name}</h2>
-              <div className="flex items-center gap-2">
-                <IconComponent className="h-4 w-4" />
-                <Badge variant="secondary">{getDisplayRole(entry)}</Badge>
+  // Helper function to render the right panel content
+  const renderRightPanel = () => {
+    if (isCreating) {
+      return (
+        <div className="h-full">
+          <div className="border-b p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <IconComponent className="h-5 w-5" />
+                <h3 className="font-semibold">Create New {selectedType.slice(0, -1)}</h3>
               </div>
-            </div>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{cardTitle}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DynamicCodexForm
-                entry={entry}
-                entryType={entryType}
-                onCancel={() => setIsEditMode(false)}
-                onSave={handleSaveComplete}
-                projectId={projectId}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
-  // Render read-only mode view
-  const renderReadOnlyMode = (entry: CodexAnyEntry, config: ReturnType<typeof getTypeConfig>) => {
-    const IconComponent = config.icon
-    const isCharacterEntry = isCharacter(entry)
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button onClick={handleBackToType} size="sm" variant="ghost">
-            ← Back to {config.title}
-          </Button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <h2 className="font-bold text-2xl">{entry.name}</h2>
-              <div className="flex items-center gap-2">
-                <IconComponent className="h-4 w-4" />
-                <Badge variant="secondary">{getDisplayRole(entry)}</Badge>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {(isCharacterEntry || isLocation(entry) || isLoreEntry(entry)) && (
-                <Button onClick={handleEditToggle} size="sm" variant="outline">
-                  Edit
-                </Button>
-              )}
-              <Button size="sm" variant="outline">
-                Delete
+              <Button onClick={() => setIsCreating(false)} size="sm" variant="ghost">
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
+          <div className="h-[calc(100%-70px)] overflow-y-auto p-6">
+            <div className="text-center text-muted-foreground">
+              <IconComponent className="mx-auto mb-4 h-16 w-16 opacity-20" />
+              <h3 className="mb-2 font-semibold">Create New {selectedType.slice(0, -1)}</h3>
+              <p className="mb-4 text-sm">
+                Creation forms for {selectedType} will be implemented here.
+              </p>
+              <p className="text-xs">
+                For now, use the sidebar "New" buttons to create {selectedType}.
+              </p>
+            </div>
+          </div>
+        </div>
+      )
+    }
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Description</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="leading-relaxed">{getDisplayDescription(entry)}</p>
-            </CardContent>
-          </Card>
+    if (selectedEntryData) {
+      return (
+        <div className="h-full">
+          <div className="border-b p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {getEntryIcon(selectedEntryData, selectedType)}
+                <div>
+                  <h3 className="font-semibold">{selectedEntryData.name}</h3>
+                  <p className="text-muted-foreground text-sm">
+                    {getEntryRole(selectedEntryData, selectedType)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="ghost">
+                        <Star className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Add to favorites</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Button onClick={() => setSelectedEntry(null)} size="sm" variant="ghost">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
 
-          {isCharacterEntry && (
-            <>
-              {entry.appearance && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Appearance</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="leading-relaxed">{entry.appearance}</p>
-                  </CardContent>
-                </Card>
-              )}
+          <div className="h-[calc(100%-70px)] overflow-y-auto">
+            <div className="p-6">
+              <Tabs className="w-full" defaultValue="overview">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="connections">Connections</TabsTrigger>
+                </TabsList>
 
-              {entry.personality && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Personality</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="leading-relaxed">{entry.personality}</p>
-                  </CardContent>
-                </Card>
-              )}
+                <TabsContent className="mt-6" value="overview">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="mb-2 font-medium">Description</h4>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {selectedEntryData.description}
+                      </p>
+                    </div>
 
-              {entry.backstory && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Backstory</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="leading-relaxed">{entry.backstory}</p>
-                  </CardContent>
-                </Card>
-              )}
+                    {/* Character appearance and personality fields removed - simplified to just name and description */}
+                  </div>
+                </TabsContent>
 
-              {entry.motivation && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Motivation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="leading-relaxed">{entry.motivation}</p>
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          )}
+                <TabsContent className="mt-6" value="details">
+                  <div className="space-y-6">
+                    {/* Character backstory and motivation fields removed - simplified to just name and description */}
 
-          {!isCharacterEntry && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  No additional notes yet. Click Edit to add more details.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+                    {selectedType === "locations" && (
+                      <div>
+                        <h4 className="mb-2 font-medium">Location Details</h4>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {selectedEntryData.description}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent className="mt-6" value="connections">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Related Elements</h4>
+                    <p className="text-muted-foreground text-sm">
+                      Connections and relationships will be shown here.
+                    </p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <IconComponent className="mx-auto mb-4 h-16 w-16 opacity-20" />
+          <h3 className="mb-2 font-semibold">{config.title}</h3>
+          <p className="mb-4 text-muted-foreground text-sm">{config.description}</p>
+          <Button onClick={handleCreateNew}>Create New {selectedType.slice(0, -1)}</Button>
         </div>
       </div>
     )
   }
 
-  const renderEntryDetail = () => {
-    if (!(selectedEntry && selectedType)) {
-      return null
-    }
-
-    const config = getTypeConfig(selectedType)
-    const canEdit =
-      isCharacter(selectedEntry) || isLocation(selectedEntry) || isLoreEntry(selectedEntry)
-
-    // Show edit mode if editing and entry can be edited
-    if (isEditMode && canEdit) {
-      return renderEditMode(selectedEntry as Character | Location | LoreEntry, config)
-    }
-
-    // Show read-only mode
-    return renderReadOnlyMode(selectedEntry, config)
-  }
-
   return (
-    <Dialog onOpenChange={onClose} open={isOpen}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0">
-        <div className="flex max-h-[90vh] flex-col">
-          {/* Main Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {(() => {
-              if (selectedEntry) {
-                return renderEntryDetail()
-              }
-              if (selectedType) {
-                return renderTypeView()
-              }
-              return renderOverview()
-            })()}
+    <Dialog onOpenChange={handleClose} open={isOpen}>
+      <DialogContent className="h-[90vh] max-w-6xl overflow-hidden p-0">
+        <div className="flex h-full">
+          {/* Left Sidebar - Type Selection */}
+          <div className="w-64 border-r bg-muted/50">
+            <div className="p-4">
+              <DialogHeader>
+                <DialogTitle className="text-left">Codex</DialogTitle>
+                <DialogDescription className="text-left">
+                  Manage your story elements
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+
+            <div className="space-y-1 p-2">
+              {[
+                { key: "characters", label: "Characters", icon: Users, count: characters.length },
+                { key: "locations", label: "Locations", icon: MapPin, count: locations.length },
+                { key: "lore", label: "Lore", icon: Scroll, count: loreEntries.length },
+                { key: "plot", label: "Plot Threads", icon: FileText, count: plotThreads.length },
+                { key: "notes", label: "Notes", icon: Zap, count: notes.length },
+              ].map((item) => (
+                <Button
+                  className={`w-full justify-start ${selectedType === item.key ? "bg-accent" : ""}`}
+                  key={item.key}
+                  onClick={() => {
+                    setSelectedType(item.key)
+                    setSelectedEntry(null)
+                    setIsCreating(false)
+                  }}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <item.icon className="mr-3 h-4 w-4" />
+                  {item.label}
+                  <Badge className="ml-auto" variant="secondary">
+                    {item.count}
+                  </Badge>
+                </Button>
+              ))}
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="p-4">
+              <div className="space-y-2">
+                <Button
+                  className="w-full gap-2"
+                  onClick={handleCreateNew}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Create New
+                </Button>
+                <Button className="w-full gap-2" size="sm" variant="outline">
+                  <Settings className="h-4 w-4" />
+                  Templates
+                </Button>
+              </div>
+            </div>
           </div>
+
+          {/* Middle Panel - Entry List */}
+          <div className="w-80 border-r">
+            <div className="border-b p-4">
+              <div className="flex items-center gap-3">
+                <IconComponent className="h-5 w-5" />
+                <div>
+                  <h3 className="font-semibold">{config.title}</h3>
+                  <p className="text-muted-foreground text-xs">{config.description}</p>
+                </div>
+              </div>
+              <Input
+                className="mt-3"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={`Search ${config.title.toLowerCase()}...`}
+                value={searchTerm}
+              />
+            </div>
+
+            <div className="h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="space-y-1 p-2">
+                {filteredEntries.map((entry) => (
+                  <Card
+                    className={`cursor-pointer transition-all hover:bg-accent/50 ${
+                      selectedEntry === entry.name ? "bg-accent" : ""
+                    }`}
+                    key={entry.name}
+                    onClick={() => handleEntryClick(entry.name)}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          {getEntryIcon(entry, selectedType)}
+                          <CardTitle className="text-sm">{entry.name}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {getStarredIcon()}
+                          <Badge className="text-xs" variant="outline">
+                            {getEntryRole(entry, selectedType)}
+                          </Badge>
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2 text-xs">
+                        {entry.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                ))}
+
+                {filteredEntries.length === 0 && !isCreating && (
+                  <div className="py-8 text-center text-muted-foreground">
+                    <IconComponent className="mx-auto mb-3 h-12 w-12 opacity-20" />
+                    <p className="mb-2 font-medium">No {config.title.toLowerCase()} found</p>
+                    <p className="text-sm">
+                      {searchTerm
+                        ? "Try adjusting your search"
+                        : `Create your first ${selectedType.slice(0, -1)}`}
+                    </p>
+                    {!searchTerm && (
+                      <Button className="mt-3" onClick={handleCreateNew} size="sm">
+                        Create New
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Panel - Entry Details/Form */}
+          <div className="flex-1">{renderRightPanel()}</div>
         </div>
       </DialogContent>
     </Dialog>

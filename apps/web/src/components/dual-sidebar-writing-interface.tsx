@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ChevronRight, FileEdit, FileText, MapPin, PenTool, Scroll, Sparkles } from "lucide-react"
+import { ChevronDown, ChevronRight, FileText, PenTool, Plus, Scroll, Sparkles } from "lucide-react"
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
 import { AutocompleteToggle } from "@/components/autocomplete-toggle"
 import { CharacterSidebarSection } from "@/components/character-sidebar-section"
 import CodexModal from "@/components/codex-modal"
+import { LocationSidebarSection } from "@/components/location-sidebar-section"
 import TiptapEditor from "@/components/tiptap-editor"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Logo } from "@/components/ui/logo"
@@ -128,65 +130,26 @@ function DualSidebarWritingInterfaceInner({
     }
   }
 
-  // Mock data for locations (until backend is ready)
-  const locations = [
-    {
-      id: "1",
-      name: "The Dark Forest",
-      type: "fantasy_realm" as const,
-      description: "An ancient forest filled with magical creatures.",
-    },
-    {
-      id: "2",
-      name: "Crystal Cave",
-      type: "building" as const,
-      description: "Hidden cavern containing the ancient crystal.",
-    },
-  ]
+  // Locations data will be fetched from API via LocationSidebarSection
 
-  // Mock data for lore entries
-  const loreEntries = [
-    {
-      id: "1",
-      name: "Magic System",
-      type: "core_rule",
-      description: "Elemental magic drawn from nature's energy.",
-    },
-    {
-      id: "2",
-      name: "The Ancient Prophecy",
-      type: "history",
-      description: "Foretells the coming of a chosen one.",
-    },
-  ]
+  const loreEntries: Array<{
+    id: string
+    name: string
+    type: string
+    description?: string
+  }> = []
 
-  // Mock data for plot threads
-  const plotThreads = [
-    {
-      name: "Quest for the Crystal",
-      role: "Main Plot",
-      description: "The primary journey driving the story.",
-    },
-    {
-      name: "Kellan's Secret Past",
-      role: "Subplot",
-      description: "Mysteries surrounding the mentor's history.",
-    },
-  ]
+  const plotThreads: Array<{
+    name: string
+    role: string
+    description?: string
+  }> = []
 
-  // Mock data for notes
-  const notes = [
-    {
-      name: "Chapter 3 Notes",
-      role: "Notes",
-      description: "Key points to remember for the forest scene.",
-    },
-    {
-      name: "Character Arc Ideas",
-      role: "Notes",
-      description: "Development ideas for Aria's journey.",
-    },
-  ]
+  const notes: Array<{
+    name: string
+    role: string
+    description?: string
+  }> = []
 
   const openCodexModal = (type?: string, entry?: string) => {
     setCodexModalConfig({
@@ -232,131 +195,178 @@ function DualSidebarWritingInterfaceInner({
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Characters Section */}
-          <CharacterSidebarSection
-            isExpanded={expandedCodexSections.characters}
-            onOpenCodexModal={openCodexModal}
-            onToggle={() => toggleCodexSection("characters")}
-            projectId={projectId}
-          />
+          <SidebarGroup>
+            <SidebarGroupLabel>Codex</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {/* Characters */}
+                <CharacterSidebarSection
+                  isExpanded={expandedCodexSections.characters}
+                  onOpenCodexModal={openCodexModal}
+                  onToggle={() => toggleCodexSection("characters")}
+                  projectId={projectId}
+                />
 
-          {/* Locations Section */}
-          <Collapsible
-            onOpenChange={() => toggleCodexSection("locations")}
-            open={expandedCodexSections.locations}
-          >
-            <SidebarGroup>
-              <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="group/collapsible">
-                  <MapPin className="h-4 w-4" />
-                  Locations
-                  <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {locations.map((location) => (
-                      <SidebarMenuItem key={location.id}>
-                        <SidebarMenuButton
-                          onClick={() => openCodexModal("locations", location.name)}
+                {/* Locations */}
+                <LocationSidebarSection
+                  isExpanded={expandedCodexSections.locations}
+                  onOpenCodexModal={openCodexModal}
+                  onToggle={() => toggleCodexSection("locations")}
+                  projectId={projectId}
+                />
+
+                {/* Lore */}
+                <SidebarMenuItem>
+                  <Collapsible
+                    onOpenChange={() => toggleCodexSection("lore")}
+                    open={expandedCodexSections.lore}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton>
+                        {expandedCodexSections.lore ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                        <Scroll className="h-4 w-4" />
+                        <span>Lore</span>
+                        <Badge className="ml-auto" variant="secondary">
+                          {loreEntries.length}
+                        </Badge>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-6 space-y-1">
+                        <Button
+                          className="w-full justify-start text-muted-foreground"
+                          onClick={() => openCodexModal("lore")}
+                          size="sm"
+                          variant="ghost"
                         >
-                          <span>{location.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+                          <Plus className="h-4 w-4" />
+                          <span>New</span>
+                        </Button>
+                        {loreEntries.map((loreItem) => (
+                          <Button
+                            className="w-full justify-start"
+                            key={loreItem.id}
+                            onClick={() => openCodexModal("lore", loreItem.name)}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            <span className="truncate">{loreItem.name}</span>
+                            <span className="ml-auto text-muted-foreground text-xs">
+                              {loreItem.type}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
 
-          {/* Lore Section */}
-          <Collapsible
-            onOpenChange={() => toggleCodexSection("lore")}
-            open={expandedCodexSections.lore}
-          >
-            <SidebarGroup>
-              <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="group/collapsible">
-                  <Scroll className="h-4 w-4" />
-                  Lore & World-building
-                  <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {loreEntries.map((loreItem) => (
-                      <SidebarMenuItem key={loreItem.id}>
-                        <SidebarMenuButton onClick={() => openCodexModal("lore", loreItem.name)}>
-                          <span>{loreItem.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+                {/* Plot Threads */}
+                <SidebarMenuItem>
+                  <Collapsible
+                    onOpenChange={() => toggleCodexSection("plot")}
+                    open={expandedCodexSections.plot}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton>
+                        {expandedCodexSections.plot ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                        <FileText className="h-4 w-4" />
+                        <span>Plot Threads</span>
+                        <Badge className="ml-auto" variant="secondary">
+                          {plotThreads.length}
+                        </Badge>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-6 space-y-1">
+                        <Button
+                          className="w-full justify-start text-muted-foreground"
+                          onClick={() => openCodexModal("plot")}
+                          size="sm"
+                          variant="ghost"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span>New</span>
+                        </Button>
+                        {plotThreads.map((plotItem) => (
+                          <Button
+                            className="w-full justify-start"
+                            key={plotItem.name}
+                            onClick={() => openCodexModal("plot", plotItem.name)}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            <span className="truncate">{plotItem.name}</span>
+                            <span className="ml-auto text-muted-foreground text-xs">
+                              {plotItem.role}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
 
-          {/* Plot Section */}
-          <Collapsible
-            onOpenChange={() => toggleCodexSection("plot")}
-            open={expandedCodexSections.plot}
-          >
-            <SidebarGroup>
-              <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="group/collapsible">
-                  <FileEdit className="h-4 w-4" />
-                  Plot Threads
-                  <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {plotThreads.map((plotItem) => (
-                      <SidebarMenuItem key={plotItem.name}>
-                        <SidebarMenuButton onClick={() => openCodexModal("plot", plotItem.name)}>
-                          <span>{plotItem.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-
-          {/* Notes Section */}
-          <Collapsible
-            onOpenChange={() => toggleCodexSection("notes")}
-            open={expandedCodexSections.notes}
-          >
-            <SidebarGroup>
-              <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="group/collapsible">
-                  <FileText className="h-4 w-4" />
-                  Notes & Ideas
-                  <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {notes.map((note) => (
-                      <SidebarMenuItem key={note.name}>
-                        <SidebarMenuButton onClick={() => openCodexModal("notes", note.name)}>
-                          <span>{note.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+                {/* Notes */}
+                <SidebarMenuItem>
+                  <Collapsible
+                    onOpenChange={() => toggleCodexSection("notes")}
+                    open={expandedCodexSections.notes}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton>
+                        {expandedCodexSections.notes ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                        <FileText className="h-4 w-4" />
+                        <span>Notes & Ideas</span>
+                        <Badge className="ml-auto" variant="secondary">
+                          {notes.length}
+                        </Badge>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-6 space-y-1">
+                        <Button
+                          className="w-full justify-start text-muted-foreground"
+                          onClick={() => openCodexModal("notes")}
+                          size="sm"
+                          variant="ghost"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span>New</span>
+                        </Button>
+                        {notes.map((note) => (
+                          <Button
+                            className="w-full justify-start"
+                            key={note.name}
+                            onClick={() => openCodexModal("notes", note.name)}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            <span className="truncate">{note.name}</span>
+                            <span className="ml-auto text-muted-foreground text-xs">
+                              {note.role}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter>

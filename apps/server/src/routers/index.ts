@@ -286,11 +286,7 @@ router.get(
         id: character.id,
         name: character.name,
         description: character.description,
-        role: character.role,
-        appearance: character.appearance,
-        personality: character.personality,
-        backstory: character.backstory,
-        motivation: character.motivation,
+        // appearance, personality, backstory, motivation removed - simplified character schema
         image: character.image,
         metadata: character.metadata,
         createdAt: character.createdAt,
@@ -349,17 +345,7 @@ router.post(
 
     try {
       const body = await c.req.json()
-      const {
-        name,
-        description,
-        role,
-        appearance,
-        personality,
-        backstory,
-        motivation,
-        image,
-        metadata,
-      } = body
+      const { name, description, image, metadata } = body
 
       if (!name || name.trim().length === 0) {
         return c.json({ error: "Name is required" }, 400)
@@ -372,11 +358,7 @@ router.post(
         id,
         name: name.trim(),
         description: description?.trim() || null,
-        role: role || null,
-        appearance: appearance?.trim() || null,
-        personality: personality?.trim() || null,
-        backstory: backstory?.trim() || null,
-        motivation: motivation?.trim() || null,
+        // appearance, personality, backstory, motivation removed - simplified character schema
         projectId,
         workId: null, // Project-level character
         image: image || null,
@@ -402,17 +384,7 @@ router.put(
     const characterId = c.req.param("characterId")
 
     try {
-      const {
-        name,
-        description,
-        role,
-        appearance,
-        personality,
-        backstory,
-        motivation,
-        image,
-        metadata,
-      } = await c.req.json()
+      const { name, description, image, metadata } = await c.req.json()
 
       const updateData: Record<string, string | Date | null> = {
         updatedAt: new Date(),
@@ -424,21 +396,7 @@ router.put(
       if (description !== undefined) {
         updateData.description = description
       }
-      if (role !== undefined) {
-        updateData.role = role
-      }
-      if (appearance !== undefined) {
-        updateData.appearance = appearance
-      }
-      if (personality !== undefined) {
-        updateData.personality = personality
-      }
-      if (backstory !== undefined) {
-        updateData.backstory = backstory
-      }
-      if (motivation !== undefined) {
-        updateData.motivation = motivation
-      }
+      // appearance, personality, backstory, motivation fields removed - simplified character schema
       if (image !== undefined) {
         updateData.image = image
       }
@@ -492,7 +450,6 @@ router.get(
         id: location.id,
         name: location.name,
         description: location.description,
-        type: location.type,
         parentLocationId: location.parentLocationId,
         image: location.image,
         metadata: location.metadata,
@@ -564,7 +521,6 @@ router.post(
         id,
         name: body.name,
         description: body.description,
-        type: body.type,
         parentLocationId: body.parentLocationId,
         image: body.image,
         metadata: body.metadata,
@@ -596,7 +552,6 @@ router.put(
         .set({
           name: body.name,
           description: body.description,
-          type: body.type,
           parentLocationId: body.parentLocationId,
           image: body.image,
           metadata: body.metadata,
