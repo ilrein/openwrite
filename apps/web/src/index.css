@@ -325,7 +325,7 @@ body {
 
 /* Story Canvas grid pattern */
 .bg-grid-pattern {
-  background-image: 
+  background-image:
     linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 20px 20px;
@@ -354,6 +354,5 @@ body {
 
 /* Story Canvas selected element ring */
 .story-element-selected {
-  ring: 2px solid hsl(var(--primary));
-  ring-offset: 2px;
+  box-shadow: 0 0 0 2px hsl(var(--primary));
 }

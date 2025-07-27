@@ -35,11 +35,7 @@ export function LocationSidebarSection({
   const [deleteLocationDialogOpen, setDeleteLocationDialogOpen] = useState(false)
 
   // Fetch locations
-  const {
-    data: locations = [],
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: locations = [] } = useQuery({
     queryKey: ["locations", projectId],
     queryFn: async () => {
       const result = await api.locations.list(projectId)
@@ -67,15 +63,9 @@ export function LocationSidebarSection({
   return (
     <>
       <SidebarMenuItem>
-        <Collapsible
-          onOpenChange={(open) => {
-            console.log("LocationSidebarSection Collapsible onOpenChange:", open)
-            onToggle()
-          }}
-          open={isExpanded}
-        >
+        <Collapsible onOpenChange={onToggle} open={isExpanded}>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton onClick={() => console.log("LocationSidebarSection button clicked")}>
+            <SidebarMenuButton>
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (

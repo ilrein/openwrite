@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { ChevronDown, ChevronRight, FileText, PenTool, Plus, Scroll } from "lucide-react"
 import { useState } from "react"
@@ -22,7 +21,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import UserMenu from "@/components/user-menu"
-import { api } from "@/lib/api"
 
 interface ProjectSidebarProps {
   projectId: string
@@ -40,15 +38,6 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
     lore: false,
     plot: false,
     notes: false,
-  })
-
-  // Fetch project details
-  const { data: project } = useQuery({
-    queryKey: ["project", projectId],
-    queryFn: async () => {
-      const result = await api.projects.get(projectId)
-      return result
-    },
   })
 
   // Mock data for codex sections
@@ -305,8 +294,8 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
       <CodexModal
         initialEntry={codexModalConfig.initialEntry}
         initialType={codexModalConfig.initialType}
-        onOpenChange={setIsCodexModalOpen}
-        open={isCodexModalOpen}
+        isOpen={isCodexModalOpen}
+        onClose={() => setIsCodexModalOpen(false)}
         projectId={projectId}
       />
     </>

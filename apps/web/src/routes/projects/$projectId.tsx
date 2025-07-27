@@ -44,10 +44,9 @@ function WriteLayout() {
     }
   )
 
-  const handleInsertText = (text: string) => {
+  const handleInsertText = (_text: string) => {
     // This would integrate with the TiptapEditor to insert text at cursor position
     // TODO: Implement text insertion at cursor position
-    console.log("Insert text:", text)
   }
 
   // Fetch project details

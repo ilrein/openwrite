@@ -6,8 +6,6 @@ export const Route = createFileRoute("/projects/$projectId/write")({
 })
 
 function WriteInterface() {
-  const { projectId } = Route.useParams()
-
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="flex-1">
