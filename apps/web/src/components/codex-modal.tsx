@@ -290,44 +290,13 @@ export default function CodexModal({
                       </p>
                     </div>
 
-                    {selectedType === "characters" && (
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div>
-                          <h4 className="mb-2 font-medium">Appearance</h4>
-                          <p className="text-muted-foreground text-sm">
-                            {(selectedEntryData as Character).appearance || "No appearance details"}
-                          </p>
-                        </div>
-                        <div>
-                          <h4 className="mb-2 font-medium">Personality</h4>
-                          <p className="text-muted-foreground text-sm">
-                            {(selectedEntryData as Character).personality ||
-                              "No personality details"}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    {/* Character appearance and personality fields removed - simplified to just name and description */}
                   </div>
                 </TabsContent>
 
                 <TabsContent className="mt-6" value="details">
                   <div className="space-y-6">
-                    {selectedType === "characters" && (
-                      <>
-                        <div>
-                          <h4 className="mb-2 font-medium">Backstory</h4>
-                          <p className="text-muted-foreground text-sm leading-relaxed">
-                            {(selectedEntryData as Character).backstory || "No backstory"}
-                          </p>
-                        </div>
-                        <div>
-                          <h4 className="mb-2 font-medium">Motivation</h4>
-                          <p className="text-muted-foreground text-sm leading-relaxed">
-                            {(selectedEntryData as Character).motivation || "No motivation"}
-                          </p>
-                        </div>
-                      </>
-                    )}
+                    {/* Character backstory and motivation fields removed - simplified to just name and description */}
 
                     {selectedType === "locations" && (
                       <div>

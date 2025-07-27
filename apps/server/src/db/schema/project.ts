@@ -140,11 +140,7 @@ export const character = sqliteTable(
     description: text("description"),
     // role field removed - users can describe character roles freely in description
 
-    // Physical and personality traits
-    appearance: text("appearance"), // Physical description
-    personality: text("personality"), // Personality traits
-    backstory: text("backstory"), // Character history
-    motivation: text("motivation"), // What drives the character
+    // Simplified character - just name, description, and core metadata
 
     // Relationships - can be shared across project or specific to a work
     projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared characters

@@ -29,10 +29,7 @@ const characterSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   description: z.string().optional(),
   // role field removed - users can describe character roles freely in description
-  appearance: z.string().optional(),
-  personality: z.string().optional(),
-  backstory: z.string().optional(),
-  motivation: z.string().optional(),
+  // appearance, personality, backstory, motivation removed - simplified to just name and description
 })
 
 type CharacterFormData = z.infer<typeof characterSchema>
@@ -60,10 +57,7 @@ export function CharacterDialog({
       name: character?.name || "",
       description: character?.description || "",
       // role field removed
-      appearance: character?.appearance || "",
-      personality: character?.personality || "",
-      backstory: character?.backstory || "",
-      motivation: character?.motivation || "",
+      // appearance, personality, backstory, motivation removed - simplified to just name and description
     },
   })
 
@@ -73,10 +67,7 @@ export function CharacterDialog({
       name: character?.name || "",
       description: character?.description || "",
       // role field removed
-      appearance: character?.appearance || "",
-      personality: character?.personality || "",
-      backstory: character?.backstory || "",
-      motivation: character?.motivation || "",
+      // appearance, personality, backstory, motivation removed - simplified to just name and description
     })
   }, [character, form])
 
@@ -168,77 +159,7 @@ export function CharacterDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="appearance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Appearance</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="Physical description, clothing, distinguishing features"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="personality"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Personality</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="Personality traits, quirks, mannerisms"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="backstory"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Backstory</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="Character's history, upbringing, past events"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="motivation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Motivation</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-[80px]"
-                      placeholder="What drives this character? Goals, fears, desires"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Appearance, personality, backstory, motivation fields removed - simplified to just name and description */}
 
             <DialogFooter>
               <Button

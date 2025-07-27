@@ -12,10 +12,7 @@ export interface Character {
   name: string
   description?: string
   // role field removed - users can describe character roles freely in description
-  appearance?: string
-  personality?: string
-  backstory?: string
-  motivation?: string
+  // appearance, personality, backstory, motivation removed - simplified to just name and description
   projectId?: string
   workId?: string
   image?: string
@@ -28,10 +25,7 @@ export interface CreateCharacterData {
   name: string
   description?: string
   // role field removed
-  appearance?: string
-  personality?: string
-  backstory?: string
-  motivation?: string
+  // appearance, personality, backstory, motivation removed - simplified to just name and description
   image?: string
   metadata?: string
 }
