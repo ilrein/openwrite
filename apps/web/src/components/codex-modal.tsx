@@ -570,14 +570,6 @@ export default function CodexModal({
                       <Settings className="h-4 w-4" />
                       Templates
                     </Button>
-                    <Button
-                      className="w-full gap-2"
-                      onClick={() => toast.success("Test animation!", { duration: 5000 })}
-                      size="sm"
-                      variant="outline"
-                    >
-                      🧪 Test Toast
-                    </Button>
                   </div>
                 </div>
               </div>
