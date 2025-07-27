@@ -10,7 +10,7 @@ function WriteInterface() {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="flex-1 p-6">
+      <div className="flex-1">
         <TiptapEditor
           content=""
           onUpdate={(_content) => {
