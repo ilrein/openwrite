@@ -322,3 +322,38 @@ body {
   float: left;
   height: 0;
 }
+
+/* Story Canvas grid pattern */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-color: hsl(var(--background));
+}
+
+/* Story Canvas element drag cursor */
+.cursor-move {
+  cursor: move;
+}
+
+/* Story Canvas zoom transform */
+.canvas-transform {
+  transition: transform 0.1s ease-out;
+}
+
+/* Story Canvas element hover effects */
+.story-element-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.story-element-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Story Canvas selected element ring */
+.story-element-selected {
+  ring: 2px solid hsl(var(--primary));
+  ring-offset: 2px;
+}

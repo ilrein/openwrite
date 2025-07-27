@@ -11,10 +11,10 @@ function ProjectOutlinePage() {
       <div className="mx-auto max-w-4xl">
         <div className="py-12 text-center">
           <FileText className="mx-auto mb-4 h-16 w-16 opacity-50" />
-          <h3 className="mb-2 font-medium text-xl">Outline Coming Soon</h3>
+          <h3 className="mb-2 font-medium text-xl">Canvas Available in Projects</h3>
           <p>
-            This is where you'll be able to create and manage your project's outline, plot
-            structure, and chapter organization.
+            The Story Canvas feature is now available in the main Projects section. Use the new
+            Canvas tool to create and manage your story structure with drag-and-drop elements.
           </p>
         </div>
       </div>

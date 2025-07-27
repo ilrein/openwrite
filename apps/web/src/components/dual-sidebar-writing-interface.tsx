@@ -180,15 +180,19 @@ function DualSidebarWritingInterfaceInner({
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <FileText />
-                    <span>Outline</span>
+                  <SidebarMenuButton asChild>
+                    <Link params={{ projectId }} to="/projects/$projectId/canvas">
+                      <FileText />
+                      <span>Canvas</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <PenTool />
-                    <span>Write</span>
+                  <SidebarMenuButton asChild>
+                    <Link params={{ projectId }} to="/write/$projectId">
+                      <PenTool />
+                      <span>Write</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

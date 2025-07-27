@@ -144,9 +144,9 @@ function WriteLayout() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link params={{ projectId }} to="/projects/$projectId/outline">
+                      <Link params={{ projectId }} to="/projects/$projectId/canvas">
                         <FileText />
-                        <span>Outline</span>
+                        <span>Canvas</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
