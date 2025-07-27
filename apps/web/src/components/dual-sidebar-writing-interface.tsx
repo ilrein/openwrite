@@ -1,21 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import {
-  ChevronDown,
-  ChevronRight,
-  FileText,
-  MapPin,
-  PenTool,
-  Plus,
-  Scroll,
-  Sparkles,
-} from "lucide-react"
+import { ChevronDown, ChevronRight, FileText, PenTool, Plus, Scroll, Sparkles } from "lucide-react"
 import { useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import { AIChatContent } from "@/components/ai-chat-content"
 import { AutocompleteToggle } from "@/components/autocomplete-toggle"
 import { CharacterSidebarSection } from "@/components/character-sidebar-section"
 import CodexModal from "@/components/codex-modal"
+import { LocationSidebarSection } from "@/components/location-sidebar-section"
 import TiptapEditor from "@/components/tiptap-editor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -138,13 +130,7 @@ function DualSidebarWritingInterfaceInner({
     }
   }
 
-  // Data will be fetched from API
-  const locations: Array<{
-    id: string
-    name: string
-    type: string
-    description?: string
-  }> = []
+  // Locations data will be fetched from API via LocationSidebarSection
 
   const loreEntries: Array<{
     id: string
@@ -222,54 +208,12 @@ function DualSidebarWritingInterfaceInner({
                 />
 
                 {/* Locations */}
-                <SidebarMenuItem>
-                  <Collapsible
-                    onOpenChange={() => toggleCodexSection("locations")}
-                    open={expandedCodexSections.locations}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
-                        {expandedCodexSections.locations ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                        <MapPin className="h-4 w-4" />
-                        <span>Locations</span>
-                        <Badge className="ml-auto" variant="secondary">
-                          {locations.length}
-                        </Badge>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="ml-6 space-y-1">
-                        <Button
-                          className="w-full justify-start text-muted-foreground"
-                          onClick={() => openCodexModal("locations")}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span>New</span>
-                        </Button>
-                        {locations.map((location) => (
-                          <Button
-                            className="w-full justify-start"
-                            key={location.id}
-                            onClick={() => openCodexModal("locations", location.name)}
-                            size="sm"
-                            variant="ghost"
-                          >
-                            <span className="truncate">{location.name}</span>
-                            <span className="ml-auto text-muted-foreground text-xs">
-                              {location.type}
-                            </span>
-                          </Button>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
+                <LocationSidebarSection
+                  isExpanded={expandedCodexSections.locations}
+                  onOpenCodexModal={openCodexModal}
+                  onToggle={() => toggleCodexSection("locations")}
+                  projectId={projectId}
+                />
 
                 {/* Lore */}
                 <SidebarMenuItem>
