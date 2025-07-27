@@ -17,6 +17,7 @@ export default function AppHeader() {
   })
 
   const isIndexPage = location === "/"
+  const isAuthPage = location === "/login" || location === "/register"
 
   const navigationItems = [
     { to: "/", label: "Home" },
@@ -50,15 +51,17 @@ export default function AppHeader() {
             {/* Desktop Navigation */}
             <div className="hidden items-center space-x-2 md:flex">
               <ModeToggle />
-              <UserMenu />
+              {!isAuthPage && <UserMenu />}
             </div>
 
             {/* Mobile Sign In Button */}
             <div className="flex items-center space-x-2 md:hidden">
               <ModeToggle />
-              <Button asChild size="sm">
-                <Link to="/login">Sign In</Link>
-              </Button>
+              {!isAuthPage && (
+                <Button asChild size="sm">
+                  <Link to="/login">Sign In</Link>
+                </Button>
+              )}
             </div>
           </nav>
         </div>
