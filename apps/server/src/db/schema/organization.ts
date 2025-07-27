@@ -17,7 +17,7 @@ export const member = sqliteTable("member", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   organizationId: text("organization_id")
     .notNull()
     .references(() => organization.id),
@@ -31,7 +31,7 @@ export const invitation = sqliteTable("invitation", {
   email: text("email").notNull(),
   inviterId: text("inviter_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   organizationId: text("organization_id")
     .notNull()
     .references(() => organization.id),
@@ -60,6 +60,6 @@ export const teamMember = sqliteTable("team_member", {
     .references(() => team.id),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
