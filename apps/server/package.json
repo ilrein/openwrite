@@ -3,6 +3,10 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
     "build": "wrangler deploy --dry-run",
     "check-types": "tsc --noEmit",
     "lint": "biome check src",
@@ -31,6 +35,7 @@
     "zod": "^4.0.10"
   },
   "devDependencies": {
+    "vitest": "^3.2.4",
     "@biomejs/biome": "^2.1.2",
     "drizzle-kit": "^0.31.4",
     "tsdown": "^0.13.0",
