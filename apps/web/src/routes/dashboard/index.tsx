@@ -106,7 +106,7 @@ function DashboardHome() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">2,341</div>
+              <div className="font-bold text-2xl">0</div>
               <p className="text-muted-foreground text-xs">Words written</p>
             </CardContent>
           </Card>
