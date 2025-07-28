@@ -43,6 +43,13 @@
       "when": 1753715582191,
       "tag": "0005_parched_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1753727380959,
+      "tag": "0006_brief_ares",
+      "breakpoints": true
     }
   ]
 }

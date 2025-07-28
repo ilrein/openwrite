@@ -371,4 +371,37 @@ app.openapi(
   }
 )
 
+// Delete a connection
+app.openapi(
+  {
+    method: "delete",
+    path: "/projects/{projectId}/graph/connections/{connectionId}",
+    request: {
+      params: z.object({
+        projectId: z.string(),
+        connectionId: z.string(),
+      }),
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              success: z.boolean(),
+            }),
+          },
+        },
+        description: "Graph connection deleted successfully",
+      },
+    },
+  },
+  async (c) => {
+    const { connectionId } = c.req.valid("param")
+
+    await db.delete(graphConnection).where(eq(graphConnection.id, connectionId))
+
+    return c.json({ success: true })
+  }
+)
+
 export default app
