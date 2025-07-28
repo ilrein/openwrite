@@ -371,6 +371,47 @@ app.openapi(
   }
 )
 
+// Delete a graph node
+app.openapi(
+  {
+    method: "delete",
+    path: "/projects/{projectId}/graph/nodes/{nodeId}",
+    request: {
+      params: z.object({
+        projectId: z.string(),
+        nodeId: z.string(),
+      }),
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              success: z.boolean(),
+            }),
+          },
+        },
+        description: "Graph node deleted successfully",
+      },
+    },
+  },
+  async (c) => {
+    const { nodeId } = c.req.valid("param")
+
+    // Delete associated text blocks first (cascade delete)
+    await db.delete(textBlock).where(eq(textBlock.storyNodeId, nodeId))
+
+    // Delete associated connections where this node is source or target
+    await db.delete(graphConnection).where(eq(graphConnection.sourceNodeId, nodeId))
+    await db.delete(graphConnection).where(eq(graphConnection.targetNodeId, nodeId))
+
+    // Finally delete the node itself
+    await db.delete(graphNode).where(eq(graphNode.id, nodeId))
+
+    return c.json({ success: true })
+  }
+)
+
 // Delete a connection
 app.openapi(
   {

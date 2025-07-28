@@ -34,6 +34,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react"
+import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -244,7 +245,7 @@ function StoryCanvas() {
 
   // Convert graph nodes to ReactFlow nodes (memoized to prevent infinite loops)
   const flowNodes = useMemo(() => {
-    return graphNodes.map((node) => {
+    const flowNodeList = graphNodes.map((node) => {
       const visualProps = api.graph.parseVisualProperties(node.visualProperties)
       return {
         id: node.id,
@@ -269,6 +270,8 @@ function StoryCanvas() {
         },
       }
     })
+
+    return flowNodeList
   }, [graphNodes])
 
   // Convert graph connections to ReactFlow edges (memoized to prevent infinite loops)
@@ -382,6 +385,21 @@ function StoryCanvas() {
     },
   })
 
+  // Delete node mutation
+  const deleteNodeMutation = useMutation({
+    mutationFn: async (nodeId: string) => {
+      return await api.graph.deleteNode(projectId, nodeId)
+    },
+    onSuccess: () => {
+      // Refresh both nodes and connections data after deletion
+      queryClient.invalidateQueries({ queryKey: ["graph-nodes", projectId] })
+      queryClient.invalidateQueries({ queryKey: ["graph-connections", projectId] })
+    },
+    onError: () => {
+      toast.error("Failed to delete node. Please try again.")
+    },
+  })
+
   // Handle edge connections - persist to database
   const onConnect = useCallback(
     (params: Connection) => {
@@ -413,6 +431,22 @@ function StoryCanvas() {
       }
     },
     [deleteConnectionMutation, graphConnections]
+  )
+
+  // Handle node deletion via ReactFlow (keyboard delete, etc.)
+  const onNodesDelete = useCallback(
+    (nodesToDelete: StoryNode[]) => {
+      for (const node of nodesToDelete) {
+        // Get the graph node ID from the node data
+        const graphNodeId = node.data?.graphNodeId
+        if (graphNodeId) {
+          deleteNodeMutation.mutate(graphNodeId)
+        }
+      }
+      setSelectedNode(null)
+      setIsDetailPaneOpen(false)
+    },
+    [deleteNodeMutation]
   )
 
   // Handle node drag stop - update position in database
@@ -586,12 +620,14 @@ function StoryCanvas() {
       updateNodePositionMutation.isPending ||
       createConnectionMutation.isPending ||
       deleteConnectionMutation.isPending ||
+      deleteNodeMutation.isPending ||
       isCreatingNode
     )
   }, [
     updateNodePositionMutation.isPending,
     createConnectionMutation.isPending,
     deleteConnectionMutation.isPending,
+    deleteNodeMutation.isPending,
     isCreatingNode,
   ])
 
@@ -618,13 +654,15 @@ function StoryCanvas() {
       return
     }
 
-    setNodes((nds) => nds.filter((node) => node.id !== selectedNode.id))
-    setEdges((eds) =>
-      eds.filter((edge) => edge.source !== selectedNode.id && edge.target !== selectedNode.id)
-    )
+    // Get the graph node ID from the selected node data
+    const graphNodeId = selectedNode.data.graphNodeId
+    if (graphNodeId) {
+      deleteNodeMutation.mutate(graphNodeId)
+    }
+
     setSelectedNode(null)
     setIsDetailPaneOpen(false)
-  }, [selectedNode, setNodes, setEdges])
+  }, [selectedNode, deleteNodeMutation])
 
   return (
     <div className="h-screen w-full">
@@ -736,6 +774,7 @@ function StoryCanvas() {
           onNodeClick={onNodeClick}
           onNodeDragStop={onNodeDragStop}
           onNodesChange={onNodesChange}
+          onNodesDelete={onNodesDelete}
           snapGrid={[20, 20]}
           snapToGrid
         >
