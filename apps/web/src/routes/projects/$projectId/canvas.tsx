@@ -1,6 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import {
-  addEdge,
   Background,
   BackgroundVariant,
   type Connection,
@@ -17,13 +17,14 @@ import {
   useNodesState,
   useReactFlow,
 } from "@xyflow/react"
-import { useCallback, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import "@xyflow/react/dist/style.css"
 
 import {
   Circle,
   FileText,
   Layers,
+  Loader2,
   Redo2,
   Square,
   Target,
@@ -63,24 +64,38 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { api, type ConnectionType, type GraphNodeType } from "@/lib/api"
 
 export const Route = createFileRoute("/projects/$projectId/canvas")({
   component: StoryCanvasPage,
 })
 
-// Story element types
+// Story element types - now using our graph types
 type StoryElementType = "act" | "chapter" | "scene" | "beat" | "plot-point"
 
-// Story node data interface
+// Enhanced story node data interface matching our graph system
 interface StoryNodeData extends Record<string, unknown> {
+  // Core graph node properties
+  graphNodeId: string
+  nodeType: GraphNodeType
+  subType?: string
   label: string
   description: string
+
+  // Visual properties
+  color: string
+  size: string
+  icon: string
+  shape: string
+
+  // Story-specific fields (for backward compatibility)
   goals: string
   conflict: string
   notes: string
   characters: string[]
   themes: string[]
-  color: string
+
+  // Legacy field mapping
   elementType: StoryElementType
 }
 
@@ -181,65 +196,89 @@ const nodeTypes = {
   storyNode: StoryNode,
 }
 
-// Initial nodes
-const initialNodes: StoryNode[] = [
-  {
-    id: "1",
-    type: "storyNode",
-    position: { x: 300, y: 100 },
-    data: {
-      label: "Act I: Setup",
-      description: "Introduce the protagonist and their world",
-      goals: "Establish the main character and their normal world",
-      conflict: "The inciting incident that disrupts the status quo",
-      notes: "",
-      characters: [],
-      themes: [],
-      color: "bg-blue-500",
-      elementType: "act",
-    },
-  },
-  {
-    id: "2",
-    type: "storyNode",
-    position: { x: 300, y: 300 },
-    data: {
-      label: "Opening Scene",
-      description: "The story begins",
-      goals: "Hook the reader and establish tone",
-      conflict: "",
-      notes: "",
-      characters: [],
-      themes: [],
-      color: "bg-yellow-500",
-      elementType: "scene",
-    },
-  },
-]
+// Initial nodes and edges - now empty, will be loaded dynamically
+const initialNodes: StoryNode[] = []
 
-const initialEdges: Edge[] = [
-  {
-    id: "e1-2",
-    source: "1",
-    target: "2",
-    type: "smoothstep",
-    animated: true,
-  },
-]
+const initialEdges: Edge[] = []
 
 // Main Canvas Component
 function StoryCanvas() {
+  const { projectId } = Route.useParams()
+  const queryClient = useQueryClient()
+
+  // Load graph data from API
+  const { data: graphNodes = [] } = useQuery({
+    queryKey: ["graph-nodes", projectId],
+    queryFn: async () => {
+      return await api.graph.listNodes(projectId)
+    },
+  })
+
+  const { data: graphConnections = [] } = useQuery({
+    queryKey: ["graph-connections", projectId],
+    queryFn: async () => {
+      return await api.graph.listConnections(projectId)
+    },
+  })
+
+  // Convert graph nodes to ReactFlow nodes (memoized to prevent infinite loops)
+  const flowNodes = useMemo(() => {
+    return graphNodes.map((node) => {
+      const visualProps = api.graph.parseVisualProperties(node.visualProperties)
+      return {
+        id: node.id,
+        type: "storyNode",
+        position: { x: node.positionX, y: node.positionY },
+        data: {
+          graphNodeId: node.id,
+          nodeType: node.nodeType,
+          subType: node.subType,
+          label: node.title,
+          description: node.description || "",
+          color: visualProps.color || "bg-blue-500",
+          size: visualProps.size || "medium",
+          icon: visualProps.icon || "📝",
+          shape: visualProps.shape || "rectangle",
+          goals: "", // These could come from metadata
+          conflict: "",
+          notes: "",
+          characters: [],
+          themes: [],
+          elementType: (node.subType as StoryElementType) || "scene",
+        },
+      }
+    })
+  }, [graphNodes])
+
+  // Convert graph connections to ReactFlow edges (memoized to prevent infinite loops)
+  const flowEdges = useMemo(() => {
+    return graphConnections.map((conn) => ({
+      id: conn.id,
+      source: conn.sourceNodeId,
+      target: conn.targetNodeId,
+      type: "smoothstep",
+      animated: true,
+    }))
+  }, [graphConnections])
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [selectedNode, setSelectedNode] = useState<StoryNode | null>(null)
   const [isDetailPaneOpen, setIsDetailPaneOpen] = useState(false)
   const { screenToFlowPosition, zoomIn, zoomOut, fitView } = useReactFlow()
 
-  // Handle edge connections
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
-    [setEdges]
-  )
+  // Update nodes and edges when graph data loads (safe one-time update)
+  React.useEffect(() => {
+    if (graphNodes.length > 0) {
+      setNodes(flowNodes) // Using the converted flow nodes
+    }
+  }, [graphNodes.length, flowNodes, setNodes])
+
+  React.useEffect(() => {
+    if (graphConnections.length > 0) {
+      setEdges(flowEdges)
+    }
+  }, [graphConnections.length, flowEdges, setEdges])
 
   // Handle node selection
   const onNodeClick = useCallback((_: React.MouseEvent, node: StoryNode) => {
@@ -247,38 +286,274 @@ function StoryCanvas() {
     setIsDetailPaneOpen(true)
   }, [])
 
-  // Create new story element
-  const createStoryElement = useCallback(
-    (elementType: StoryElementType) => {
-      const config = nodeConfigs[elementType]
+  // Update node position mutation
+  const updateNodePositionMutation = useMutation({
+    mutationFn: async ({
+      nodeId,
+      positionX,
+      positionY,
+    }: {
+      nodeId: string
+      positionX: number
+      positionY: number
+    }) => {
+      return await api.graph.updateNodePosition(projectId, nodeId, positionX, positionY)
+    },
+    onError: (_error: Error) => {
+      // Position update failed - could show user notification here
+    },
+  })
+
+  // Create connection mutation
+  const createConnectionMutation = useMutation({
+    mutationFn: async (params: {
+      sourceNodeId: string
+      targetNodeId: string
+      connectionType?: ConnectionType
+    }) => {
+      return await api.graph.createConnection(projectId, {
+        sourceNodeId: params.sourceNodeId,
+        targetNodeId: params.targetNodeId,
+        connectionType: params.connectionType || "story_flow",
+        connectionStrength: 1,
+        metadata: api.graph.stringifyMetadata({}),
+      })
+    },
+    onSuccess: () => {
+      // Refresh connections data after creation
+      queryClient.invalidateQueries({ queryKey: ["graph-connections", projectId] })
+    },
+    onError: (_error: Error) => {
+      // Connection creation failed - could show user notification here
+    },
+  })
+
+  // Delete connection mutation
+  const deleteConnectionMutation = useMutation({
+    mutationFn: async (connectionId: string) => {
+      return await api.graph.deleteConnection(projectId, connectionId)
+    },
+    onSuccess: () => {
+      // Refresh connections data after deletion
+      queryClient.invalidateQueries({ queryKey: ["graph-connections", projectId] })
+    },
+    onError: (_error: Error) => {
+      // Connection deletion failed - could show user notification here
+    },
+  })
+
+  // Handle edge connections - persist to database
+  const onConnect = useCallback(
+    (params: Connection) => {
+      if (params.source && params.target) {
+        // Extract graph node IDs from React Flow node IDs
+        const sourceNode = nodes.find((n) => n.id === params.source)
+        const targetNode = nodes.find((n) => n.id === params.target)
+
+        if (sourceNode?.data.graphNodeId && targetNode?.data.graphNodeId) {
+          createConnectionMutation.mutate({
+            sourceNodeId: sourceNode.data.graphNodeId,
+            targetNodeId: targetNode.data.graphNodeId,
+          })
+        }
+      }
+    },
+    [createConnectionMutation, nodes]
+  )
+
+  // Handle edge deletion - remove from database
+  const onEdgesDelete = useCallback(
+    (edgesToDelete: { id: string }[]) => {
+      for (const edge of edgesToDelete) {
+        // Find the corresponding graph connection by React Flow edge ID
+        const connection = graphConnections.find((conn) => conn.id === edge.id)
+        if (connection) {
+          deleteConnectionMutation.mutate(connection.id)
+        }
+      }
+    },
+    [deleteConnectionMutation, graphConnections]
+  )
+
+  // Handle node drag stop - update position in database
+  const onNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: StoryNode) => {
+      // Extract the actual graph node ID from the React Flow node
+      const graphNodeId = node.data.graphNodeId
+      if (graphNodeId) {
+        updateNodePositionMutation.mutate({
+          nodeId: graphNodeId,
+          positionX: Math.round(node.position.x),
+          positionY: Math.round(node.position.y),
+        })
+      }
+    },
+    [updateNodePositionMutation]
+  )
+
+  // Track node creation state
+  const [isCreatingNode, setIsCreatingNode] = React.useState(false)
+
+  // Utility functions for graph node creation
+  const getNodeConfig = useCallback((type: GraphNodeType, subType?: string) => {
+    // Use existing nodeConfigs for story elements
+    if (type === "story_element" && subType && nodeConfigs[subType as keyof typeof nodeConfigs]) {
+      return {
+        color: nodeConfigs[subType as keyof typeof nodeConfigs].color,
+        icon:
+          typeof nodeConfigs[subType as keyof typeof nodeConfigs].icon === "string"
+            ? nodeConfigs[subType as keyof typeof nodeConfigs].icon
+            : "📄", // fallback for JSX icons
+        label: nodeConfigs[subType as keyof typeof nodeConfigs].label,
+        shape: "rectangle",
+      }
+    }
+
+    // Default configs for other node types
+    const defaultConfigs: Record<
+      string,
+      { color: string; icon: string; label: string; shape: string }
+    > = {
+      character: { color: "bg-blue-500", icon: "👤", label: "Character", shape: "circle" },
+      location: { color: "bg-green-500", icon: "🏰", label: "Location", shape: "rectangle" },
+      lore: { color: "bg-purple-500", icon: "📜", label: "Lore", shape: "circle" },
+      plot_thread: { color: "bg-red-500", icon: "🎯", label: "Plot Thread", shape: "diamond" },
+    }
+
+    return (
+      defaultConfigs[type] || {
+        color: "bg-gray-500",
+        icon: "⭐",
+        label: "Node",
+        shape: "rectangle",
+      }
+    )
+  }, [])
+
+  const getNodeTitle = useCallback(
+    (nodeType: GraphNodeType, config: ReturnType<typeof getNodeConfig>) => {
+      if (nodeType === "character") {
+        return "Select Character"
+      }
+      return `New ${config.label}`
+    },
+    []
+  )
+
+  const getNodeDescription = useCallback((nodeType: GraphNodeType) => {
+    if (nodeType === "character") {
+      return "Choose an existing character to place in your story"
+    }
+    return ""
+  }, [])
+
+  const getNodeMetadata = useCallback((nodeType: GraphNodeType) => {
+    if (nodeType === "character") {
+      // Character nodes store which existing character they represent
+      return api.graph.stringifyMetadata({
+        linkedCharacterId: null, // Will be set when user selects a character
+        isPlaceholder: true, // Indicates this node needs character selection
+      })
+    }
+  }, [])
+
+  const getNodeVisualProperties = useCallback((config: ReturnType<typeof getNodeConfig>) => {
+    return api.graph.stringifyVisualProperties({
+      color: config.color,
+      size: "medium",
+      icon: config.icon,
+      shape: config.shape,
+    })
+  }, [])
+
+  const handleNodeCreationError = useCallback((error: unknown, nodeType: GraphNodeType) => {
+    // biome-ignore lint/suspicious/noConsole: User specifically requested console.error for error handling
+    console.error(`Failed to create ${nodeType} node:`, error)
+
+    // In a real app, you'd show a toast notification here
+    // For now, we'll use console.error as requested
+    // biome-ignore lint/suspicious/noConsole: User specifically requested console.error for error handling
+    console.error(`Could not create ${nodeType} node. Please try again.`)
+  }, [])
+
+  const waitForQueryInvalidation = useCallback(
+    (client: ReturnType<typeof useQueryClient>, queryKey: string[]): Promise<void> => {
+      return client.invalidateQueries({ queryKey })
+    },
+    []
+  )
+
+  // Create new graph node (supports all types!)
+  const createGraphNode = useCallback(
+    async (nodeType: GraphNodeType, subType?: string) => {
       const position = screenToFlowPosition({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
       })
 
-      const newNode: StoryNode = {
-        id: `${elementType}-${crypto.randomUUID()}`,
-        type: "storyNode",
-        position,
-        data: {
-          label: `New ${config.label}`,
-          description: "",
-          goals: "",
-          conflict: "",
-          notes: "",
-          characters: [],
-          themes: [],
-          color: config.color,
-          elementType,
-        },
-      }
+      const config = getNodeConfig(nodeType, subType)
 
-      setNodes((nds) => [...nds, newNode])
-      setSelectedNode(newNode)
-      setIsDetailPaneOpen(true)
+      try {
+        setIsCreatingNode(true)
+
+        // Create via API
+        const result = await api.graph.createNode(projectId, {
+          nodeType,
+          subType,
+          title: getNodeTitle(nodeType, config),
+          description: getNodeDescription(nodeType),
+          positionX: position.x,
+          positionY: position.y,
+          visualProperties: getNodeVisualProperties(config),
+          metadata: getNodeMetadata(nodeType),
+        })
+
+        if (result && "id" in result) {
+          // Wait for query invalidation to complete
+          await waitForQueryInvalidation(queryClient, ["graph-nodes", projectId])
+
+          // Find and select the new node after invalidation
+          const newNode = nodes.find((n) => n.id === result.id)
+          if (newNode) {
+            setSelectedNode(newNode)
+            setIsDetailPaneOpen(true)
+          }
+        }
+      } catch (error) {
+        handleNodeCreationError(error, nodeType)
+      } finally {
+        setIsCreatingNode(false)
+      }
     },
-    [screenToFlowPosition, setNodes]
+    [
+      screenToFlowPosition,
+      projectId,
+      queryClient,
+      nodes,
+      getNodeConfig,
+      getNodeTitle,
+      getNodeDescription,
+      getNodeMetadata,
+      getNodeVisualProperties,
+      handleNodeCreationError,
+      waitForQueryInvalidation,
+    ]
   )
+
+  // Track loading state for all graph operations
+  const isGraphOperationPending = React.useMemo(() => {
+    return (
+      updateNodePositionMutation.isPending ||
+      createConnectionMutation.isPending ||
+      deleteConnectionMutation.isPending ||
+      isCreatingNode
+    )
+  }, [
+    updateNodePositionMutation.isPending,
+    createConnectionMutation.isPending,
+    deleteConnectionMutation.isPending,
+    isCreatingNode,
+  ])
 
   // Update selected node
   const updateSelectedNode = useCallback(
@@ -318,26 +593,43 @@ function StoryCanvas() {
         <MenubarMenu>
           <MenubarTrigger>Elements</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => createStoryElement("act")}>
+            <MenubarItem onClick={() => createGraphNode("story_element", "act")}>
               <Layers className="mr-2 h-4 w-4" />
               New Act <MenubarShortcut>⌘1</MenubarShortcut>
             </MenubarItem>
-            <MenubarItem onClick={() => createStoryElement("chapter")}>
+            <MenubarItem onClick={() => createGraphNode("story_element", "chapter")}>
               <Square className="mr-2 h-4 w-4" />
               New Chapter <MenubarShortcut>⌘2</MenubarShortcut>
             </MenubarItem>
-            <MenubarItem onClick={() => createStoryElement("scene")}>
+            <MenubarItem onClick={() => createGraphNode("story_element", "scene")}>
               <Circle className="mr-2 h-4 w-4" />
               New Scene <MenubarShortcut>⌘3</MenubarShortcut>
             </MenubarItem>
-            <MenubarItem onClick={() => createStoryElement("beat")}>
+            <MenubarItem onClick={() => createGraphNode("story_element", "beat")}>
               <Triangle className="mr-2 h-4 w-4" />
               New Beat <MenubarShortcut>⌘4</MenubarShortcut>
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem onClick={() => createStoryElement("plot-point")}>
+            <MenubarItem onClick={() => createGraphNode("story_element", "plot-point")}>
               <Target className="mr-2 h-4 w-4" />
               New Plot Point <MenubarShortcut>⌘P</MenubarShortcut>
+            </MenubarItem>
+            <MenubarSeparator />
+            <MenubarItem onClick={() => createGraphNode("character")}>
+              <Circle className="mr-2 h-4 w-4" />
+              New Character <MenubarShortcut>⌘C</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem onClick={() => createGraphNode("location")}>
+              <Square className="mr-2 h-4 w-4" />
+              New Location <MenubarShortcut>⌘L</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem onClick={() => createGraphNode("lore")}>
+              <FileText className="mr-2 h-4 w-4" />
+              New Lore <MenubarShortcut>⌘R</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem onClick={() => createGraphNode("plot_thread")}>
+              <Target className="mr-2 h-4 w-4" />
+              New Plot Thread <MenubarShortcut>⌘T</MenubarShortcut>
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
@@ -378,6 +670,13 @@ function StoryCanvas() {
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
+
+        {/* Loading indicator */}
+        {isGraphOperationPending && (
+          <div className="ml-auto flex items-center px-4">
+            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+          </div>
+        )}
       </Menubar>
 
       {/* React Flow Canvas */}
@@ -393,7 +692,9 @@ function StoryCanvas() {
           nodeTypes={nodeTypes}
           onConnect={onConnect}
           onEdgesChange={onEdgesChange}
+          onEdgesDelete={onEdgesDelete}
           onNodeClick={onNodeClick}
+          onNodeDragStop={onNodeDragStop}
           onNodesChange={onNodesChange}
           snapGrid={[20, 20]}
           snapToGrid

@@ -4,6 +4,7 @@ import { db } from "../db"
 import { character, location, lore, member, organization, plotPoint, project } from "../db/schema"
 import { requireAuth, verifyProjectAccess } from "../middleware/auth"
 import { aiProvidersRouter } from "./ai-providers"
+import graphRouter from "./graph"
 
 interface Env {
   CORS_ORIGIN: string
@@ -911,5 +912,8 @@ router.delete(
 
 // Mount AI providers router
 router.route("/ai-providers", aiProvidersRouter)
+
+// Mount graph router
+router.route("/", graphRouter)
 
 export { router as apiRouter }

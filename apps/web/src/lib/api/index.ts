@@ -24,6 +24,22 @@ export type {
 // Characters API
 export { charactersApi, createCharacterApi } from "./characters"
 export type {
+  ConnectionType,
+  CreateGraphConnectionData,
+  CreateGraphNodeData,
+  CreateTextBlockData,
+  GraphConnection,
+  GraphNode,
+  GraphNodeType,
+  StoryElementType,
+  TextBlock,
+  UpdateGraphConnectionData,
+  UpdateGraphNodeData,
+  UpdateTextBlockData,
+} from "./graph"
+// Graph API
+export { graphApi } from "./graph"
+export type {
   CreateLocationData,
   Location,
   UpdateLocationData,
@@ -58,6 +74,7 @@ export { novelApi, projectApi } from "./projects"
 
 import { aiProvidersApi } from "./ai-providers"
 import { charactersApi } from "./characters"
+import { graphApi } from "./graph"
 import { locationsApi } from "./locations"
 import { loreApi } from "./lore"
 import { plotApi } from "./plot"
@@ -78,6 +95,7 @@ export const api = {
   locations: locationsApi,
   lore: loreApi,
   plot: plotApi,
+  graph: graphApi,
   // chapters: chapterApi,
   // organizations: organizationApi,
 }
