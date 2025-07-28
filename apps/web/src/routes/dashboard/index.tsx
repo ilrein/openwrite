@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { BookOpen, Clock, Edit, FileText, Plus, TrendingUp, Users } from "lucide-react"
+import { BookOpen, Clock, Plus, TrendingUp, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { EditProjectDialog } from "@/components/edit-project-dialog"
-import { Badge } from "@/components/ui/badge"
+import { ProjectCard } from "@/components/project-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -136,58 +136,24 @@ function DashboardHome() {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentProjects.map((project: Project) => (
-                  <div
-                    className="flex flex-col space-y-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:space-y-0"
-                    key={project.id}
-                  >
-                    <div className="flex min-w-0 flex-1 items-center space-x-4">
-                      <BookOpen className="h-8 w-8 flex-shrink-0 text-blue-600" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{project.title}</p>
-                        <p className="truncate text-muted-foreground text-sm">
-                          {project.currentWordCount.toLocaleString()} words
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-shrink-0 items-center space-x-2 sm:ml-4">
-                      <Badge variant={project.status === "draft" ? "secondary" : "default"}>
-                        {project.status}
-                      </Badge>
-                      <div className="flex space-x-1">
-                        <Button
-                          className="h-8 w-8 p-0"
-                          onClick={() => setEditingProject(project)}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button asChild className="h-8 px-3" size="sm" variant="default">
-                          <Link params={{ projectId: project.id }} to="/write/$projectId">
-                            <FileText className="mr-1 h-3 w-3" />
-                            Write
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {recentProjects.length === 0 && (
-                  <div className="py-8 text-center">
-                    <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-50" />
-                    <p className="mb-4 text-muted-foreground">No projects yet</p>
-                    <Button asChild>
-                      <Link to="/dashboard/projects">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create Your First Project
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
+              {recentProjects.length > 0 ? (
+                <div className="space-y-4">
+                  {recentProjects.map((project: Project) => (
+                    <ProjectCard key={project.id} onEdit={setEditingProject} project={project} />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-50" />
+                  <p className="mb-4 text-muted-foreground">No projects yet</p>
+                  <Button asChild>
+                    <Link to="/dashboard/projects">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Your First Project
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

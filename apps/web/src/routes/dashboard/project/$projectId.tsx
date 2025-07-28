@@ -109,7 +109,7 @@ function ProjectLayout() {
             activeProps={{ className: "text-blue-600 border-blue-600" }}
             className="flex items-center border-transparent border-b-2 px-3 py-2 font-medium text-sm [&.active]:border-blue-600 [&.active]:text-blue-600"
             params={{ projectId: id }}
-            to="/write/$projectId"
+            to="/projects/$projectId/write"
           >
             <Edit3 className="mr-2 h-4 w-4" />
             Write

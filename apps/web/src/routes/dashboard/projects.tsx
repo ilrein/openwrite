@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { BookOpen, Edit, Plus } from "lucide-react"
+import { createFileRoute } from "@tanstack/react-router"
+import { BookOpen, Plus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { EditProjectDialog } from "@/components/edit-project-dialog"
-import { Badge } from "@/components/ui/badge"
+import { ProjectCard } from "@/components/project-card"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,7 +12,6 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -279,68 +278,7 @@ function ProjectsPage() {
         {projects && projects.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((project: Project) => (
-              <Card className="relative transition-shadow hover:shadow-lg" key={project.id}>
-                <div className="absolute top-3 right-3 z-10">
-                  <Button
-                    className="h-8 w-8 p-0"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      setEditingProject(project)
-                    }}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Link params={{ projectId: project.id }} to="/write/$projectId">
-                  <div className="cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-start justify-between pr-8">
-                        <BookOpen className="h-8 w-8 text-blue-600" />
-                        <Badge variant={project.status === "draft" ? "secondary" : "default"}>
-                          {project.status}
-                        </Badge>
-                      </div>
-                      <CardTitle className="mt-4 truncate">{project.title}</CardTitle>
-                      {project.description && (
-                        <CardDescription className="line-clamp-2">
-                          {project.description}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="text-gray-600 text-sm">
-                          <span className="font-medium">Type:</span>{" "}
-                          {project.type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                        </div>
-                        {project.genre && (
-                          <div className="text-gray-600 text-sm">
-                            <span className="font-medium">Genre:</span> {project.genre}
-                          </div>
-                        )}
-                        <div className="text-gray-600 text-sm">
-                          <span className="font-medium">Progress:</span>{" "}
-                          {project.currentWordCount.toLocaleString()} /{" "}
-                          {project.targetWordCount?.toLocaleString() || "∞"} words
-                        </div>
-                        {project.targetWordCount && (
-                          <div className="h-2 w-full rounded-full bg-gray-200">
-                            <div
-                              className="h-2 rounded-full bg-blue-600"
-                              style={{
-                                width: `${Math.min((project.currentWordCount / project.targetWordCount) * 100, 100)}%`,
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </div>
-                </Link>
-              </Card>
+              <ProjectCard key={project.id} onEdit={setEditingProject} project={project} />
             ))}
           </div>
         ) : (
