@@ -137,13 +137,8 @@ export const createGraphNodeApi = (
  * Text Block API client factory
  * Creates a text block API client for story nodes
  */
-export const createTextBlockApi = (
-  projectId: string
-): Required<ApiClient<TextBlock, CreateTextBlockData, UpdateTextBlockData>> => ({
-  async list(storyNodeId?: string): Promise<TextBlock[]> {
-    if (!storyNodeId) {
-      throw new Error("Story node ID is required for text block operations")
-    }
+export const createTextBlockApi = (projectId: string) => ({
+  async list(storyNodeId: string): Promise<TextBlock[]> {
     const response = await apiCall(
       `/api/projects/${projectId}/graph/nodes/${storyNodeId}/text-blocks`
     )
@@ -239,6 +234,17 @@ export const graphApi = {
   updateNode: (projectId: string, nodeId: string, data: UpdateGraphNodeData) => {
     return createGraphNodeApi(projectId).update(nodeId, data)
   },
+  updateNodePosition: async (
+    projectId: string,
+    nodeId: string,
+    positionX: number,
+    positionY: number
+  ) => {
+    return await apiCall(`/api/projects/${projectId}/graph/nodes/${nodeId}/position`, {
+      method: "PUT",
+      body: JSON.stringify({ positionX, positionY }),
+    })
+  },
   deleteNode: (projectId: string, nodeId: string) => {
     return createGraphNodeApi(projectId).delete(nodeId)
   },
@@ -262,7 +268,9 @@ export const graphApi = {
 
   // Utility functions for working with graph data
   parseVisualProperties: (visualProps?: string) => {
-    if (!visualProps) return {}
+    if (!visualProps) {
+      return {}
+    }
     try {
       return JSON.parse(visualProps)
     } catch {
@@ -275,7 +283,9 @@ export const graphApi = {
   },
 
   parseMetadata: (metadata?: string) => {
-    if (!metadata) return {}
+    if (!metadata) {
+      return {}
+    }
     try {
       return JSON.parse(metadata)
     } catch {

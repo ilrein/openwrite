@@ -8,11 +8,18 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Sheet,
   SheetContent,
@@ -21,7 +28,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
-import { api, type GraphNode, type TextBlock } from "@/lib/api"
+import { api, type GraphNode } from "@/lib/api"
 
 interface GraphWritingInterfaceProps {
   projectId: string
@@ -43,16 +50,29 @@ export function GraphWritingInterface({
   const { data: textBlocks = [], isLoading } = useQuery({
     queryKey: ["text-blocks", projectId, selectedNode?.id],
     queryFn: async () => {
-      if (!selectedNode?.id) return []
+      if (!selectedNode?.id) {
+        return []
+      }
       return await api.graph.listTextBlocks(projectId, selectedNode.id)
     },
     enabled: !!selectedNode?.id && selectedNode.nodeType === "story_element",
   })
 
+  // Load existing characters for character nodes
+  const { data: characters = [] } = useQuery({
+    queryKey: ["characters", projectId],
+    queryFn: async () => {
+      return await api.characters.list(projectId)
+    },
+    enabled: !!selectedNode && selectedNode.nodeType === "character",
+  })
+
   // Create new text block mutation
   const createTextBlockMutation = useMutation({
     mutationFn: async (content: string) => {
-      if (!selectedNode?.id) throw new Error("No node selected")
+      if (!selectedNode?.id) {
+        throw new Error("No node selected")
+      }
       return await api.graph.createTextBlock(projectId, {
         storyNodeId: selectedNode.id,
         content,
@@ -60,24 +80,55 @@ export function GraphWritingInterface({
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["text-blocks", projectId, selectedNode?.id])
+      queryClient.invalidateQueries({ queryKey: ["text-blocks", projectId, selectedNode?.id] })
       setNewBlockContent("")
     },
   })
 
   // Update node details mutation
   const updateNodeMutation = useMutation({
-    mutationFn: async (updates: { title?: string; description?: string }) => {
-      if (!selectedNode?.id) throw new Error("No node selected")
+    mutationFn: async (updates: { title?: string; description?: string; metadata?: string }) => {
+      if (!selectedNode?.id) {
+        throw new Error("No node selected")
+      }
       return await api.graph.updateNode(projectId, selectedNode.id, updates)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["graph-nodes", projectId])
+      queryClient.invalidateQueries({ queryKey: ["graph-nodes", projectId] })
+    },
+  })
+
+  // Character selection mutation
+  const selectCharacterMutation = useMutation({
+    mutationFn: async (characterId: string) => {
+      if (!selectedNode?.id) {
+        throw new Error("No node selected")
+      }
+      const character = characters.find((c) => c.id === characterId)
+      if (!character) {
+        throw new Error("Character not found")
+      }
+
+      const newMetadata = api.graph.stringifyMetadata({
+        linkedCharacterId: characterId,
+        isPlaceholder: false,
+      })
+
+      return await api.graph.updateNode(projectId, selectedNode.id, {
+        title: character.name,
+        description: character.description || `${character.name} appears in this part of the story`,
+        metadata: newMetadata,
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["graph-nodes", projectId] })
     },
   })
 
   const handleAddTextBlock = () => {
-    if (!newBlockContent.trim()) return
+    if (!newBlockContent.trim()) {
+      return
+    }
     createTextBlockMutation.mutate(newBlockContent)
   }
 
@@ -111,7 +162,9 @@ export function GraphWritingInterface({
     return textBlocks.reduce((total, block) => total + (block.wordCount || 0), 0)
   }
 
-  if (!selectedNode) return null
+  if (!selectedNode) {
+    return null
+  }
 
   return (
     <Sheet onOpenChange={onClose} open={isOpen}>
@@ -172,23 +225,22 @@ export function GraphWritingInterface({
               <h3 className="font-medium text-lg">Writing Content</h3>
 
               {/* Existing Text Blocks */}
-              {isLoading ? (
+              {isLoading && (
                 <div className="py-8 text-center text-muted-foreground">Loading text blocks...</div>
-              ) : textBlocks.length > 0 ? (
+              )}
+              {!isLoading && textBlocks.length > 0 && (
                 <div className="space-y-4">
                   {textBlocks.map((block, index) => (
                     <div className="rounded-lg border bg-muted/20 p-4" key={block.id}>
                       <div className="mb-2 flex items-center justify-between">
-                        <Badge size="sm" variant="outline">
-                          Block {index + 1}
-                        </Badge>
+                        <Badge variant="outline">Block {index + 1}</Badge>
                         <span className="text-muted-foreground text-xs">
                           {block.wordCount || 0} words
                         </span>
                       </div>
                       <div className="prose text-sm">
                         {block.content?.split("\n").map((line, i) => (
-                          <p className="mb-2 last:mb-0" key={i}>
+                          <p className="mb-2 last:mb-0" key={`${block.id}-line-${i}`}>
                             {line}
                           </p>
                         ))}
@@ -196,7 +248,8 @@ export function GraphWritingInterface({
                     </div>
                   ))}
                 </div>
-              ) : (
+              )}
+              {!isLoading && textBlocks.length === 0 && (
                 <div className="rounded-lg border-2 border-dashed py-8 text-center text-muted-foreground">
                   No content yet. Add your first text block below!
                 </div>
@@ -240,9 +293,44 @@ export function GraphWritingInterface({
                 </p>
 
                 {selectedNode.nodeType === "character" && (
-                  <div className="mt-3 text-sm">
-                    <strong>Usage:</strong> Drag this character onto scenes where they appear to
-                    create character arc connections.
+                  <div className="mt-3 space-y-3">
+                    <div className="text-sm">
+                      <strong>Usage:</strong> Drag this character onto scenes where they appear to
+                      create character arc connections.
+                    </div>
+
+                    {/* Character Selection */}
+                    <div className="space-y-2">
+                      <Label htmlFor="character-select">Select Character</Label>
+                      <Select
+                        disabled={selectCharacterMutation.isPending}
+                        onValueChange={(value) => selectCharacterMutation.mutate(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose an existing character..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {characters.map((character) => (
+                            <SelectItem key={character.id} value={character.id}>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{character.name}</span>
+                                {character.description && (
+                                  <span className="truncate text-muted-foreground text-xs">
+                                    {character.description}
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {characters.length === 0 && (
+                        <p className="text-muted-foreground text-xs">
+                          No characters created yet. Create characters in the sidebar first!
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 

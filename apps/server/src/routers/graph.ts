@@ -7,6 +7,9 @@ import { requireAuth, verifyProjectAccess } from "../middleware/auth"
 
 const app = new OpenAPIHono()
 
+// Move regex to top level to avoid performance issues
+const WORD_SPLIT_REGEX = /\s+/
+
 // Zod schemas for validation
 const CreateGraphNodeSchema = z.object({
   nodeType: z.enum(["story_element", "character", "location", "lore", "plot_thread"]),
@@ -78,6 +81,59 @@ app.openapi(
   }
 )
 
+// Update graph node position
+app.openapi(
+  {
+    method: "put",
+    path: "/projects/{projectId}/graph/nodes/{nodeId}/position",
+    request: {
+      params: z.object({
+        projectId: z.string(),
+        nodeId: z.string(),
+      }),
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              positionX: z.number(),
+              positionY: z.number(),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              success: z.boolean(),
+            }),
+          },
+        },
+        description: "Node position updated successfully",
+      },
+    },
+  },
+  async (c) => {
+    const { nodeId } = c.req.valid("param")
+    const { positionX, positionY } = c.req.valid("json")
+
+    const now = new Date()
+
+    await db
+      .update(graphNode)
+      .set({
+        positionX,
+        positionY,
+        updatedAt: now,
+      })
+      .where(eq(graphNode.id, nodeId))
+
+    return c.json({ success: true })
+  }
+)
+
 // Create a new graph node
 app.openapi(
   {
@@ -111,15 +167,24 @@ app.openapi(
   },
   async (c) => {
     const { projectId } = c.req.valid("param")
-    const nodeData = c.req.valid("body")
+    const nodeData = c.req.valid("json")
 
     const nodeId = crypto.randomUUID()
     const now = new Date()
 
+    // Map camelCase API fields to snake_case database fields
     await db.insert(graphNode).values({
       id: nodeId,
       projectId,
-      ...nodeData,
+      nodeType: nodeData.nodeType,
+      subType: nodeData.subType,
+      title: nodeData.title,
+      description: nodeData.description,
+      positionX: nodeData.positionX || 0,
+      positionY: nodeData.positionY || 0,
+      visualProperties: nodeData.visualProperties,
+      metadata: nodeData.metadata,
+      wordCount: 0, // Default for new nodes
       createdAt: now,
       updatedAt: now,
     })
@@ -194,15 +259,18 @@ app.openapi(
     },
   },
   async (c) => {
-    const blockData = c.req.valid("body")
+    const blockData = c.req.valid("json")
 
     const blockId = crypto.randomUUID()
     const now = new Date()
-    const wordCount = blockData.content ? blockData.content.split(/\s+/).length : 0
+    const wordCount = blockData.content ? blockData.content.split(WORD_SPLIT_REGEX).length : 0
 
+    // Map camelCase API fields to proper database fields
     await db.insert(textBlock).values({
       id: blockId,
-      ...blockData,
+      storyNodeId: blockData.storyNodeId,
+      content: blockData.content,
+      orderIndex: blockData.orderIndex || 0,
       wordCount,
       createdAt: now,
       updatedAt: now,
@@ -280,15 +348,21 @@ app.openapi(
   },
   async (c) => {
     const { projectId } = c.req.valid("param")
-    const connectionData = c.req.valid("body")
+    const connectionData = c.req.valid("json")
 
     const connectionId = crypto.randomUUID()
     const now = new Date()
 
+    // Map camelCase API fields to proper database fields
     await db.insert(graphConnection).values({
       id: connectionId,
       projectId,
-      ...connectionData,
+      sourceNodeId: connectionData.sourceNodeId,
+      targetNodeId: connectionData.targetNodeId,
+      connectionType: connectionData.connectionType,
+      connectionStrength: connectionData.connectionStrength || 1,
+      visualProperties: connectionData.visualProperties,
+      metadata: connectionData.metadata,
       createdAt: now,
       updatedAt: now,
     })
