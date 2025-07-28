@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { ChevronDown, ChevronRight, FileText, PenTool, Plus, Scroll } from "lucide-react"
 import { useState } from "react"
@@ -21,6 +22,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import UserMenu from "@/components/user-menu"
+import { api } from "@/lib/api"
 
 interface ProjectSidebarProps {
   projectId: string
@@ -110,21 +112,35 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
     notes: false,
   })
 
-  // Mock data for codex sections
-  const loreEntries = [
-    { id: "1", name: "Magic System", type: "Core Rule" },
-    { id: "2", name: "Ancient History", type: "History" },
-  ]
+  // Fetch lore entries
+  const { data: loreEntries = [] } = useQuery({
+    queryKey: ["lore", projectId],
+    queryFn: async () => {
+      const result = await api.lore.list(projectId)
+      return result.map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        type: entry.type || "General",
+      }))
+    },
+  })
 
-  const plotThreads = [
-    { id: "1", name: "Hero's Journey", role: "Main Plot" },
-    { id: "2", name: "Romance Subplot", role: "Secondary" },
-  ]
+  // Fetch plot threads
+  const { data: plotThreads = [] } = useQuery({
+    queryKey: ["plot", projectId],
+    queryFn: async () => {
+      const result = await api.plot.list(projectId)
+      return result.map((thread) => ({
+        id: thread.id,
+        name: thread.title,
+        role: thread.status || "Planned",
+      }))
+    },
+  })
 
-  const notes = [
-    { id: "1", name: "Chapter Ideas", role: "Planning" },
-    { id: "2", name: "Research Notes", role: "Reference" },
-  ]
+  // For now, keeping notes as empty until there's a proper API endpoint
+  // This could be extended to use lore entries with a specific type filter
+  const notes: Array<{ id: string; name: string; role: string }> = []
 
   const toggleCodexSection = (section: string) => {
     setExpandedCodexSections((prev) => ({
