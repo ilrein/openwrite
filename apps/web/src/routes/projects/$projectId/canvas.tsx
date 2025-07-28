@@ -64,7 +64,9 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { api, type ConnectionType, type GraphNodeType } from "@/lib/api"
+-import { api, type ConnectionType, type GraphNodeType } from "@/lib/api"
++import { api } from "@/lib/api"
++import type { ConnectionType, GraphNodeType } from "@/lib/api"
 
 export const Route = createFileRoute("/projects/$projectId/canvas")({
   component: StoryCanvasPage,
