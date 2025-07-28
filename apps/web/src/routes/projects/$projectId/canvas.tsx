@@ -396,6 +396,95 @@ function StoryCanvas() {
   // Track node creation state
   const [isCreatingNode, setIsCreatingNode] = React.useState(false)
 
+  // Utility functions for graph node creation
+  const getNodeConfig = useCallback((type: GraphNodeType, subType?: string) => {
+    // Use existing nodeConfigs for story elements
+    if (type === "story_element" && subType && nodeConfigs[subType as keyof typeof nodeConfigs]) {
+      return {
+        color: nodeConfigs[subType as keyof typeof nodeConfigs].color,
+        icon:
+          typeof nodeConfigs[subType as keyof typeof nodeConfigs].icon === "string"
+            ? nodeConfigs[subType as keyof typeof nodeConfigs].icon
+            : "📄", // fallback for JSX icons
+        label: nodeConfigs[subType as keyof typeof nodeConfigs].label,
+        shape: "rectangle",
+      }
+    }
+
+    // Default configs for other node types
+    const defaultConfigs: Record<
+      string,
+      { color: string; icon: string; label: string; shape: string }
+    > = {
+      character: { color: "bg-blue-500", icon: "👤", label: "Character", shape: "circle" },
+      location: { color: "bg-green-500", icon: "🏰", label: "Location", shape: "rectangle" },
+      lore: { color: "bg-purple-500", icon: "📜", label: "Lore", shape: "circle" },
+      plot_thread: { color: "bg-red-500", icon: "🎯", label: "Plot Thread", shape: "diamond" },
+    }
+
+    return (
+      defaultConfigs[type] || {
+        color: "bg-gray-500",
+        icon: "⭐",
+        label: "Node",
+        shape: "rectangle",
+      }
+    )
+  }, [])
+
+  const getNodeTitle = useCallback(
+    (nodeType: GraphNodeType, config: ReturnType<typeof getNodeConfig>) => {
+      if (nodeType === "character") {
+        return "Select Character"
+      }
+      return `New ${config.label}`
+    },
+    []
+  )
+
+  const getNodeDescription = useCallback((nodeType: GraphNodeType) => {
+    if (nodeType === "character") {
+      return "Choose an existing character to place in your story"
+    }
+    return ""
+  }, [])
+
+  const getNodeMetadata = useCallback((nodeType: GraphNodeType) => {
+    if (nodeType === "character") {
+      // Character nodes store which existing character they represent
+      return api.graph.stringifyMetadata({
+        linkedCharacterId: null, // Will be set when user selects a character
+        isPlaceholder: true, // Indicates this node needs character selection
+      })
+    }
+  }, [])
+
+  const getNodeVisualProperties = useCallback((config: ReturnType<typeof getNodeConfig>) => {
+    return api.graph.stringifyVisualProperties({
+      color: config.color,
+      size: "medium",
+      icon: config.icon,
+      shape: config.shape,
+    })
+  }, [])
+
+  const handleNodeCreationError = useCallback((error: unknown, nodeType: GraphNodeType) => {
+    // biome-ignore lint/suspicious/noConsole: User specifically requested console.error for error handling
+    console.error(`Failed to create ${nodeType} node:`, error)
+
+    // In a real app, you'd show a toast notification here
+    // For now, we'll use console.error as requested
+    // biome-ignore lint/suspicious/noConsole: User specifically requested console.error for error handling
+    console.error(`Could not create ${nodeType} node. Please try again.`)
+  }, [])
+
+  const waitForQueryInvalidation = useCallback(
+    (client: ReturnType<typeof useQueryClient>, queryKey: string[]): Promise<void> => {
+      return client.invalidateQueries({ queryKey })
+    },
+    []
+  )
+
   // Create new graph node (supports all types!)
   const createGraphNode = useCallback(
     async (nodeType: GraphNodeType, subType?: string) => {
@@ -404,94 +493,53 @@ function StoryCanvas() {
         y: window.innerHeight / 2,
       })
 
-      // Get appropriate config based on node type
-      const getNodeConfig = (type: GraphNodeType, sub?: string) => {
-        if (type === "story_element" && sub && nodeConfigs[sub as keyof typeof nodeConfigs]) {
-          return nodeConfigs[sub as keyof typeof nodeConfigs]
-        }
-
-        // Default configs for other node types
-        const defaultConfigs: Record<
-          string,
-          { color: string; icon: string; label: string; shape: string }
-        > = {
-          character: { color: "bg-blue-500", icon: "👤", label: "Character", shape: "circle" },
-          location: { color: "bg-green-500", icon: "🏰", label: "Location", shape: "rectangle" },
-          lore: { color: "bg-purple-500", icon: "📜", label: "Lore", shape: "circle" },
-          plot_thread: { color: "bg-red-500", icon: "🎯", label: "Plot Thread", shape: "diamond" },
-        }
-
-        return (
-          defaultConfigs[type] || {
-            color: "bg-gray-500",
-            icon: "⭐",
-            label: "Node",
-            shape: "rectangle",
-          }
-        )
-      }
-
       const config = getNodeConfig(nodeType, subType)
 
       try {
         setIsCreatingNode(true)
-        // Special handling for character nodes - they should reference existing characters
-        const getNodeTitle = () => {
-          if (nodeType === "character") {
-            return "Select Character"
-          }
-          return `New ${config.label}`
-        }
-
-        const getNodeMetadata = () => {
-          if (nodeType === "character") {
-            // Character nodes store which existing character they represent
-            return api.graph.stringifyMetadata({
-              linkedCharacterId: null, // Will be set when user selects a character
-              isPlaceholder: true, // Indicates this node needs character selection
-            })
-          }
-          // Return undefined is unnecessary - just don't return anything
-        }
 
         // Create via API
         const result = await api.graph.createNode(projectId, {
           nodeType,
           subType,
-          title: getNodeTitle(),
-          description:
-            nodeType === "character" ? "Choose an existing character to place in your story" : "",
+          title: getNodeTitle(nodeType, config),
+          description: getNodeDescription(nodeType),
           positionX: position.x,
           positionY: position.y,
-          visualProperties: api.graph.stringifyVisualProperties({
-            color: config.color,
-            size: "medium",
-            icon: config.icon,
-            shape: "shape" in config ? config.shape : "rectangle", // Default shape if not specified
-          }),
-          metadata: getNodeMetadata(),
+          visualProperties: getNodeVisualProperties(config),
+          metadata: getNodeMetadata(nodeType),
         })
 
         if (result && "id" in result) {
-          // Refresh the graph data to show the new node
-          queryClient.invalidateQueries({ queryKey: ["graph-nodes", projectId] })
+          // Wait for query invalidation to complete
+          await waitForQueryInvalidation(queryClient, ["graph-nodes", projectId])
 
-          // Find and select the new node after it's loaded
-          setTimeout(() => {
-            const newNode = nodes.find((n) => n.id === result.id)
-            if (newNode) {
-              setSelectedNode(newNode)
-              setIsDetailPaneOpen(true)
-            }
-          }, 100)
+          // Find and select the new node after invalidation
+          const newNode = nodes.find((n) => n.id === result.id)
+          if (newNode) {
+            setSelectedNode(newNode)
+            setIsDetailPaneOpen(true)
+          }
         }
-      } catch (_error) {
-        // Node creation failed - error handling could be added here
+      } catch (error) {
+        handleNodeCreationError(error, nodeType)
       } finally {
         setIsCreatingNode(false)
       }
     },
-    [screenToFlowPosition, projectId, queryClient, nodes]
+    [
+      screenToFlowPosition,
+      projectId,
+      queryClient,
+      nodes,
+      getNodeConfig,
+      getNodeTitle,
+      getNodeDescription,
+      getNodeMetadata,
+      getNodeVisualProperties,
+      handleNodeCreationError,
+      waitForQueryInvalidation,
+    ]
   )
 
   // Track loading state for all graph operations
