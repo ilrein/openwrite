@@ -22,6 +22,7 @@ import "@xyflow/react/dist/style.css"
 
 import {
   Circle,
+  Edit,
   FileText,
   Layers,
   Loader2,
@@ -137,8 +138,21 @@ const nodeConfigs = {
 }
 
 // Custom Story Node Component
-function StoryNode({ data, selected }: NodeProps<StoryNode>) {
+function StoryNode(props: NodeProps<StoryNode> & { onEdit?: (node: StoryNode) => void }) {
+  const { data, selected, id, onEdit } = props
   const config = nodeConfigs[data.elementType]
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onEdit) {
+      onEdit({
+        id,
+        type: "storyNode",
+        position: { x: 0, y: 0 },
+        data,
+      } as StoryNode)
+    }
+  }
 
   return (
     <div
@@ -149,10 +163,20 @@ function StoryNode({ data, selected }: NodeProps<StoryNode>) {
       {/* Node Header */}
       <div className={`flex items-center gap-2 rounded-t-lg p-3 text-white ${config.color}`}>
         <div className="flex-shrink-0">{config.icon}</div>
-        <div className="flex-1 font-medium text-sm">{data.label}</div>
-        <Badge className="text-xs" variant="secondary">
-          {config.label}
-        </Badge>
+        <div className="min-w-0 flex-1 truncate font-medium text-sm">{data.label}</div>
+        <div className="flex flex-shrink-0 items-center gap-2">
+          <Badge className="text-xs" variant="secondary">
+            {config.label}
+          </Badge>
+          <Button
+            className="h-6 w-6 p-0 hover:bg-white/20"
+            onClick={handleEdit}
+            size="sm"
+            variant="ghost"
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+        </div>
       </div>
 
       {/* Node Content */}
@@ -191,10 +215,7 @@ function StoryNode({ data, selected }: NodeProps<StoryNode>) {
   )
 }
 
-// Node types configuration
-const nodeTypes = {
-  storyNode: StoryNode,
-}
+// This will be moved inside the component to access state
 
 // Initial nodes and edges - now empty, will be loaded dynamically
 const initialNodes: StoryNode[] = []
@@ -267,6 +288,26 @@ function StoryCanvas() {
   const [isDetailPaneOpen, setIsDetailPaneOpen] = useState(false)
   const { screenToFlowPosition, zoomIn, zoomOut, fitView } = useReactFlow()
 
+  // Handle node edit functionality
+  const handleNodeEdit = useCallback((node: StoryNode) => {
+    setSelectedNode(node)
+    setIsDetailPaneOpen(true)
+  }, [])
+
+  // Create StoryNode wrapper with edit functionality
+  const StoryNodeWithEdit = useCallback(
+    (props: NodeProps<StoryNode>) => <StoryNode {...props} onEdit={handleNodeEdit} />,
+    [handleNodeEdit]
+  )
+
+  // Node types configuration
+  const nodeTypes = useMemo(
+    () => ({
+      storyNode: StoryNodeWithEdit,
+    }),
+    [StoryNodeWithEdit]
+  )
+
   // Update nodes and edges when graph data loads (safe one-time update)
   React.useEffect(() => {
     if (graphNodes.length > 0) {
@@ -280,10 +321,9 @@ function StoryCanvas() {
     }
   }, [graphConnections.length, flowEdges, setEdges])
 
-  // Handle node selection
+  // Handle node selection (sidebar only opens via edit button)
   const onNodeClick = useCallback((_: React.MouseEvent, node: StoryNode) => {
     setSelectedNode(node)
-    setIsDetailPaneOpen(true)
   }, [])
 
   // Update node position mutation
