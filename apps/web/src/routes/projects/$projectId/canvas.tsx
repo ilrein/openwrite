@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   addEdge,
@@ -17,7 +18,7 @@ import {
   useNodesState,
   useReactFlow,
 } from "@xyflow/react"
-import { useCallback, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import "@xyflow/react/dist/style.css"
 
 import {
@@ -63,24 +64,38 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { api, type GraphConnection, type GraphNode, type GraphNodeType } from "@/lib/api"
 
 export const Route = createFileRoute("/projects/$projectId/canvas")({
   component: StoryCanvasPage,
 })
 
-// Story element types
+// Story element types - now using our graph types
 type StoryElementType = "act" | "chapter" | "scene" | "beat" | "plot-point"
 
-// Story node data interface
+// Enhanced story node data interface matching our graph system
 interface StoryNodeData extends Record<string, unknown> {
+  // Core graph node properties
+  graphNodeId: string
+  nodeType: GraphNodeType
+  subType?: string
   label: string
   description: string
+
+  // Visual properties
+  color: string
+  size: string
+  icon: string
+  shape: string
+
+  // Story-specific fields (for backward compatibility)
   goals: string
   conflict: string
   notes: string
   characters: string[]
   themes: string[]
-  color: string
+
+  // Legacy field mapping
   elementType: StoryElementType
 }
 
@@ -181,59 +196,89 @@ const nodeTypes = {
   storyNode: StoryNode,
 }
 
-// Initial nodes
-const initialNodes: StoryNode[] = [
-  {
-    id: "1",
-    type: "storyNode",
-    position: { x: 300, y: 100 },
-    data: {
-      label: "Act I: Setup",
-      description: "Introduce the protagonist and their world",
-      goals: "Establish the main character and their normal world",
-      conflict: "The inciting incident that disrupts the status quo",
-      notes: "",
-      characters: [],
-      themes: [],
-      color: "bg-blue-500",
-      elementType: "act",
-    },
-  },
-  {
-    id: "2",
-    type: "storyNode",
-    position: { x: 300, y: 300 },
-    data: {
-      label: "Opening Scene",
-      description: "The story begins",
-      goals: "Hook the reader and establish tone",
-      conflict: "",
-      notes: "",
-      characters: [],
-      themes: [],
-      color: "bg-yellow-500",
-      elementType: "scene",
-    },
-  },
-]
+// Initial nodes and edges - now empty, will be loaded dynamically
+const initialNodes: StoryNode[] = []
 
-const initialEdges: Edge[] = [
-  {
-    id: "e1-2",
-    source: "1",
-    target: "2",
-    type: "smoothstep",
-    animated: true,
-  },
-]
+const initialEdges: Edge[] = []
 
 // Main Canvas Component
 function StoryCanvas() {
+  const { projectId } = Route.useParams()
+  const queryClient = useQueryClient()
+
+  // Load graph data from API
+  const { data: graphNodes = [], isLoading: nodesLoading } = useQuery({
+    queryKey: ["graph-nodes", projectId],
+    queryFn: async () => {
+      return await api.graph.listNodes(projectId)
+    },
+  })
+
+  const { data: graphConnections = [], isLoading: connectionsLoading } = useQuery({
+    queryKey: ["graph-connections", projectId],
+    queryFn: async () => {
+      return await api.graph.listConnections(projectId)
+    },
+  })
+
+  // Convert graph nodes to ReactFlow nodes (memoized to prevent infinite loops)
+  const flowNodes = useMemo(() => {
+    return graphNodes.map((node) => {
+      const visualProps = api.graph.parseVisualProperties(node.visualProperties)
+      return {
+        id: node.id,
+        type: "storyNode",
+        position: { x: node.positionX, y: node.positionY },
+        data: {
+          graphNodeId: node.id,
+          nodeType: node.nodeType,
+          subType: node.subType,
+          label: node.title,
+          description: node.description || "",
+          color: visualProps.color || "bg-blue-500",
+          size: visualProps.size || "medium",
+          icon: visualProps.icon || "📝",
+          shape: visualProps.shape || "rectangle",
+          goals: "", // These could come from metadata
+          conflict: "",
+          notes: "",
+          characters: [],
+          themes: [],
+          elementType: (node.subType as StoryElementType) || "scene",
+        },
+      }
+    })
+  }, [graphNodes])
+
+  // Convert graph connections to ReactFlow edges (memoized to prevent infinite loops)
+  const flowEdges = useMemo(() => {
+    return graphConnections.map((conn) => ({
+      id: conn.id,
+      source: conn.sourceNodeId,
+      target: conn.targetNodeId,
+      type: "smoothstep",
+      animated: true,
+    }))
+  }, [graphConnections])
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [selectedNode, setSelectedNode] = useState<StoryNode | null>(null)
   const [isDetailPaneOpen, setIsDetailPaneOpen] = useState(false)
   const { screenToFlowPosition, zoomIn, zoomOut, fitView } = useReactFlow()
+
+  // Update nodes and edges when graph data loads (safe one-time update)
+  React.useEffect(() => {
+    if (graphNodes.length > 0) {
+      setNodes(flowNodes as any) // Type assertion to avoid complex typing issues for now
+    }
+  }, [graphNodes.length, flowNodes, setNodes])
+
+  React.useEffect(() => {
+    if (graphConnections.length > 0) {
+      setEdges(flowEdges)
+    }
+  }, [graphConnections.length, flowEdges, setEdges])
 
   // Handle edge connections
   const onConnect = useCallback(
