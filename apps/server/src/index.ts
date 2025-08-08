@@ -20,53 +20,52 @@ const app = new Hono<{ Bindings: Env }>()
 app.use(logger())
 
 // CORS configuration - must be before routes
-app.use(
-  "/*",
-  cors({
-    origin: (origin) => {
-      // Allow requests from the web app during development
-      const allowedOrigins = [
-        "http://localhost:3001", // Web app dev server
-        "https://localhost:3001", // Web app dev server (HTTPS)
-      ]
+// CORS using Cloudflare bindings for dynamic allowed origin
+app.use("/*", (c, next) => {
+  const allowedOrigins = [
+    c.env.CORS_ORIGIN,
+    "http://localhost:3001",
+    "https://localhost:3001",
+  ].filter(Boolean) as string[]
 
-      // Allow same-origin requests (no origin header) by returning the origin
+  const corsMiddleware = cors({
+    origin: (origin) => {
+      // Allow same-origin requests (no origin header)
       if (!origin) {
         return origin || undefined
       }
-
-      // Check if origin is in allowed list and return the origin if allowed
       if (allowedOrigins.includes(origin)) {
         return origin
       }
-
-      // Reject other origins
       return
     },
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
+
+  return corsMiddleware(c, next)
+})
+
+// Public health endpoint at root (no auth)
+app.get("/health", (c) =>
+  c.json({ status: "ok", timestamp: new Date().toISOString(), version: "1.0.0" })
 )
 
-// Mount API routes
-app.route("/api", apiRouter)
+// Forward all auth-related requests early to BetterAuth, before mounting other /api routes
+app.all("/api/auth/*", async (c) => {
+  const auth = getAuth(c.env)
+  return await auth.handler(c.req.raw)
+})
 
-// Mount OpenAPI routes
+// Mount OpenAPI routes first so public endpoints like /api/health are not shadowed
 app.route("/api", openApiApp)
+
+// Mount API routes (protected and application-specific)
+app.route("/api", apiRouter)
 
 // Legacy API routes (keeping existing functionality)
 app.get("/api/health-legacy", (c) => c.json({ status: "ok" }))
-
-app.get("/api/auth/*", async (c) => {
-  const auth = getAuth(c.env)
-  return await auth.handler(c.req.raw)
-})
-
-app.post("/api/auth/*", async (c) => {
-  const auth = getAuth(c.env)
-  return await auth.handler(c.req.raw)
-})
 
 app.get("/api/session", async (c) => {
   try {

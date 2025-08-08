@@ -44,8 +44,8 @@ const CreateConnectionSchema = z.object({
   metadata: z.string().optional(),
 })
 
-// Apply auth middleware to all routes
-app.use("*", requireAuth)
+// Apply auth middleware only to the graph namespace
+app.use("/projects/*", requireAuth)
 // Verify project access for all project-specific routes
 app.use("/projects/:projectId/*", verifyProjectAccess)
 

@@ -3,8 +3,9 @@
  */
 
 const BASE_URL =
-  import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.DEV ? "http://localhost:3000" : window.location.origin)
+  import.meta.env.DEV && import.meta.env.VITE_SERVER_URL
+    ? import.meta.env.VITE_SERVER_URL
+    : window.location.origin
 
 export interface ApiRequestOptions extends RequestInit {
   headers?: Record<string, string>
