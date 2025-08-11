@@ -33,7 +33,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
     "drizzle-kit": "^0.31.4",
-    "tsdown": "^0.13.0",
+    "tsdown": "^0.14.0",
     "typescript": "^5.8.3",
     "wrangler": "^4.26.0"
   }
