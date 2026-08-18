@@ -38,6 +38,36 @@ OpenRouter provides access to 200+ AI models from various providers through a si
 
 The OAuth connection is secured using PKCE (Proof Key for Code Exchange), ensuring your credentials are never exposed.
 
+### Choosing a Model
+
+Every provider has a **Model** field on the connect form. Leave it blank to use
+the provider's default, or enter a model ID to pin the assistant to it.
+
+On OpenRouter this matters for cost: model IDs ending in `:free` (for example
+`z-ai/glm-5.2:free`) cost nothing, while `openrouter/auto` and most named models
+bill credits. If you connect an OpenRouter key with no credits and do not set a
+model, OpenWrite uses a `:free` model so the assistant still works.
+
+You can change the model later from **Settings** → **AI Providers**.
+
+### Custom (OpenAI-compatible)
+
+Any service that speaks the OpenAI chat-completions API can be connected with the
+**Custom (OpenAI-compatible)** provider — LM Studio, vLLM, llama.cpp, DeepSeek,
+Together, or a company gateway.
+
+You need two things:
+
+- **Base URL** — the OpenAI-compatible base, such as `https://api.deepseek.com/v1`
+  or `http://localhost:1234/v1`. OpenWrite appends `/chat/completions` for you, so
+  either form works.
+- **Model** — the model ID the endpoint serves. Required, since OpenWrite cannot
+  guess what a custom endpoint hosts.
+
+The **API Key** is optional here. Leave it blank for a local endpoint that does not
+authenticate; if you provide one it is encrypted at rest and sent as a
+`Bearer` token.
+
 ## Managing Providers
 
 ### Provider Settings
@@ -68,13 +98,15 @@ Track your AI usage across all providers:
 
 ## Provider Comparison
 
-| Feature | OpenRouter | OpenAI | Anthropic | Ollama |
-|---------|------------|--------|-----------|---------|
-| **Connection** | OAuth PKCE | API Key | API Key | Direct |
-| **Models** | 200+ models | GPT series | Claude series | Local models |
-| **Pricing** | Pay-per-use | Subscription/Pay-per-use | Pay-per-use | Free (local) |
-| **Setup Difficulty** | Easy | Medium | Medium | Advanced |
-| **Best For** | Variety & cost optimization | Latest GPT models | Reasoning & analysis | Privacy & local inference |
+| Feature | OpenRouter | OpenAI | Anthropic | Ollama | Custom |
+|---------|------------|--------|-----------|---------|--------|
+| **Connection** | OAuth PKCE | API Key | API Key | Direct | Base URL + optional key |
+| **Models** | 200+ models | GPT series | Claude series | Local models | Whatever the endpoint serves |
+| **Pricing** | Pay-per-use (`:free` models available) | Subscription/Pay-per-use | Pay-per-use | Free (local) | Depends on the endpoint |
+| **Setup Difficulty** | Easy | Medium | Medium | Advanced | Advanced |
+| **Best For** | Variety & cost optimization | Latest GPT models | Reasoning & analysis | Privacy & local inference | Self-hosted or unlisted services |
+
+Groq, Google Gemini and Cohere are also available and connect with an API key.
 
 ## AI Model Selection
 
@@ -134,6 +166,11 @@ Consider these factors when selecting models:
 - **Check Quotas** - Review your provider's usage limits
 - **Upgrade Plan** - Consider upgrading your provider account
 - **Switch Providers** - Use alternative providers temporarily
+
+#### 402 Payment Required
+- **Pick a free model** - On OpenRouter, set the Model field to an ID ending in `:free`
+- **Add credits** - Named models and `openrouter/auto` bill your OpenRouter balance
+- **Check the model exists** - A retired `:free` model returns an error until you change it
 
 #### Model Not Available
 - **Provider Status** - Model may be temporarily unavailable

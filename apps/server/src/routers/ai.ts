@@ -45,7 +45,9 @@ const UPSTREAM_ERROR_PREVIEW_CHARS = 300
 const OPENAI_COMPATIBLE = {
   openrouter: {
     url: "https://openrouter.ai/api/v1/chat/completions",
-    defaultModel: "openrouter/auto",
+    // Deliberately a `:free` model — `openrouter/auto` bills credits, so it 402s
+    // for anyone who has not topped up. Override per provider in Dashboard → AI.
+    defaultModel: "z-ai/glm-5.2:free",
   },
   openai: {
     url: "https://api.openai.com/v1/chat/completions",
@@ -69,6 +71,11 @@ const ANTHROPIC_DEFAULT_MODEL = "claude-haiku-4-5"
 const OLLAMA_DEFAULT_URL = "http://localhost:11434"
 const OLLAMA_DEFAULT_MODEL = "llama3.2"
 const TRAILING_SLASH_PATTERN = /\/$/
+const CHAT_COMPLETIONS_SUFFIX = "/chat/completions"
+const OPENROUTER_HEADERS = {
+  "HTTP-Referer": "https://github.com/ilrein/openwrite",
+  "X-Title": "OpenWrite",
+}
 
 const BASE_SYSTEM_PROMPT = `You are a thoughtful writing assistant for fiction writers using OpenWrite.
 Help with character development, plot structure, pacing, dialogue, world-building, and prose style.
@@ -187,7 +194,13 @@ async function callOpenAiCompatible(options: {
   })
 
   if (!response.ok) {
-    return { error: await readUpstreamError(response) }
+    const detail = await readUpstreamError(response)
+    if (response.status === 402) {
+      return {
+        error: `${detail}\n\nThis model needs provider credits. Choose a different model in Dashboard → AI.`,
+      }
+    }
+    return { error: detail }
   }
 
   const data = (await response.json()) as {
@@ -253,6 +266,77 @@ function parseProviderConfig(raw: string | null): Record<string, unknown> {
   }
 }
 
+function readConfigString(config: Record<string, unknown>, key: string): string | undefined {
+  const value = config[key]
+  return typeof value === "string" && value.trim() ? value.trim() : undefined
+}
+
+// Model precedence: what the request asked for, then what the user saved on the
+// provider, then the built-in default for that provider (if it has one).
+function resolveModel(
+  requested: string | undefined,
+  config: Record<string, unknown>
+): string | undefined {
+  return requested?.trim() || readConfigString(config, "defaultModel")
+}
+
+function normalizeChatCompletionsUrl(baseUrl: string): string {
+  const trimmed = baseUrl.replace(TRAILING_SLASH_PATTERN, "")
+  return trimmed.endsWith(CHAT_COMPLETIONS_SUFFIX)
+    ? trimmed
+    : `${trimmed}${CHAT_COMPLETIONS_SUFFIX}`
+}
+
+interface ProviderTarget {
+  extraHeaders?: Record<string, string>
+  model: string
+  requiresApiKey: boolean
+  url: string
+}
+
+// Resolve the endpoint and model for any OpenAI-compatible provider, including
+// self-hosted (ollama) and arbitrary BYOK gateways (custom).
+function resolveProviderTarget(options: {
+  provider: string
+  providerConfig: Record<string, unknown>
+  model: string | undefined
+}): ProviderTarget | { error: string } {
+  const { provider, providerConfig } = options
+  const model = resolveModel(options.model, providerConfig)
+
+  if (provider === "ollama") {
+    const baseUrl = readConfigString(providerConfig, "apiUrl") ?? OLLAMA_DEFAULT_URL
+    return {
+      url: `${baseUrl.replace(TRAILING_SLASH_PATTERN, "")}/v1/chat/completions`,
+      model: model ?? OLLAMA_DEFAULT_MODEL,
+      requiresApiKey: false,
+    }
+  }
+
+  if (provider === "custom") {
+    const baseUrl = readConfigString(providerConfig, "apiUrl")
+    if (!baseUrl) {
+      return { error: "This provider has no base URL configured. Set one in Dashboard → AI." }
+    }
+    if (!model) {
+      return { error: "This provider has no model configured. Set one in Dashboard → AI." }
+    }
+    return { url: normalizeChatCompletionsUrl(baseUrl), model, requiresApiKey: false }
+  }
+
+  const endpoint = OPENAI_COMPATIBLE[provider as keyof typeof OPENAI_COMPATIBLE]
+  if (!endpoint) {
+    return { error: `Provider "${provider}" is not supported for chat yet` }
+  }
+
+  return {
+    url: endpoint.url,
+    model: model ?? endpoint.defaultModel,
+    extraHeaders: provider === "openrouter" ? OPENROUTER_HEADERS : undefined,
+    requiresApiKey: true,
+  }
+}
+
 async function dispatchToProvider(options: {
   provider: string
   apiKey: string | null
@@ -267,46 +351,28 @@ async function dispatchToProvider(options: {
     if (!apiKey) {
       return { error: "Anthropic provider has no API key" }
     }
-    const model = options.model || ANTHROPIC_DEFAULT_MODEL
+    const model = resolveModel(options.model, providerConfig) ?? ANTHROPIC_DEFAULT_MODEL
     return { ...(await callAnthropic({ apiKey, model, system, messages })), model }
   }
 
-  if (provider === "ollama") {
-    const baseUrl =
-      typeof providerConfig.apiUrl === "string" ? providerConfig.apiUrl : OLLAMA_DEFAULT_URL
-    const model =
-      options.model ||
-      (typeof providerConfig.defaultModel === "string"
-        ? providerConfig.defaultModel
-        : OLLAMA_DEFAULT_MODEL)
-    const url = `${baseUrl.replace(TRAILING_SLASH_PATTERN, "")}/v1/chat/completions`
-    return { ...(await callOpenAiCompatible({ url, apiKey, model, system, messages })), model }
+  const target = resolveProviderTarget({ provider, providerConfig, model: options.model })
+  if ("error" in target) {
+    return { error: target.error }
   }
-
-  const endpoint = OPENAI_COMPATIBLE[provider as keyof typeof OPENAI_COMPATIBLE]
-  if (!endpoint) {
-    return { error: `Provider "${provider}" is not supported for chat yet` }
-  }
-  if (!apiKey) {
+  if (target.requiresApiKey && !apiKey) {
     return { error: "Provider has no API key configured" }
   }
 
-  const model = options.model || endpoint.defaultModel
-  const extraHeaders =
-    provider === "openrouter"
-      ? { "HTTP-Referer": "https://github.com/ilrein/openwrite", "X-Title": "OpenWrite" }
-      : undefined
-
   return {
     ...(await callOpenAiCompatible({
-      url: endpoint.url,
+      url: target.url,
       apiKey,
-      model,
+      model: target.model,
       system,
       messages,
-      extraHeaders,
+      extraHeaders: target.extraHeaders,
     })),
-    model,
+    model: target.model,
   }
 }
 
@@ -440,4 +506,4 @@ aiRouter.post("/chat", requireAuth, async (c: AppContext) => {
 })
 
 export type { ChatMessage, CompletionResult }
-export { aiRouter, isCompletionFailure, runCompletionForUser }
+export { aiRouter, isCompletionFailure, resolveProviderTarget, runCompletionForUser }

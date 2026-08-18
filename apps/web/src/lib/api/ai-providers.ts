@@ -17,6 +17,7 @@ export type ProviderId =
   | "groq"
   | "gemini"
   | "cohere"
+  | "custom"
 
 export interface AiProvider {
   createdAt: string

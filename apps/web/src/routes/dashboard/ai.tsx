@@ -52,16 +52,20 @@ interface AIProvider {
 interface ProviderFormProps {
   apiKey: string
   availableProviders: AIProvider[]
+  baseUrl: string
   handleOAuthLogin: () => void
   handleOllamaConnect?: (config: { apiUrl: string; connectionMethod: string }) => void
   handleSubmit: (e: React.FormEvent) => void
   loading: boolean
+  model: string
   oauthLoading: boolean
   preSelectedProviderId?: string | null
   selectedProvider: string
   selectedProviderData: AIProvider | undefined
   selectedProviderSupportsPKCE: boolean
   setApiKey: (key: string) => void
+  setBaseUrl: (url: string) => void
+  setModel: (model: string) => void
   setSelectedProvider: (provider: string) => void
   setShowManualApiKey: (show: boolean) => void
   showManualApiKey: boolean
@@ -192,42 +196,49 @@ function AIProvidersPage() {
     {
       id: "openai",
       name: "OpenAI",
-      description: "GPT-4o, GPT-4o-mini, o1-preview, o1-mini",
+      description: "GPT models",
       enabled: true,
       supportsPKCE: false,
     },
     {
       id: "anthropic",
       name: "Anthropic",
-      description: "Claude-4.0-Opus, Claude-4.0-Sonnet",
+      description: "Claude models",
       enabled: true,
       supportsPKCE: false,
     },
     {
       id: "groq",
       name: "Groq",
-      description: "Llama-3.1, Mixtral, Gemma (Free)",
-      enabled: false,
+      description: "Fast inference for open-weight models",
+      enabled: true,
       supportsPKCE: false,
     },
     {
       id: "gemini",
       name: "Google Gemini",
-      description: "Gemini-1.5-Pro, Gemini-1.5-Flash",
-      enabled: false,
+      description: "Gemini models",
+      enabled: true,
       supportsPKCE: false,
     },
     {
       id: "cohere",
       name: "Cohere",
-      description: "Command-R+, Command-R, Aya",
-      enabled: false,
+      description: "Command models",
+      enabled: true,
       supportsPKCE: false,
     },
     {
       id: "ollama",
       name: "Ollama",
       description: "Run models locally on your device",
+      enabled: true,
+      supportsPKCE: false,
+    },
+    {
+      id: "custom",
+      name: "Custom (OpenAI-compatible)",
+      description: "Any OpenAI-compatible endpoint — LM Studio, vLLM, DeepSeek, a gateway",
       enabled: true,
       supportsPKCE: false,
     },
@@ -449,6 +460,8 @@ function useProviderSubmit(options: {
   selectedProviderSupportsPKCE: boolean
   showManualApiKey: boolean
   apiKey: string
+  baseUrl: string
+  model: string
   onSuccess: () => void
   setLoading: (loading: boolean) => void
   setSelectedProvider: (provider: string) => void
@@ -460,6 +473,8 @@ function useProviderSubmit(options: {
     selectedProviderSupportsPKCE,
     showManualApiKey,
     apiKey,
+    baseUrl,
+    model,
     onSuccess,
     setLoading,
     setSelectedProvider,
@@ -469,23 +484,19 @@ function useProviderSubmit(options: {
   return async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const keylessProvider = selectedProvider === "ollama" || selectedProvider === "custom"
     const requiresApiKey = !selectedProviderSupportsPKCE || showManualApiKey
-    if (!selectedProvider || (requiresApiKey && !apiKey && selectedProvider !== "ollama")) {
+    if (!selectedProvider || (requiresApiKey && !apiKey && !keylessProvider)) {
       return
     }
 
     try {
       setLoading(true)
       await aiProvidersApi.create({
-        provider: selectedProvider as
-          | "openrouter"
-          | "openai"
-          | "anthropic"
-          | "ollama"
-          | "groq"
-          | "gemini"
-          | "cohere",
+        provider: selectedProvider as ProviderId,
         apiKey,
+        ...(selectedProvider === "custom" ? { apiUrl: baseUrl.trim() } : {}),
+        ...(model.trim() ? { providerConfig: { defaultModel: model.trim() } } : {}),
       })
       // Get provider name for the toast
       const providerData = availableProviders.find((p) => p.id === selectedProvider)
@@ -516,6 +527,8 @@ function AddProviderForm({
 }) {
   const [selectedProvider, setSelectedProvider] = useState(preSelectedProviderId || "")
   const [apiKey, setApiKey] = useState("")
+  const [baseUrl, setBaseUrl] = useState("")
+  const [model, setModel] = useState("")
   const [loading, setLoading] = useState(false)
   const [showManualApiKey, setShowManualApiKey] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
@@ -542,6 +555,7 @@ function AddProviderForm({
         apiUrl: config.apiUrl,
         configuration: {
           connectionMethod: config.connectionMethod,
+          ...(model.trim() ? { defaultModel: model.trim() } : {}),
         },
       })
       toast.success("Ollama connected successfully", {
@@ -567,6 +581,8 @@ function AddProviderForm({
     selectedProviderSupportsPKCE,
     showManualApiKey,
     apiKey,
+    baseUrl,
+    model,
     onSuccess,
     setLoading,
     setSelectedProvider,
@@ -578,16 +594,20 @@ function AddProviderForm({
     <ProviderForm
       apiKey={apiKey}
       availableProviders={availableProviders}
+      baseUrl={baseUrl}
       handleOAuthLogin={handleOAuthLogin}
       handleOllamaConnect={handleOllamaConnect}
       handleSubmit={handleSubmit}
       loading={loading}
+      model={model}
       oauthLoading={oauthLoading}
       preSelectedProviderId={preSelectedProviderId}
       selectedProvider={selectedProvider}
       selectedProviderData={selectedProviderData}
       selectedProviderSupportsPKCE={selectedProviderSupportsPKCE}
       setApiKey={setApiKey}
+      setBaseUrl={setBaseUrl}
+      setModel={setModel}
       setSelectedProvider={setSelectedProvider}
       setShowManualApiKey={setShowManualApiKey}
       showManualApiKey={showManualApiKey}
@@ -697,17 +717,19 @@ function ApiKeySection({
   selectedProviderSupportsPKCE,
   showManualApiKey,
   setShowManualApiKey,
+  optional = false,
 }: {
   apiKey: string
   setApiKey: (key: string) => void
   selectedProviderSupportsPKCE: boolean
   showManualApiKey: boolean
   setShowManualApiKey: (show: boolean) => void
+  optional?: boolean
 }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <Label htmlFor="apiKey">API Key</Label>
+        <Label htmlFor="apiKey">API Key{optional ? " (optional)" : ""}</Label>
         {selectedProviderSupportsPKCE && showManualApiKey && (
           <Button
             onClick={() => setShowManualApiKey(false)}
@@ -722,8 +744,8 @@ function ApiKeySection({
       <Input
         id="apiKey"
         onChange={(e) => setApiKey(e.target.value)}
-        placeholder="Enter your API key"
-        required
+        placeholder={optional ? "Leave blank if the endpoint needs no key" : "Enter your API key"}
+        required={!optional}
         type="password"
         value={apiKey}
       />
@@ -734,11 +756,69 @@ function ApiKeySection({
   )
 }
 
+function BaseUrlSection({
+  baseUrl,
+  setBaseUrl,
+}: {
+  baseUrl: string
+  setBaseUrl: (url: string) => void
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="baseUrl">Base URL</Label>
+      <Input
+        id="baseUrl"
+        onChange={(e) => setBaseUrl(e.target.value)}
+        placeholder="https://api.example.com/v1"
+        required
+        type="url"
+        value={baseUrl}
+      />
+      <p className="mt-1 text-muted-foreground text-sm">
+        The OpenAI-compatible base URL. <code>/chat/completions</code> is appended for you.
+      </p>
+    </div>
+  )
+}
+
+function ModelSection({
+  model,
+  setModel,
+  required,
+}: {
+  model: string
+  setModel: (model: string) => void
+  required: boolean
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="model">Model{required ? "" : " (optional)"}</Label>
+      <Input
+        id="model"
+        onChange={(e) => setModel(e.target.value)}
+        placeholder="e.g. z-ai/glm-5.2:free"
+        required={required}
+        type="text"
+        value={model}
+      />
+      <p className="mt-1 text-muted-foreground text-sm">
+        {required
+          ? "The model ID this endpoint serves."
+          : "Leave blank to use the provider's default. On OpenRouter, a :free model costs nothing."}
+      </p>
+    </div>
+  )
+}
+
 function ProviderForm({
   selectedProvider,
   setSelectedProvider,
   apiKey,
   setApiKey,
+  baseUrl,
+  setBaseUrl,
+  model,
+  setModel,
   loading,
   oauthLoading,
   showManualApiKey,
@@ -758,10 +838,16 @@ function ProviderForm({
     !selectedProviderSupportsPKCE && apiKey && selectedProvider !== "ollama"
   const hasApiKeyForManualMode = selectedProviderSupportsPKCE && showManualApiKey && apiKey
   const isOllama = selectedProvider === "ollama"
+  const isCustom = selectedProvider === "custom"
+  // A custom endpoint may be keyless (local vLLM, LM Studio) but always needs
+  // somewhere to send the request and a model to name.
+  const hasCustomEndpoint = isCustom && !!baseUrl.trim() && !!model.trim()
 
   const isFormValid =
     hasSelectedProvider &&
-    (canUseOAuth || hasApiKeyForNonPKCE || hasApiKeyForManualMode || isOllama)
+    (isCustom
+      ? hasCustomEndpoint
+      : canUseOAuth || hasApiKeyForNonPKCE || hasApiKeyForManualMode || isOllama)
   const isSubmitDisabled = !isFormValid || loading || oauthLoading
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -777,6 +863,10 @@ function ProviderForm({
       {preSelectedProviderId && selectedProviderData && (
         <ProviderInfo selectedProviderData={selectedProviderData} />
       )}
+
+      {isCustom && <BaseUrlSection baseUrl={baseUrl} setBaseUrl={setBaseUrl} />}
+
+      {selectedProvider && <ModelSection model={model} required={isCustom} setModel={setModel} />}
 
       {selectedProvider === "ollama" && handleOllamaConnect && (
         <div className="space-y-3">
@@ -799,6 +889,7 @@ function ProviderForm({
         (!selectedProviderSupportsPKCE || showManualApiKey) && (
           <ApiKeySection
             apiKey={apiKey}
+            optional={isCustom}
             selectedProviderSupportsPKCE={selectedProviderSupportsPKCE}
             setApiKey={setApiKey}
             setShowManualApiKey={setShowManualApiKey}

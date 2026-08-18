@@ -80,6 +80,13 @@ const requireAuth = async (
 aiProvidersRouter.use("*", requireAuth)
 
 // Helper function to prepare provider configuration
+// Providers that point at an endpoint the user controls, where a key is optional
+const KEYLESS_PROVIDERS = new Set(["ollama", "custom"])
+const DEFAULT_KEY_LABELS: Record<string, string> = {
+  ollama: "Local Ollama",
+  custom: "Custom endpoint",
+}
+
 function prepareProviderConfig(
   providerConfig: Record<string, unknown> | undefined,
   apiUrl: string | undefined,
@@ -150,8 +157,12 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
     }
 
     // API key is optional for Ollama (local installation)
-    if (provider !== "ollama" && !apiKey) {
+    if (!(KEYLESS_PROVIDERS.has(provider) || apiKey)) {
       return c.json({ error: "API key is required for this provider" }, 400)
+    }
+
+    if (provider === "custom" && !(apiUrl || providerConfig?.apiUrl)) {
+      return c.json({ error: "A base URL is required for a custom provider" }, 400)
     }
 
     // Check if user already has a provider of this type (due to unique constraint)
@@ -193,7 +204,7 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
       userId: user.id,
       provider,
       apiKey: encryptedApiKey, // Now encrypted (empty for Ollama)
-      keyLabel: keyLabel || (provider === "ollama" ? "Local Ollama" : null),
+      keyLabel: keyLabel || DEFAULT_KEY_LABELS[provider] || null,
       keyHash: apiKeyHash, // Empty for Ollama
       providerUserId: providerUserId || null,
       isActive: true,
@@ -427,7 +438,15 @@ aiProvidersRouter.post(
 // Helper function to get decrypted API key for a provider (for internal use)
 export async function getDecryptedApiKey(
   userId: string,
-  provider: "openrouter" | "openai" | "anthropic" | "ollama" | "groq" | "gemini" | "cohere",
+  provider:
+    | "openrouter"
+    | "openai"
+    | "anthropic"
+    | "ollama"
+    | "groq"
+    | "gemini"
+    | "cohere"
+    | "custom",
   env: Env
 ): Promise<string | null> {
   const providerRecord = await db
