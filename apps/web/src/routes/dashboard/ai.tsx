@@ -756,6 +756,18 @@ function ApiKeySection({
   )
 }
 
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]", "::1"])
+
+// Completions are requested by the server, so a loopback URL only resolves when
+// the server runs on the same machine — not on the hosted Worker.
+function isLoopbackUrl(value: string): boolean {
+  try {
+    return LOOPBACK_HOSTS.has(new URL(value.trim()).hostname)
+  } catch {
+    return false
+  }
+}
+
 function BaseUrlSection({
   baseUrl,
   setBaseUrl,
@@ -774,9 +786,17 @@ function BaseUrlSection({
         type="url"
         value={baseUrl}
       />
-      <p className="mt-1 text-muted-foreground text-sm">
-        The OpenAI-compatible base URL. <code>/chat/completions</code> is appended for you.
-      </p>
+      {isLoopbackUrl(baseUrl) ? (
+        <p className="mt-1 text-amber-600 text-sm dark:text-amber-500">
+          Requests are made by the OpenWrite server, which cannot reach your machine's{" "}
+          <code>localhost</code>. Expose the endpoint with a tunnel (ngrok, cloudflared) and paste
+          that URL instead — unless you are self-hosting the server locally.
+        </p>
+      ) : (
+        <p className="mt-1 text-muted-foreground text-sm">
+          The OpenAI-compatible base URL. <code>/chat/completions</code> is appended for you.
+        </p>
+      )}
     </div>
   )
 }

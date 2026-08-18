@@ -81,7 +81,7 @@ describe("custom OpenAI-compatible providers", () => {
       body: JSON.stringify({
         provider: "custom",
         apiKey: "",
-        apiUrl: "http://localhost:1234/v1",
+        apiUrl: "  http://localhost:1234/v1  ",
         providerConfig: { defaultModel: "local-model" },
       }),
     })
@@ -95,6 +95,34 @@ describe("custom OpenAI-compatible providers", () => {
     expect(JSON.parse(saved?.providerConfig ?? "{}")).toEqual({
       defaultModel: "local-model",
       apiUrl: "http://localhost:1234/v1",
+    })
+  })
+
+  it("trims the stored base URL", async () => {
+    const saved = await testDb.select().from(aiProvider).where(eq(aiProvider.userId, USER_ID)).get()
+    expect(JSON.parse(saved?.providerConfig ?? "{}").apiUrl).toBe("http://localhost:1234/v1")
+  })
+
+  it.each([
+    ["blank", ""],
+    ["whitespace only", "   "],
+    ["no scheme", "api.example.com/v1"],
+    ["unsupported scheme", "ftp://api.example.com/v1"],
+    ["not a URL at all", "not a url"],
+  ])("rejects a %s base URL", async (_label, apiUrl) => {
+    const response = await request("/api/ai-providers", {
+      method: "POST",
+      body: JSON.stringify({
+        provider: "custom",
+        apiKey: "",
+        apiUrl,
+        providerConfig: { defaultModel: "local-model" },
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringContaining("base URL"),
     })
   })
 

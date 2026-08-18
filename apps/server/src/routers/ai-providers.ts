@@ -87,18 +87,40 @@ const DEFAULT_KEY_LABELS: Record<string, string> = {
   custom: "Custom endpoint",
 }
 
-function prepareProviderConfig(
+function buildProviderConfig(
   providerConfig: Record<string, unknown> | undefined,
   apiUrl: string | undefined,
   configuration: Record<string, unknown> | undefined
-): string | null {
+): Record<string, unknown> {
   const combinedConfig = {
     ...(providerConfig || {}),
     ...(apiUrl == null ? {} : { apiUrl }),
     ...(configuration || {}),
   }
 
-  return Object.keys(combinedConfig).length > 0 ? JSON.stringify(combinedConfig) : null
+  if (typeof combinedConfig.apiUrl === "string") {
+    combinedConfig.apiUrl = combinedConfig.apiUrl.trim()
+  }
+
+  return combinedConfig
+}
+
+function serializeProviderConfig(config: Record<string, unknown>): string | null {
+  return Object.keys(config).length > 0 ? JSON.stringify(config) : null
+}
+
+// A custom endpoint is only useful if we can actually build a request from it,
+// so reject blank and malformed values here rather than at dispatch time.
+function isValidEndpointUrl(value: unknown): boolean {
+  if (typeof value !== "string" || !value.trim()) {
+    return false
+  }
+  try {
+    const { protocol } = new URL(value.trim())
+    return protocol === "http:" || protocol === "https:"
+  } catch {
+    return false
+  }
 }
 
 // List user's AI providers
@@ -161,8 +183,13 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
       return c.json({ error: "API key is required for this provider" }, 400)
     }
 
-    if (provider === "custom" && !(apiUrl || providerConfig?.apiUrl)) {
-      return c.json({ error: "A base URL is required for a custom provider" }, 400)
+    const combinedConfig = buildProviderConfig(providerConfig, apiUrl, configuration)
+
+    if (provider === "custom" && !isValidEndpointUrl(combinedConfig.apiUrl)) {
+      return c.json(
+        { error: "A custom provider needs a base URL starting with http:// or https://" },
+        400
+      )
     }
 
     // Check if user already has a provider of this type (due to unique constraint)
@@ -197,7 +224,6 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
     const apiKeyHash = apiKey ? keyHash || (await hashApiKey(apiKey)) : ""
 
     // Prepare provider config with apiUrl and configuration
-    const finalProviderConfig = prepareProviderConfig(providerConfig, apiUrl, configuration)
 
     await db.insert(aiProvider).values({
       id,
@@ -212,7 +238,7 @@ aiProvidersRouter.post("/", async (c: Context<{ Bindings: Env; Variables: Variab
       usageLimit: usageLimit || null,
       currentUsage: 0,
       supportedModels: supportedModels ? JSON.stringify(supportedModels) : null,
-      providerConfig: finalProviderConfig,
+      providerConfig: serializeProviderConfig(combinedConfig),
       createdAt: now,
       updatedAt: now,
     })

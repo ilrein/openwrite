@@ -48,7 +48,8 @@ On OpenRouter this matters for cost: model IDs ending in `:free` (for example
 bill credits. If you connect an OpenRouter key with no credits and do not set a
 model, OpenWrite uses a `:free` model so the assistant still works.
 
-You can change the model later from **Settings** → **AI Providers**.
+There is no edit flow for a connected provider yet, so changing the model means
+disconnecting the provider and connecting it again with the new value.
 
 ### Custom (OpenAI-compatible)
 
@@ -58,15 +59,35 @@ Together, or a company gateway.
 
 You need two things:
 
-- **Base URL** — the OpenAI-compatible base, such as `https://api.deepseek.com/v1`
-  or `http://localhost:1234/v1`. OpenWrite appends `/chat/completions` for you, so
-  either form works.
+- **Base URL** — the OpenAI-compatible base, such as `https://api.deepseek.com/v1`.
+  OpenWrite appends `/chat/completions` for you, so a URL that already ends in it
+  works too.
 - **Model** — the model ID the endpoint serves. Required, since OpenWrite cannot
   guess what a custom endpoint hosts.
 
-The **API Key** is optional here. Leave it blank for a local endpoint that does not
+The **API Key** is optional here. Leave it blank for an endpoint that does not
 authenticate; if you provide one it is encrypted at rest and sent as a
 `Bearer` token.
+
+::: warning Local endpoints need a tunnel
+Completions are requested by the server, not your browser. On the hosted app that
+server is a Cloudflare Worker, which cannot reach `http://localhost` on your
+machine — a loopback URL will fail even though the endpoint works locally.
+
+To use LM Studio, vLLM or llama.cpp from your own machine, expose it with a tunnel
+and paste the public HTTPS URL, the same way the Ollama setup does:
+
+```bash
+# ngrok
+ngrok http 1234
+
+# or cloudflared
+cloudflared tunnel --url http://localhost:1234
+```
+
+If you self-host OpenWrite and run the server on the same machine as the model, a
+`localhost` URL is fine.
+:::
 
 ## Managing Providers
 
