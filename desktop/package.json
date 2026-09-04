@@ -1,0 +1,13 @@
+{
+  "name": "openwrite-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local-only novel writing studio. No server, no cloud, no AI.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^39.0.0"
+  }
+}
