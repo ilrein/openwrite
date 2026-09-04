@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ArrowDown, ArrowUp, Network, Pencil, Plus, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, Network, Pencil, Plus, Sparkles, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import { ChapterInspectorDialog } from "@/components/story-bible/chapter-inspector-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { api, type Chapter } from "@/lib/api"
@@ -25,6 +26,7 @@ export function ChapterList({
   const queryClient = useQueryClient()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState("")
+  const [inspectingChapter, setInspectingChapter] = useState<Chapter | null>(null)
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["chapters", projectId] })
 
@@ -153,6 +155,16 @@ export function ChapterList({
                 <div className="hidden shrink-0 items-center group-hover:flex">
                   <Button
                     className="h-6 w-6 p-0"
+                    onClick={() => setInspectingChapter(ch)}
+                    size="sm"
+                    title="Synopsis & braindump"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    className="h-6 w-6 p-0"
                     disabled={index === 0 || reorderMutation.isPending}
                     onClick={() => move(ch.id, -1)}
                     size="sm"
@@ -220,6 +232,15 @@ export function ChapterList({
           </Link>
         </Button>
       </div>
+
+      {inspectingChapter && (
+        <ChapterInspectorDialog
+          chapter={inspectingChapter}
+          onOpenChange={(open) => !open && setInspectingChapter(null)}
+          open={Boolean(inspectingChapter)}
+          projectId={projectId}
+        />
+      )}
     </div>
   )
 }

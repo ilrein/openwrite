@@ -27,7 +27,31 @@ export const workTypeEnum = [
   "graphic_novel",
   "screenplay",
 ] as const
-// Role and type enums removed - no longer constraining users to predefined categories
+
+// Story Bible character roles — the dropdown Sudowrite shows on every character.
+export const characterRoleEnum = [
+  "protagonist",
+  "antagonist",
+  "supporting",
+  "minor",
+  "love_interest",
+] as const
+
+// Story Bible worldbuilding element types. Each type seeds a different set of
+// default traits (see lib/story-bible.ts); "other" is the freeform catch-all.
+export const worldElementTypeEnum = [
+  "setting",
+  "item",
+  "organization",
+  "culture",
+  "magic_system",
+  "technology",
+  "religion",
+  "history",
+  "language",
+  "creature",
+  "other",
+] as const
 export const plotPointTypeEnum = [
   "inciting_incident",
   "plot_point_1",
@@ -75,6 +99,10 @@ export const project = sqliteTable(
     // Cover and metadata
     coverImage: text("cover_image"),
     metadata: text("metadata"), // JSON for additional project data (themes, inspiration, series info, etc.)
+
+    // Story Bible "Style" section — the prose voice, tone, and comp titles the
+    // AI should match when generating for this project.
+    styleBible: text("style_bible"),
 
     // Timestamps
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
@@ -128,7 +156,8 @@ export const chapter = sqliteTable(
     id: text("id").primaryKey(),
     title: text("title").notNull(),
     content: text("content"), // Markdown/rich text content
-    summary: text("summary"), // Brief chapter summary
+    summary: text("summary"), // Brief chapter summary — the Story Bible "Synopsis" for this chapter
+    braindump: text("braindump"), // Freeform AI brainstorm scratchpad for this chapter
     wordCount: integer("word_count").default(0),
     order: integer("order").notNull(), // Chapter order within the work
     status: text("status", { enum: projectStatusEnum }).notNull().default("draft"),
@@ -157,9 +186,10 @@ export const character = sqliteTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     description: text("description"),
-    // role field removed - users can describe character roles freely in description
 
-    // Simplified character - just name, description, and core metadata
+    // Story Bible fields (Sudowrite-style)
+    role: text("role", { enum: characterRoleEnum }), // Protagonist / Antagonist / …
+    traits: text("traits"), // JSON: Array<{ id: string; label: string; value: string }>
 
     // Relationships - can be shared across project or specific to a work
     projectId: text("project_id").references(() => project.id, { onDelete: "cascade" }), // For shared characters
@@ -279,6 +309,51 @@ export const lore = sqliteTable(
     loreAssociation: check("lore_association", sql`(project_id IS NULL) IS NOT (work_id IS NULL)`),
     projectIdIdx: index("lore_project_id_idx").on(table.projectId),
     workIdIdx: index("lore_work_id_idx").on(table.workId),
+  })
+)
+
+// Character group table - Story Bible grouping ("The Gang", "House Stark").
+// Membership is stored as a JSON array of character ids so a character can
+// belong to several groups without a join table.
+export const characterGroup = sqliteTable(
+  "character_group",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    memberIds: text("member_ids"), // JSON array of character ids
+
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => ({
+    projectIdIdx: index("character_group_project_id_idx").on(table.projectId),
+  })
+)
+
+// Worldbuilding element table - Story Bible "Worldbuilding" section. Like a
+// character, each element is name + type + a list of labeled traits.
+export const worldElement = sqliteTable(
+  "world_element",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    type: text("type", { enum: worldElementTypeEnum }).notNull().default("other"),
+    description: text("description"),
+    traits: text("traits"), // JSON: Array<{ id: string; label: string; value: string }>
+    metadata: text("metadata"),
+
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => ({
+    projectIdIdx: index("world_element_project_id_idx").on(table.projectId),
   })
 )
 

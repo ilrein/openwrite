@@ -22,76 +22,84 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import {
-  api,
-  CHARACTER_DEFAULT_TRAIT_LABELS,
-  CHARACTER_ROLE_OPTIONS,
-  type Character,
-  type CharacterRole,
   storyBibleApi,
   type Trait,
   traitsFromLabels,
+  WORLD_ELEMENT_DEFAULT_TRAIT_LABELS,
+  WORLD_ELEMENT_TYPE_OPTIONS,
+  type WorldElement,
+  type WorldElementType,
 } from "@/lib/api"
 
-interface CharacterDialogProps {
-  character?: Character | null
+interface WorldElementDialogProps {
+  element?: WorldElement | null
   mode: "create" | "edit"
   onOpenChange: (open: boolean) => void
   open: boolean
   projectId: string
 }
 
-const NO_ROLE = "none"
-
-const seedTraits = (character?: Character | null): Trait[] => {
-  if (character?.traits && character.traits.length > 0) {
-    return character.traits
+const seedTraits = (element?: WorldElement | null): Trait[] => {
+  if (element?.traits && element.traits.length > 0) {
+    return element.traits
   }
-  return traitsFromLabels(CHARACTER_DEFAULT_TRAIT_LABELS)
+  return traitsFromLabels(WORLD_ELEMENT_DEFAULT_TRAIT_LABELS[element?.type ?? "setting"])
 }
 
-export function CharacterDialog({
+export function WorldElementDialog({
   open,
   onOpenChange,
   projectId,
-  character,
+  element,
   mode,
-}: CharacterDialogProps) {
+}: WorldElementDialogProps) {
   const queryClient = useQueryClient()
 
   const [name, setName] = useState("")
-  const [role, setRole] = useState<CharacterRole | typeof NO_ROLE>(NO_ROLE)
+  const [type, setType] = useState<WorldElementType>("setting")
   const [description, setDescription] = useState("")
   const [traits, setTraits] = useState<Trait[]>([])
+  // Track whether the writer has hand-edited traits so a type switch doesn't
+  // wipe their work — it only re-seeds an untouched default set.
+  const [traitsPristine, setTraitsPristine] = useState(true)
 
   useEffect(() => {
     if (!open) {
       return
     }
-    setName(character?.name ?? "")
-    setRole(character?.role ?? NO_ROLE)
-    setDescription(character?.description ?? "")
-    setTraits(seedTraits(character))
-  }, [open, character])
+    setName(element?.name ?? "")
+    setType(element?.type ?? "setting")
+    setDescription(element?.description ?? "")
+    setTraits(seedTraits(element))
+    setTraitsPristine(mode === "create")
+  }, [open, element, mode])
+
+  const changeType = (next: WorldElementType) => {
+    setType(next)
+    if (traitsPristine) {
+      setTraits(traitsFromLabels(WORLD_ELEMENT_DEFAULT_TRAIT_LABELS[next]))
+    }
+  }
 
   const save = useMutation({
     mutationFn: () => {
       const payload = {
         name: name.trim(),
+        type,
         description: description.trim(),
-        role: role === NO_ROLE ? null : role,
         traits: traits.filter((trait) => trait.label.trim()),
       }
-      if (mode === "edit" && character?.id) {
-        return api.characters.update(projectId, character.id, payload)
+      if (mode === "edit" && element?.id) {
+        return storyBibleApi.worldElements.update(projectId, element.id, payload)
       }
-      return api.characters.create(projectId, payload)
+      return storyBibleApi.worldElements.create(projectId, payload)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["characters", projectId] })
-      toast.success(mode === "edit" ? "Character updated" : "Character created")
+      queryClient.invalidateQueries({ queryKey: ["world-elements", projectId] })
+      toast.success(mode === "edit" ? "Element updated" : "Element created")
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error(`Couldn't save character: ${error.message}`),
+    onError: (error: Error) => toast.error(`Couldn't save element: ${error.message}`),
   })
 
   const canSave = name.trim().length > 0 && !save.isPending
@@ -108,35 +116,33 @@ export function CharacterDialog({
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? "Create character" : `Edit ${character?.name ?? "character"}`}
+            {mode === "create" ? "New worldbuilding element" : `Edit ${element?.name ?? "element"}`}
           </DialogTitle>
           <DialogDescription>
-            Give the character a role and flesh out each trait — use the ✨ on any field for AI
-            options.
+            Pick a type to seed its traits, then flesh each one out — the ✨ drafts options for you.
           </DialogDescription>
         </DialogHeader>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
             <div className="space-y-2">
-              <Label htmlFor="character-name">Name *</Label>
+              <Label htmlFor="world-element-name">Name *</Label>
               <Input
                 autoFocus
-                id="character-name"
+                id="world-element-name"
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Character name"
+                placeholder="e.g. The Iron Bank, Aetherweave, King's Landing"
                 value={name}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="character-role">Role</Label>
-              <Select onValueChange={(value) => setRole(value as CharacterRole)} value={role}>
-                <SelectTrigger id="character-role">
-                  <SelectValue placeholder="Choose a role" />
+              <Label htmlFor="world-element-type">Type</Label>
+              <Select onValueChange={(value) => changeType(value as WorldElementType)} value={type}>
+                <SelectTrigger id="world-element-type">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NO_ROLE}>No role</SelectItem>
-                  {CHARACTER_ROLE_OPTIONS.map((option) => (
+                  {WORLD_ELEMENT_TYPE_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -147,12 +153,12 @@ export function CharacterDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="character-description">Description</Label>
+            <Label htmlFor="world-element-description">Description</Label>
             <Textarea
               className="min-h-[70px]"
-              id="character-description"
+              id="world-element-description"
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="A one-line sketch of who they are and what they want."
+              placeholder="A one-line summary of what this is."
               value={description}
             />
           </div>
@@ -160,15 +166,18 @@ export function CharacterDialog({
           <div className="space-y-3">
             <Label>Traits</Label>
             <TraitEditor
-              canGenerate={mode === "edit" && Boolean(character?.id)}
-              onChange={setTraits}
+              canGenerate={mode === "edit" && Boolean(element?.id)}
+              onChange={(next) => {
+                setTraits(next)
+                setTraitsPristine(false)
+              }}
               onGenerateTrait={async (label, instructions) => {
-                if (!character?.id) {
+                if (!element?.id) {
                   return []
                 }
-                const result = await storyBibleApi.generateCharacterTrait(
+                const result = await storyBibleApi.worldElements.generateTrait(
                   projectId,
-                  character.id,
+                  element.id,
                   label,
                   instructions
                 )
@@ -193,7 +202,7 @@ export function CharacterDialog({
                 if (save.isPending) {
                   return "Saving…"
                 }
-                return mode === "create" ? "Create character" : "Save changes"
+                return mode === "create" ? "Create element" : "Save changes"
               })()}
             </Button>
           </DialogFooter>

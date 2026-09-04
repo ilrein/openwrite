@@ -84,6 +84,26 @@ export type {
 } from "./projects"
 // Project API (formerly Novel API)
 export { novelApi, projectApi } from "./projects"
+export type {
+  CharacterGroup,
+  CharacterGroupInput,
+  CharacterRole,
+  GenerateOptionsResult,
+  Trait,
+  WorldElement,
+  WorldElementInput,
+  WorldElementType,
+} from "./story-bible"
+// Story Bible API (worldbuilding, character groups, AI generation)
+export {
+  CHARACTER_DEFAULT_TRAIT_LABELS,
+  CHARACTER_ROLE_OPTIONS,
+  newTrait,
+  storyBibleApi,
+  traitsFromLabels,
+  WORLD_ELEMENT_DEFAULT_TRAIT_LABELS,
+  WORLD_ELEMENT_TYPE_OPTIONS,
+} from "./story-bible"
 
 import { aiApi } from "./ai"
 import { aiProvidersApi } from "./ai-providers"
@@ -95,6 +115,7 @@ import { locationsApi } from "./locations"
 import { loreApi } from "./lore"
 import { plotApi } from "./plot"
 import { novelApi, projectApi } from "./projects"
+import { storyBibleApi } from "./story-bible"
 
 // Future API clients will be exported here:
 // export { chapterApi } from "./chapters"
@@ -115,6 +136,7 @@ export const api = {
   lore: loreApi,
   plot: plotApi,
   graph: graphApi,
+  storyBible: storyBibleApi,
   // chapters: chapterApi,
   // organizations: organizationApi,
 }

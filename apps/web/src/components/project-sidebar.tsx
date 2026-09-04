@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ChevronDown, ChevronRight, FileText, PenTool, Plus, Scroll } from "lucide-react"
+import { ChevronDown, ChevronRight, Feather, FileText, PenTool, Plus, Scroll } from "lucide-react"
 import { useState } from "react"
 import { CharacterSidebarSection } from "@/components/character-sidebar-section"
 import CodexModal from "@/components/codex-modal"
 import { LocationSidebarSection } from "@/components/location-sidebar-section"
+import { CharacterGroupSidebarSection } from "@/components/story-bible/character-group-sidebar-section"
+import { StyleDialog } from "@/components/story-bible/style-dialog"
+import { WorldElementSidebarSection } from "@/components/story-bible/world-element-sidebar-section"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -100,6 +103,7 @@ function CollapsibleSection({
 
 export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
+  const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false)
   const [codexModalConfig, setCodexModalConfig] = useState<{
     initialType?: string | null
     initialEntry?: string | null
@@ -110,6 +114,8 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
     lore: false,
     plot: false,
     notes: false,
+    worldbuilding: false,
+    groups: false,
   })
 
   // Fetch lore entries
@@ -187,6 +193,34 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Story Bible</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setIsStyleDialogOpen(true)}>
+                    <Feather className="h-4 w-4" />
+                    <span>Style</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <WorldElementSidebarSection
+                  isExpanded={expandedCodexSections.worldbuilding}
+                  key="worldbuilding-section"
+                  onToggle={() => toggleCodexSection("worldbuilding")}
+                  projectId={projectId}
+                />
+
+                <CharacterGroupSidebarSection
+                  isExpanded={expandedCodexSections.groups}
+                  key="character-groups-section"
+                  onToggle={() => toggleCodexSection("groups")}
+                  projectId={projectId}
+                />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -271,6 +305,12 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
           setIsCodexModalOpen(false)
           setCodexModalConfig({})
         }}
+        projectId={projectId}
+      />
+
+      <StyleDialog
+        onOpenChange={setIsStyleDialogOpen}
+        open={isStyleDialogOpen}
         projectId={projectId}
       />
     </>

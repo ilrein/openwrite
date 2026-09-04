@@ -14,6 +14,7 @@ export interface Project {
   id: string
   lastWrittenAt: string | null
   status: "draft" | "in_progress" | "completed" | "published" | "archived"
+  styleBible?: string | null // Story Bible "Style" section
   targetWordCount: number | null
   title: string
   type: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
@@ -57,6 +58,7 @@ export type CreateNovelData = CreateProjectData
 export interface UpdateProjectData {
   description?: string | null
   genre?: string | null
+  styleBible?: string | null
   targetWordCount?: number | null
   title?: string
   type?: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
