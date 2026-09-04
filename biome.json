@@ -1,6 +1,7 @@
 {
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": ["**", "!desktop/**"]
   },
   "formatter": {
     "enabled": true,
