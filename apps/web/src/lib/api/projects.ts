@@ -5,6 +5,7 @@ import { apiCall } from "./base"
  * Project data types
  */
 export interface Project {
+  braindump?: string | null // Story Bible "Braindump" section
   content?: string | null // Content field for writing interface
   coverImage: string | null
   createdAt: string
@@ -14,6 +15,7 @@ export interface Project {
   id: string
   lastWrittenAt: string | null
   status: "draft" | "in_progress" | "completed" | "published" | "archived"
+  styleBible?: string | null // Story Bible "Style" section
   targetWordCount: number | null
   title: string
   type: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"
@@ -55,8 +57,10 @@ export interface CreateProjectData {
 export type CreateNovelData = CreateProjectData
 
 export interface UpdateProjectData {
+  braindump?: string | null
   description?: string | null
   genre?: string | null
+  styleBible?: string | null
   targetWordCount?: number | null
   title?: string
   type?: "novel" | "trilogy" | "series" | "short_story_collection" | "graphic_novel" | "screenplay"

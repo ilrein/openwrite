@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ArrowDown, ArrowUp, Network, Pencil, Plus, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, Network, Pencil, Plus, Sparkles, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -151,6 +151,20 @@ export function ChapterList({
                 </button>
 
                 <div className="hidden shrink-0 items-center group-hover:flex">
+                  <Button
+                    asChild
+                    className="h-6 w-6 p-0"
+                    size="sm"
+                    title="Synopsis & braindump"
+                    variant="ghost"
+                  >
+                    <Link
+                      params={{ projectId, chapterId: ch.id }}
+                      to="/projects/$projectId/story-bible/chapter/$chapterId"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                    </Link>
+                  </Button>
                   <Button
                     className="h-6 w-6 p-0"
                     disabled={index === 0 || reorderMutation.isPending}

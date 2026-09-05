@@ -93,6 +93,7 @@ export async function listProjectChapters(projectId: string) {
       id: chapter.id,
       title: chapter.title,
       summary: chapter.summary,
+      braindump: chapter.braindump,
       order: chapter.order,
       status: chapter.status,
       wordCount: chapter.wordCount,
@@ -243,6 +244,9 @@ contentRouter.put(
     }
     if (typeof body.summary === "string") {
       updates.summary = body.summary
+    }
+    if (typeof body.braindump === "string") {
+      updates.braindump = body.braindump
     }
     if (typeof body.status === "string") {
       updates.status = body.status

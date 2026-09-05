@@ -24,14 +24,23 @@ import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settin
 import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
 import { Route as DashboardAiRouteImport } from './routes/dashboard/ai'
 import { Route as ProjectsProjectIdWriteRouteImport } from './routes/projects/$projectId/write'
-import { Route as ProjectsProjectIdCodexRouteImport } from './routes/projects/$projectId/codex'
+import { Route as ProjectsProjectIdStoryBibleRouteImport } from './routes/projects/$projectId/story-bible'
 import { Route as ProjectsProjectIdCanvasRouteImport } from './routes/projects/$projectId/canvas'
 import { Route as DashboardProjectProjectIdRouteImport } from './routes/dashboard/project/$projectId'
 import { Route as DashboardProjectProjectIdIndexRouteImport } from './routes/dashboard/project/$projectId/index'
-import { Route as ProjectsProjectIdCodexTypeRouteImport } from './routes/projects/$projectId/codex/$type'
+import { Route as ProjectsProjectIdStoryBibleStyleRouteImport } from './routes/projects/$projectId/story-bible/style'
+import { Route as ProjectsProjectIdStoryBibleBraindumpRouteImport } from './routes/projects/$projectId/story-bible/braindump'
 import { Route as DashboardProjectProjectIdSettingsRouteImport } from './routes/dashboard/project/$projectId/settings'
 import { Route as DashboardProjectProjectIdOutlineRouteImport } from './routes/dashboard/project/$projectId/outline'
 import { Route as DashboardProjectProjectIdCharactersRouteImport } from './routes/dashboard/project/$projectId/characters'
+import { Route as ProjectsProjectIdStoryBibleWorldWorldIdRouteImport } from './routes/projects/$projectId/story-bible/world.$worldId'
+import { Route as ProjectsProjectIdStoryBiblePlotPlotIdRouteImport } from './routes/projects/$projectId/story-bible/plot.$plotId'
+import { Route as ProjectsProjectIdStoryBibleNoteNoteIdRouteImport } from './routes/projects/$projectId/story-bible/note.$noteId'
+import { Route as ProjectsProjectIdStoryBibleLoreLoreIdRouteImport } from './routes/projects/$projectId/story-bible/lore.$loreId'
+import { Route as ProjectsProjectIdStoryBibleLocationLocationIdRouteImport } from './routes/projects/$projectId/story-bible/location.$locationId'
+import { Route as ProjectsProjectIdStoryBibleGroupGroupIdRouteImport } from './routes/projects/$projectId/story-bible/group.$groupId'
+import { Route as ProjectsProjectIdStoryBibleCharacterCharacterIdRouteImport } from './routes/projects/$projectId/story-bible/character.$characterId'
+import { Route as ProjectsProjectIdStoryBibleChapterChapterIdRouteImport } from './routes/projects/$projectId/story-bible/chapter.$chapterId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -108,11 +117,12 @@ const ProjectsProjectIdWriteRoute = ProjectsProjectIdWriteRouteImport.update({
   path: '/write',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
-const ProjectsProjectIdCodexRoute = ProjectsProjectIdCodexRouteImport.update({
-  id: '/codex',
-  path: '/codex',
-  getParentRoute: () => ProjectsProjectIdRoute,
-} as any)
+const ProjectsProjectIdStoryBibleRoute =
+  ProjectsProjectIdStoryBibleRouteImport.update({
+    id: '/story-bible',
+    path: '/story-bible',
+    getParentRoute: () => ProjectsProjectIdRoute,
+  } as any)
 const ProjectsProjectIdCanvasRoute = ProjectsProjectIdCanvasRouteImport.update({
   id: '/canvas',
   path: '/canvas',
@@ -130,11 +140,17 @@ const DashboardProjectProjectIdIndexRoute =
     path: '/',
     getParentRoute: () => DashboardProjectProjectIdRoute,
   } as any)
-const ProjectsProjectIdCodexTypeRoute =
-  ProjectsProjectIdCodexTypeRouteImport.update({
-    id: '/$type',
-    path: '/$type',
-    getParentRoute: () => ProjectsProjectIdCodexRoute,
+const ProjectsProjectIdStoryBibleStyleRoute =
+  ProjectsProjectIdStoryBibleStyleRouteImport.update({
+    id: '/style',
+    path: '/style',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleBraindumpRoute =
+  ProjectsProjectIdStoryBibleBraindumpRouteImport.update({
+    id: '/braindump',
+    path: '/braindump',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
   } as any)
 const DashboardProjectProjectIdSettingsRoute =
   DashboardProjectProjectIdSettingsRouteImport.update({
@@ -154,6 +170,54 @@ const DashboardProjectProjectIdCharactersRoute =
     path: '/characters',
     getParentRoute: () => DashboardProjectProjectIdRoute,
   } as any)
+const ProjectsProjectIdStoryBibleWorldWorldIdRoute =
+  ProjectsProjectIdStoryBibleWorldWorldIdRouteImport.update({
+    id: '/world/$worldId',
+    path: '/world/$worldId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBiblePlotPlotIdRoute =
+  ProjectsProjectIdStoryBiblePlotPlotIdRouteImport.update({
+    id: '/plot/$plotId',
+    path: '/plot/$plotId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleNoteNoteIdRoute =
+  ProjectsProjectIdStoryBibleNoteNoteIdRouteImport.update({
+    id: '/note/$noteId',
+    path: '/note/$noteId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleLoreLoreIdRoute =
+  ProjectsProjectIdStoryBibleLoreLoreIdRouteImport.update({
+    id: '/lore/$loreId',
+    path: '/lore/$loreId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleLocationLocationIdRoute =
+  ProjectsProjectIdStoryBibleLocationLocationIdRouteImport.update({
+    id: '/location/$locationId',
+    path: '/location/$locationId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleGroupGroupIdRoute =
+  ProjectsProjectIdStoryBibleGroupGroupIdRouteImport.update({
+    id: '/group/$groupId',
+    path: '/group/$groupId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleCharacterCharacterIdRoute =
+  ProjectsProjectIdStoryBibleCharacterCharacterIdRouteImport.update({
+    id: '/character/$characterId',
+    path: '/character/$characterId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
+const ProjectsProjectIdStoryBibleChapterChapterIdRoute =
+  ProjectsProjectIdStoryBibleChapterChapterIdRouteImport.update({
+    id: '/chapter/$chapterId',
+    path: '/chapter/$chapterId',
+    getParentRoute: () => ProjectsProjectIdStoryBibleRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -172,13 +236,22 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/project/$projectId': typeof DashboardProjectProjectIdRouteWithChildren
   '/projects/$projectId/canvas': typeof ProjectsProjectIdCanvasRoute
-  '/projects/$projectId/codex': typeof ProjectsProjectIdCodexRouteWithChildren
+  '/projects/$projectId/story-bible': typeof ProjectsProjectIdStoryBibleRouteWithChildren
   '/projects/$projectId/write': typeof ProjectsProjectIdWriteRoute
   '/dashboard/project/$projectId/characters': typeof DashboardProjectProjectIdCharactersRoute
   '/dashboard/project/$projectId/outline': typeof DashboardProjectProjectIdOutlineRoute
   '/dashboard/project/$projectId/settings': typeof DashboardProjectProjectIdSettingsRoute
-  '/projects/$projectId/codex/$type': typeof ProjectsProjectIdCodexTypeRoute
+  '/projects/$projectId/story-bible/braindump': typeof ProjectsProjectIdStoryBibleBraindumpRoute
+  '/projects/$projectId/story-bible/style': typeof ProjectsProjectIdStoryBibleStyleRoute
   '/dashboard/project/$projectId/': typeof DashboardProjectProjectIdIndexRoute
+  '/projects/$projectId/story-bible/chapter/$chapterId': typeof ProjectsProjectIdStoryBibleChapterChapterIdRoute
+  '/projects/$projectId/story-bible/character/$characterId': typeof ProjectsProjectIdStoryBibleCharacterCharacterIdRoute
+  '/projects/$projectId/story-bible/group/$groupId': typeof ProjectsProjectIdStoryBibleGroupGroupIdRoute
+  '/projects/$projectId/story-bible/location/$locationId': typeof ProjectsProjectIdStoryBibleLocationLocationIdRoute
+  '/projects/$projectId/story-bible/lore/$loreId': typeof ProjectsProjectIdStoryBibleLoreLoreIdRoute
+  '/projects/$projectId/story-bible/note/$noteId': typeof ProjectsProjectIdStoryBibleNoteNoteIdRoute
+  '/projects/$projectId/story-bible/plot/$plotId': typeof ProjectsProjectIdStoryBiblePlotPlotIdRoute
+  '/projects/$projectId/story-bible/world/$worldId': typeof ProjectsProjectIdStoryBibleWorldWorldIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -195,13 +268,22 @@ export interface FileRoutesByTo {
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
   '/dashboard': typeof DashboardIndexRoute
   '/projects/$projectId/canvas': typeof ProjectsProjectIdCanvasRoute
-  '/projects/$projectId/codex': typeof ProjectsProjectIdCodexRouteWithChildren
+  '/projects/$projectId/story-bible': typeof ProjectsProjectIdStoryBibleRouteWithChildren
   '/projects/$projectId/write': typeof ProjectsProjectIdWriteRoute
   '/dashboard/project/$projectId/characters': typeof DashboardProjectProjectIdCharactersRoute
   '/dashboard/project/$projectId/outline': typeof DashboardProjectProjectIdOutlineRoute
   '/dashboard/project/$projectId/settings': typeof DashboardProjectProjectIdSettingsRoute
-  '/projects/$projectId/codex/$type': typeof ProjectsProjectIdCodexTypeRoute
+  '/projects/$projectId/story-bible/braindump': typeof ProjectsProjectIdStoryBibleBraindumpRoute
+  '/projects/$projectId/story-bible/style': typeof ProjectsProjectIdStoryBibleStyleRoute
   '/dashboard/project/$projectId': typeof DashboardProjectProjectIdIndexRoute
+  '/projects/$projectId/story-bible/chapter/$chapterId': typeof ProjectsProjectIdStoryBibleChapterChapterIdRoute
+  '/projects/$projectId/story-bible/character/$characterId': typeof ProjectsProjectIdStoryBibleCharacterCharacterIdRoute
+  '/projects/$projectId/story-bible/group/$groupId': typeof ProjectsProjectIdStoryBibleGroupGroupIdRoute
+  '/projects/$projectId/story-bible/location/$locationId': typeof ProjectsProjectIdStoryBibleLocationLocationIdRoute
+  '/projects/$projectId/story-bible/lore/$loreId': typeof ProjectsProjectIdStoryBibleLoreLoreIdRoute
+  '/projects/$projectId/story-bible/note/$noteId': typeof ProjectsProjectIdStoryBibleNoteNoteIdRoute
+  '/projects/$projectId/story-bible/plot/$plotId': typeof ProjectsProjectIdStoryBiblePlotPlotIdRoute
+  '/projects/$projectId/story-bible/world/$worldId': typeof ProjectsProjectIdStoryBibleWorldWorldIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -221,13 +303,22 @@ export interface FileRoutesById {
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/project/$projectId': typeof DashboardProjectProjectIdRouteWithChildren
   '/projects/$projectId/canvas': typeof ProjectsProjectIdCanvasRoute
-  '/projects/$projectId/codex': typeof ProjectsProjectIdCodexRouteWithChildren
+  '/projects/$projectId/story-bible': typeof ProjectsProjectIdStoryBibleRouteWithChildren
   '/projects/$projectId/write': typeof ProjectsProjectIdWriteRoute
   '/dashboard/project/$projectId/characters': typeof DashboardProjectProjectIdCharactersRoute
   '/dashboard/project/$projectId/outline': typeof DashboardProjectProjectIdOutlineRoute
   '/dashboard/project/$projectId/settings': typeof DashboardProjectProjectIdSettingsRoute
-  '/projects/$projectId/codex/$type': typeof ProjectsProjectIdCodexTypeRoute
+  '/projects/$projectId/story-bible/braindump': typeof ProjectsProjectIdStoryBibleBraindumpRoute
+  '/projects/$projectId/story-bible/style': typeof ProjectsProjectIdStoryBibleStyleRoute
   '/dashboard/project/$projectId/': typeof DashboardProjectProjectIdIndexRoute
+  '/projects/$projectId/story-bible/chapter/$chapterId': typeof ProjectsProjectIdStoryBibleChapterChapterIdRoute
+  '/projects/$projectId/story-bible/character/$characterId': typeof ProjectsProjectIdStoryBibleCharacterCharacterIdRoute
+  '/projects/$projectId/story-bible/group/$groupId': typeof ProjectsProjectIdStoryBibleGroupGroupIdRoute
+  '/projects/$projectId/story-bible/location/$locationId': typeof ProjectsProjectIdStoryBibleLocationLocationIdRoute
+  '/projects/$projectId/story-bible/lore/$loreId': typeof ProjectsProjectIdStoryBibleLoreLoreIdRoute
+  '/projects/$projectId/story-bible/note/$noteId': typeof ProjectsProjectIdStoryBibleNoteNoteIdRoute
+  '/projects/$projectId/story-bible/plot/$plotId': typeof ProjectsProjectIdStoryBiblePlotPlotIdRoute
+  '/projects/$projectId/story-bible/world/$worldId': typeof ProjectsProjectIdStoryBibleWorldWorldIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -248,13 +339,22 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/project/$projectId'
     | '/projects/$projectId/canvas'
-    | '/projects/$projectId/codex'
+    | '/projects/$projectId/story-bible'
     | '/projects/$projectId/write'
     | '/dashboard/project/$projectId/characters'
     | '/dashboard/project/$projectId/outline'
     | '/dashboard/project/$projectId/settings'
-    | '/projects/$projectId/codex/$type'
+    | '/projects/$projectId/story-bible/braindump'
+    | '/projects/$projectId/story-bible/style'
     | '/dashboard/project/$projectId/'
+    | '/projects/$projectId/story-bible/chapter/$chapterId'
+    | '/projects/$projectId/story-bible/character/$characterId'
+    | '/projects/$projectId/story-bible/group/$groupId'
+    | '/projects/$projectId/story-bible/location/$locationId'
+    | '/projects/$projectId/story-bible/lore/$loreId'
+    | '/projects/$projectId/story-bible/note/$noteId'
+    | '/projects/$projectId/story-bible/plot/$plotId'
+    | '/projects/$projectId/story-bible/world/$worldId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -271,13 +371,22 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/dashboard'
     | '/projects/$projectId/canvas'
-    | '/projects/$projectId/codex'
+    | '/projects/$projectId/story-bible'
     | '/projects/$projectId/write'
     | '/dashboard/project/$projectId/characters'
     | '/dashboard/project/$projectId/outline'
     | '/dashboard/project/$projectId/settings'
-    | '/projects/$projectId/codex/$type'
+    | '/projects/$projectId/story-bible/braindump'
+    | '/projects/$projectId/story-bible/style'
     | '/dashboard/project/$projectId'
+    | '/projects/$projectId/story-bible/chapter/$chapterId'
+    | '/projects/$projectId/story-bible/character/$characterId'
+    | '/projects/$projectId/story-bible/group/$groupId'
+    | '/projects/$projectId/story-bible/location/$locationId'
+    | '/projects/$projectId/story-bible/lore/$loreId'
+    | '/projects/$projectId/story-bible/note/$noteId'
+    | '/projects/$projectId/story-bible/plot/$plotId'
+    | '/projects/$projectId/story-bible/world/$worldId'
   id:
     | '__root__'
     | '/'
@@ -296,13 +405,22 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/project/$projectId'
     | '/projects/$projectId/canvas'
-    | '/projects/$projectId/codex'
+    | '/projects/$projectId/story-bible'
     | '/projects/$projectId/write'
     | '/dashboard/project/$projectId/characters'
     | '/dashboard/project/$projectId/outline'
     | '/dashboard/project/$projectId/settings'
-    | '/projects/$projectId/codex/$type'
+    | '/projects/$projectId/story-bible/braindump'
+    | '/projects/$projectId/story-bible/style'
     | '/dashboard/project/$projectId/'
+    | '/projects/$projectId/story-bible/chapter/$chapterId'
+    | '/projects/$projectId/story-bible/character/$characterId'
+    | '/projects/$projectId/story-bible/group/$groupId'
+    | '/projects/$projectId/story-bible/location/$locationId'
+    | '/projects/$projectId/story-bible/lore/$loreId'
+    | '/projects/$projectId/story-bible/note/$noteId'
+    | '/projects/$projectId/story-bible/plot/$plotId'
+    | '/projects/$projectId/story-bible/world/$worldId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -424,11 +542,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdWriteRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
-    '/projects/$projectId/codex': {
-      id: '/projects/$projectId/codex'
-      path: '/codex'
-      fullPath: '/projects/$projectId/codex'
-      preLoaderRoute: typeof ProjectsProjectIdCodexRouteImport
+    '/projects/$projectId/story-bible': {
+      id: '/projects/$projectId/story-bible'
+      path: '/story-bible'
+      fullPath: '/projects/$projectId/story-bible'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
     '/projects/$projectId/canvas': {
@@ -452,12 +570,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectProjectIdIndexRouteImport
       parentRoute: typeof DashboardProjectProjectIdRoute
     }
-    '/projects/$projectId/codex/$type': {
-      id: '/projects/$projectId/codex/$type'
-      path: '/$type'
-      fullPath: '/projects/$projectId/codex/$type'
-      preLoaderRoute: typeof ProjectsProjectIdCodexTypeRouteImport
-      parentRoute: typeof ProjectsProjectIdCodexRoute
+    '/projects/$projectId/story-bible/style': {
+      id: '/projects/$projectId/story-bible/style'
+      path: '/style'
+      fullPath: '/projects/$projectId/story-bible/style'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleStyleRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/braindump': {
+      id: '/projects/$projectId/story-bible/braindump'
+      path: '/braindump'
+      fullPath: '/projects/$projectId/story-bible/braindump'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleBraindumpRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
     }
     '/dashboard/project/$projectId/settings': {
       id: '/dashboard/project/$projectId/settings'
@@ -479,6 +604,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/project/$projectId/characters'
       preLoaderRoute: typeof DashboardProjectProjectIdCharactersRouteImport
       parentRoute: typeof DashboardProjectProjectIdRoute
+    }
+    '/projects/$projectId/story-bible/world/$worldId': {
+      id: '/projects/$projectId/story-bible/world/$worldId'
+      path: '/world/$worldId'
+      fullPath: '/projects/$projectId/story-bible/world/$worldId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleWorldWorldIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/plot/$plotId': {
+      id: '/projects/$projectId/story-bible/plot/$plotId'
+      path: '/plot/$plotId'
+      fullPath: '/projects/$projectId/story-bible/plot/$plotId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBiblePlotPlotIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/note/$noteId': {
+      id: '/projects/$projectId/story-bible/note/$noteId'
+      path: '/note/$noteId'
+      fullPath: '/projects/$projectId/story-bible/note/$noteId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleNoteNoteIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/lore/$loreId': {
+      id: '/projects/$projectId/story-bible/lore/$loreId'
+      path: '/lore/$loreId'
+      fullPath: '/projects/$projectId/story-bible/lore/$loreId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleLoreLoreIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/location/$locationId': {
+      id: '/projects/$projectId/story-bible/location/$locationId'
+      path: '/location/$locationId'
+      fullPath: '/projects/$projectId/story-bible/location/$locationId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleLocationLocationIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/group/$groupId': {
+      id: '/projects/$projectId/story-bible/group/$groupId'
+      path: '/group/$groupId'
+      fullPath: '/projects/$projectId/story-bible/group/$groupId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleGroupGroupIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/character/$characterId': {
+      id: '/projects/$projectId/story-bible/character/$characterId'
+      path: '/character/$characterId'
+      fullPath: '/projects/$projectId/story-bible/character/$characterId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleCharacterCharacterIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
+    }
+    '/projects/$projectId/story-bible/chapter/$chapterId': {
+      id: '/projects/$projectId/story-bible/chapter/$chapterId'
+      path: '/chapter/$chapterId'
+      fullPath: '/projects/$projectId/story-bible/chapter/$chapterId'
+      preLoaderRoute: typeof ProjectsProjectIdStoryBibleChapterChapterIdRouteImport
+      parentRoute: typeof ProjectsProjectIdStoryBibleRoute
     }
   }
 }
@@ -528,29 +709,58 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
-interface ProjectsProjectIdCodexRouteChildren {
-  ProjectsProjectIdCodexTypeRoute: typeof ProjectsProjectIdCodexTypeRoute
+interface ProjectsProjectIdStoryBibleRouteChildren {
+  ProjectsProjectIdStoryBibleBraindumpRoute: typeof ProjectsProjectIdStoryBibleBraindumpRoute
+  ProjectsProjectIdStoryBibleStyleRoute: typeof ProjectsProjectIdStoryBibleStyleRoute
+  ProjectsProjectIdStoryBibleChapterChapterIdRoute: typeof ProjectsProjectIdStoryBibleChapterChapterIdRoute
+  ProjectsProjectIdStoryBibleCharacterCharacterIdRoute: typeof ProjectsProjectIdStoryBibleCharacterCharacterIdRoute
+  ProjectsProjectIdStoryBibleGroupGroupIdRoute: typeof ProjectsProjectIdStoryBibleGroupGroupIdRoute
+  ProjectsProjectIdStoryBibleLocationLocationIdRoute: typeof ProjectsProjectIdStoryBibleLocationLocationIdRoute
+  ProjectsProjectIdStoryBibleLoreLoreIdRoute: typeof ProjectsProjectIdStoryBibleLoreLoreIdRoute
+  ProjectsProjectIdStoryBibleNoteNoteIdRoute: typeof ProjectsProjectIdStoryBibleNoteNoteIdRoute
+  ProjectsProjectIdStoryBiblePlotPlotIdRoute: typeof ProjectsProjectIdStoryBiblePlotPlotIdRoute
+  ProjectsProjectIdStoryBibleWorldWorldIdRoute: typeof ProjectsProjectIdStoryBibleWorldWorldIdRoute
 }
 
-const ProjectsProjectIdCodexRouteChildren: ProjectsProjectIdCodexRouteChildren =
+const ProjectsProjectIdStoryBibleRouteChildren: ProjectsProjectIdStoryBibleRouteChildren =
   {
-    ProjectsProjectIdCodexTypeRoute: ProjectsProjectIdCodexTypeRoute,
+    ProjectsProjectIdStoryBibleBraindumpRoute:
+      ProjectsProjectIdStoryBibleBraindumpRoute,
+    ProjectsProjectIdStoryBibleStyleRoute:
+      ProjectsProjectIdStoryBibleStyleRoute,
+    ProjectsProjectIdStoryBibleChapterChapterIdRoute:
+      ProjectsProjectIdStoryBibleChapterChapterIdRoute,
+    ProjectsProjectIdStoryBibleCharacterCharacterIdRoute:
+      ProjectsProjectIdStoryBibleCharacterCharacterIdRoute,
+    ProjectsProjectIdStoryBibleGroupGroupIdRoute:
+      ProjectsProjectIdStoryBibleGroupGroupIdRoute,
+    ProjectsProjectIdStoryBibleLocationLocationIdRoute:
+      ProjectsProjectIdStoryBibleLocationLocationIdRoute,
+    ProjectsProjectIdStoryBibleLoreLoreIdRoute:
+      ProjectsProjectIdStoryBibleLoreLoreIdRoute,
+    ProjectsProjectIdStoryBibleNoteNoteIdRoute:
+      ProjectsProjectIdStoryBibleNoteNoteIdRoute,
+    ProjectsProjectIdStoryBiblePlotPlotIdRoute:
+      ProjectsProjectIdStoryBiblePlotPlotIdRoute,
+    ProjectsProjectIdStoryBibleWorldWorldIdRoute:
+      ProjectsProjectIdStoryBibleWorldWorldIdRoute,
   }
 
-const ProjectsProjectIdCodexRouteWithChildren =
-  ProjectsProjectIdCodexRoute._addFileChildren(
-    ProjectsProjectIdCodexRouteChildren,
+const ProjectsProjectIdStoryBibleRouteWithChildren =
+  ProjectsProjectIdStoryBibleRoute._addFileChildren(
+    ProjectsProjectIdStoryBibleRouteChildren,
   )
 
 interface ProjectsProjectIdRouteChildren {
   ProjectsProjectIdCanvasRoute: typeof ProjectsProjectIdCanvasRoute
-  ProjectsProjectIdCodexRoute: typeof ProjectsProjectIdCodexRouteWithChildren
+  ProjectsProjectIdStoryBibleRoute: typeof ProjectsProjectIdStoryBibleRouteWithChildren
   ProjectsProjectIdWriteRoute: typeof ProjectsProjectIdWriteRoute
 }
 
 const ProjectsProjectIdRouteChildren: ProjectsProjectIdRouteChildren = {
   ProjectsProjectIdCanvasRoute: ProjectsProjectIdCanvasRoute,
-  ProjectsProjectIdCodexRoute: ProjectsProjectIdCodexRouteWithChildren,
+  ProjectsProjectIdStoryBibleRoute:
+    ProjectsProjectIdStoryBibleRouteWithChildren,
   ProjectsProjectIdWriteRoute: ProjectsProjectIdWriteRoute,
 }
 

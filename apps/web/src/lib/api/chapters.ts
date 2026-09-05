@@ -7,6 +7,7 @@
 import { apiCall } from "./base"
 
 export interface Chapter {
+  braindump: string | null
   id: string
   order: number
   status: string
@@ -48,7 +49,7 @@ export const chaptersApi = {
   async update(
     projectId: string,
     chapterId: string,
-    data: { title?: string; summary?: string; status?: string }
+    data: { title?: string; summary?: string; braindump?: string; status?: string }
   ): Promise<{ success: boolean }> {
     return (await apiCall(`/api/projects/${projectId}/chapters/${chapterId}`, {
       method: "PUT",

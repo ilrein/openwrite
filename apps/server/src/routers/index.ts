@@ -2,11 +2,13 @@ import { and, desc, eq } from "drizzle-orm"
 import { type Context, Hono } from "hono"
 import { db } from "../db"
 import { character, location, lore, member, organization, plotPoint, project } from "../db/schema"
+import { isCharacterRole, parseTraits } from "../lib/story-bible"
 import { requireAuth, verifyProjectAccess } from "../middleware/auth"
 import { aiRouter } from "./ai"
 import { aiProvidersRouter } from "./ai-providers"
 import { contentRouter } from "./content"
 import graphRouter from "./graph"
+import { storyBibleRouter } from "./story-bible"
 
 interface Env {
   BETTER_AUTH_SECRET: string
@@ -301,7 +303,8 @@ router.get(
         id: character.id,
         name: character.name,
         description: character.description,
-        // appearance, personality, backstory, motivation removed - simplified character schema
+        role: character.role,
+        traits: character.traits,
         image: character.image,
         metadata: character.metadata,
         createdAt: character.createdAt,
@@ -314,6 +317,7 @@ router.get(
     return c.json({
       characters: characters.map((char) => ({
         ...char,
+        traits: parseTraits(char.traits),
         createdAt: char.createdAt.toISOString(),
         updatedAt: char.updatedAt.toISOString(),
       })),
@@ -346,6 +350,7 @@ router.get(
     return c.json({
       character: {
         ...characterData,
+        traits: parseTraits(characterData.traits),
         createdAt: characterData.createdAt.toISOString(),
         updatedAt: characterData.updatedAt.toISOString(),
       },
@@ -366,7 +371,7 @@ router.post(
 
     try {
       const body = await c.req.json()
-      const { name, description, image, metadata } = body
+      const { name, description, image, metadata, role, traits } = body
 
       if (!name || name.trim().length === 0) {
         return c.json({ error: "Name is required" }, 400)
@@ -379,7 +384,8 @@ router.post(
         id,
         name: name.trim(),
         description: description?.trim() || null,
-        // appearance, personality, backstory, motivation removed - simplified character schema
+        role: isCharacterRole(role) ? role : null,
+        traits: traits === undefined ? null : JSON.stringify(parseTraits(traits)),
         projectId,
         workId: null, // Project-level character
         image: image || null,
@@ -408,7 +414,7 @@ router.put(
     }
 
     try {
-      const { name, description, image, metadata } = await c.req.json()
+      const { name, description, image, metadata, role, traits } = await c.req.json()
 
       const updateData: Record<string, string | Date | null> = {
         updatedAt: new Date(),
@@ -420,7 +426,12 @@ router.put(
       if (description !== undefined) {
         updateData.description = description
       }
-      // appearance, personality, backstory, motivation fields removed - simplified character schema
+      if (role !== undefined) {
+        updateData.role = isCharacterRole(role) ? role : null
+      }
+      if (traits !== undefined) {
+        updateData.traits = JSON.stringify(parseTraits(traits))
+      }
       if (image !== undefined) {
         updateData.image = image
       }
@@ -992,5 +1003,8 @@ router.route("/", contentRouter)
 
 // Mount graph router
 router.route("/", graphRouter)
+
+// Mount Story Bible router (worldbuilding, character groups, AI generation)
+router.route("/", storyBibleRouter)
 
 export { router as apiRouter }

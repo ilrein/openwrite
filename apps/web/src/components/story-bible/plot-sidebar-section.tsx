@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ChevronDown, ChevronRight, MapPin, Plus, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronRight, GitBranch, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,35 +14,31 @@ import {
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { api } from "@/lib/api"
 
-interface LocationSidebarSectionProps {
+interface PlotSidebarSectionProps {
   isExpanded: boolean
   onToggle: () => void
   projectId: string
 }
 
-export function LocationSidebarSection({
-  projectId,
-  isExpanded,
-  onToggle,
-}: LocationSidebarSectionProps) {
+export function PlotSidebarSection({ projectId, isExpanded, onToggle }: PlotSidebarSectionProps) {
   const queryClient = useQueryClient()
 
   const {
-    data: locations = [],
+    data: threads = [],
     isError,
     error,
   } = useQuery({
-    queryKey: ["locations", projectId],
-    queryFn: () => api.locations.list(projectId),
+    queryKey: ["plot", projectId],
+    queryFn: () => api.plot.list(projectId),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.locations.delete(projectId, id),
+    mutationFn: (id: string) => api.plot.delete(projectId, id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["locations", projectId] })
-      toast.success("Location deleted")
+      queryClient.invalidateQueries({ queryKey: ["plot", projectId] })
+      toast.success("Plot thread deleted")
     },
-    onError: () => toast.error("Failed to delete location"),
+    onError: () => toast.error("Failed to delete plot thread"),
   })
 
   return (
@@ -55,10 +51,10 @@ export function LocationSidebarSection({
             ) : (
               <ChevronRight className="h-4 w-4" />
             )}
-            <MapPin className="h-4 w-4" />
-            <span>Locations</span>
+            <GitBranch className="h-4 w-4" />
+            <span>Plot Threads</span>
             <Badge className="ml-auto" variant="secondary">
-              {locations.length}
+              {threads.length}
             </Badge>
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -71,8 +67,8 @@ export function LocationSidebarSection({
               variant="ghost"
             >
               <Link
-                params={{ projectId, locationId: "new" }}
-                to="/projects/$projectId/story-bible/location/$locationId"
+                params={{ projectId, plotId: "new" }}
+                to="/projects/$projectId/story-bible/plot/$plotId"
               >
                 <Plus className="h-4 w-4" />
                 <span>New</span>
@@ -80,25 +76,26 @@ export function LocationSidebarSection({
             </Button>
             {isError && (
               <p className="px-2 text-destructive text-xs">
-                Couldn't load locations: {error instanceof Error ? error.message : "unknown error"}
+                Couldn't load plot threads:{" "}
+                {error instanceof Error ? error.message : "unknown error"}
               </p>
             )}
-            {locations.map((location) => (
-              <ContextMenu key={location.id}>
+            {threads.map((thread) => (
+              <ContextMenu key={thread.id}>
                 <ContextMenuTrigger asChild>
                   <Button asChild className="w-full justify-start" size="sm" variant="ghost">
                     <Link
-                      params={{ projectId, locationId: location.id }}
-                      to="/projects/$projectId/story-bible/location/$locationId"
+                      params={{ projectId, plotId: thread.id }}
+                      to="/projects/$projectId/story-bible/plot/$plotId"
                     >
-                      <span className="truncate">{location.name}</span>
+                      <span className="truncate">{thread.title}</span>
                     </Link>
                   </Button>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   <ContextMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={() => deleteMutation.mutate(location.id)}
+                    onClick={() => deleteMutation.mutate(thread.id)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
