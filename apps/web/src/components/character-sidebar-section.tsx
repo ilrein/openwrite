@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
-import { ChevronDown, ChevronRight, Edit, FileText, Plus, Trash2, Users } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { ChevronDown, ChevronRight, Plus, Trash2, Users } from "lucide-react"
 import { useState } from "react"
-import { CharacterDialog } from "@/components/character-dialog"
 import { DeleteCharacterDialog } from "@/components/delete-character-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,6 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
@@ -18,7 +17,6 @@ import { api, type Character } from "@/lib/api"
 
 interface CharacterSidebarSectionProps {
   isExpanded: boolean
-  onOpenCodexModal: (type: string, entry: string) => void
   onToggle: () => void
   projectId: string
 }
@@ -27,38 +25,13 @@ export function CharacterSidebarSection({
   projectId,
   isExpanded,
   onToggle,
-  onOpenCodexModal,
 }: CharacterSidebarSectionProps) {
-  const [characterDialogOpen, setCharacterDialogOpen] = useState(false)
-  const [characterDialogMode, setCharacterDialogMode] = useState<"create" | "edit">("create")
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
-  const [deleteCharacterDialogOpen, setDeleteCharacterDialogOpen] = useState(false)
+  const [deletingCharacter, setDeletingCharacter] = useState<Character | null>(null)
 
-  // Fetch characters
   const { data: characters = [] } = useQuery({
     queryKey: ["characters", projectId],
-    queryFn: async () => {
-      const result = await api.characters.list(projectId)
-      return result
-    },
+    queryFn: () => api.characters.list(projectId),
   })
-
-  const handleCreateCharacter = () => {
-    setSelectedCharacter(null)
-    setCharacterDialogMode("create")
-    setCharacterDialogOpen(true)
-  }
-
-  const handleEditCharacter = (character: Character) => {
-    setSelectedCharacter(character)
-    setCharacterDialogMode("edit")
-    setCharacterDialogOpen(true)
-  }
-
-  const handleDeleteCharacter = (character: Character) => {
-    setSelectedCharacter(character)
-    setDeleteCharacterDialogOpen(true)
-  }
 
   return (
     <>
@@ -81,40 +54,35 @@ export function CharacterSidebarSection({
           <CollapsibleContent>
             <div className="ml-6 space-y-1">
               <Button
+                asChild
                 className="w-full justify-start text-muted-foreground"
-                onClick={handleCreateCharacter}
                 size="sm"
                 variant="ghost"
               >
-                <Plus className="h-4 w-4" />
-                <span>New</span>
+                <Link
+                  params={{ projectId, characterId: "new" }}
+                  to="/projects/$projectId/story-bible/character/$characterId"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>New</span>
+                </Link>
               </Button>
               {characters.map((character) => (
                 <ContextMenu key={character.id}>
                   <ContextMenuTrigger asChild>
-                    <Button
-                      className="w-full justify-start"
-                      onClick={() => onOpenCodexModal("characters", character.name)}
-                      size="sm"
-                      variant="ghost"
-                    >
-                      <span className="truncate">{character.name}</span>
-                      {/* Role display removed - no longer showing character.role */}
+                    <Button asChild className="w-full justify-start" size="sm" variant="ghost">
+                      <Link
+                        params={{ projectId, characterId: character.id }}
+                        to="/projects/$projectId/story-bible/character/$characterId"
+                      >
+                        <span className="truncate">{character.name}</span>
+                      </Link>
                     </Button>
                   </ContextMenuTrigger>
                   <ContextMenuContent>
-                    <ContextMenuItem onClick={() => onOpenCodexModal("characters", character.name)}>
-                      <FileText className="mr-2 h-4 w-4" />
-                      View Details
-                    </ContextMenuItem>
-                    <ContextMenuItem onClick={() => handleEditCharacter(character)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit Character
-                    </ContextMenuItem>
-                    <ContextMenuSeparator />
                     <ContextMenuItem
                       className="text-destructive focus:text-destructive"
-                      onClick={() => handleDeleteCharacter(character)}
+                      onClick={() => setDeletingCharacter(character)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete Character
@@ -127,21 +95,11 @@ export function CharacterSidebarSection({
         </Collapsible>
       </SidebarMenuItem>
 
-      {/* Character Dialog */}
-      <CharacterDialog
-        character={selectedCharacter}
-        mode={characterDialogMode}
-        onOpenChange={setCharacterDialogOpen}
-        open={characterDialogOpen}
-        projectId={projectId}
-      />
-
-      {/* Delete Character Dialog */}
-      {selectedCharacter && (
+      {deletingCharacter && (
         <DeleteCharacterDialog
-          character={selectedCharacter}
-          onOpenChange={setDeleteCharacterDialogOpen}
-          open={deleteCharacterDialogOpen}
+          character={deletingCharacter}
+          onOpenChange={(open) => !open && setDeletingCharacter(null)}
+          open={Boolean(deletingCharacter)}
           projectId={projectId}
         />
       )}

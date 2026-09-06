@@ -104,6 +104,9 @@ export const project = sqliteTable(
     // AI should match when generating for this project.
     styleBible: text("style_bible"),
 
+    // Story Bible "Braindump" — a project-wide freeform scratchpad.
+    braindump: text("braindump"),
+
     // Timestamps
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
@@ -354,6 +357,25 @@ export const worldElement = sqliteTable(
   },
   (table) => ({
     projectIdIdx: index("world_element_project_id_idx").on(table.projectId),
+  })
+)
+
+// Note table - Story Bible "Notes" section: freeform titled notes / ideas.
+export const note = sqliteTable(
+  "note",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    content: text("content"),
+
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => ({
+    projectIdIdx: index("note_project_id_idx").on(table.projectId),
   })
 )
 

@@ -34,7 +34,6 @@ export const CHARACTER_DEFAULT_TRAIT_LABELS = [
   "Relationship to Protagonist",
   "Role in Story",
   "Other Names",
-  "Pronouns",
 ] as const
 
 export const WORLD_ELEMENT_TYPE_LABELS = {

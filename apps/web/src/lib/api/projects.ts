@@ -5,6 +5,7 @@ import { apiCall } from "./base"
  * Project data types
  */
 export interface Project {
+  braindump?: string | null // Story Bible "Braindump" section
   content?: string | null // Content field for writing interface
   coverImage: string | null
   createdAt: string
@@ -56,6 +57,7 @@ export interface CreateProjectData {
 export type CreateNovelData = CreateProjectData
 
 export interface UpdateProjectData {
+  braindump?: string | null
   description?: string | null
   genre?: string | null
   styleBible?: string | null

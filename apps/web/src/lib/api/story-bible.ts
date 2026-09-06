@@ -33,7 +33,6 @@ export const CHARACTER_DEFAULT_TRAIT_LABELS = [
   "Relationship to Protagonist",
   "Role in Story",
   "Other Names",
-  "Pronouns",
 ] as const
 
 export type WorldElementType =
@@ -118,6 +117,19 @@ export interface CharacterGroupInput {
   name?: string
 }
 
+export interface Note {
+  content: string | null
+  createdAt: string
+  id: string
+  title: string
+  updatedAt: string
+}
+
+export interface NoteInput {
+  content?: string
+  title?: string
+}
+
 export interface GenerateOptionsResult {
   model?: string | null
   options: string[]
@@ -140,6 +152,13 @@ export const storyBibleApi = {
     async list(projectId: string): Promise<WorldElement[]> {
       const response = await apiCall(`/api/projects/${projectId}/world-elements`)
       return Array.isArray(response?.worldElements) ? response.worldElements : []
+    },
+    async get(projectId: string, id: string): Promise<WorldElement> {
+      const response = await apiCall(`/api/projects/${projectId}/world-elements/${id}`)
+      if (!response?.worldElement) {
+        throw new Error("Worldbuilding element not found")
+      }
+      return response.worldElement
     },
     create(projectId: string, data: WorldElementInput) {
       return apiCall(`/api/projects/${projectId}/world-elements`, {
@@ -178,6 +197,13 @@ export const storyBibleApi = {
       const response = await apiCall(`/api/projects/${projectId}/character-groups`)
       return Array.isArray(response?.characterGroups) ? response.characterGroups : []
     },
+    async get(projectId: string, id: string): Promise<CharacterGroup> {
+      const response = await apiCall(`/api/projects/${projectId}/character-groups/${id}`)
+      if (!response?.characterGroup) {
+        throw new Error("Character group not found")
+      }
+      return response.characterGroup
+    },
     create(projectId: string, data: CharacterGroupInput) {
       return apiCall(`/api/projects/${projectId}/character-groups`, {
         method: "POST",
@@ -192,6 +218,37 @@ export const storyBibleApi = {
     },
     delete(projectId: string, id: string) {
       return apiCall(`/api/projects/${projectId}/character-groups/${id}`, {
+        method: "DELETE",
+      }) as Promise<{ success: boolean }>
+    },
+  },
+
+  notes: {
+    async list(projectId: string): Promise<Note[]> {
+      const response = await apiCall(`/api/projects/${projectId}/notes`)
+      return Array.isArray(response?.notes) ? response.notes : []
+    },
+    async get(projectId: string, id: string): Promise<Note> {
+      const response = await apiCall(`/api/projects/${projectId}/notes/${id}`)
+      if (!response?.note) {
+        throw new Error("Note not found")
+      }
+      return response.note
+    },
+    create(projectId: string, data: NoteInput) {
+      return apiCall(`/api/projects/${projectId}/notes`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }) as Promise<{ success: boolean; id: string }>
+    },
+    update(projectId: string, id: string, data: NoteInput) {
+      return apiCall(`/api/projects/${projectId}/notes/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }) as Promise<{ success: boolean }>
+    },
+    delete(projectId: string, id: string) {
+      return apiCall(`/api/projects/${projectId}/notes/${id}`, {
         method: "DELETE",
       }) as Promise<{ success: boolean }>
     },
@@ -239,6 +296,14 @@ export const storyBibleApi = {
     instructions?: string
   ): Promise<string> {
     const response = await apiCall(`/api/projects/${projectId}/chapters/${chapterId}/braindump`, {
+      method: "POST",
+      body: JSON.stringify({ instructions }),
+    })
+    return typeof response?.text === "string" ? response.text : ""
+  },
+
+  async generateProjectBraindump(projectId: string, instructions?: string): Promise<string> {
+    const response = await apiCall(`/api/projects/${projectId}/braindump/generate`, {
       method: "POST",
       body: JSON.stringify({ instructions }),
     })

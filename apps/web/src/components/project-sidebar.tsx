@@ -1,16 +1,13 @@
-import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ChevronDown, ChevronRight, Feather, FileText, PenTool, Plus, Scroll } from "lucide-react"
+import { Feather, FileText, NotebookPen, PenTool } from "lucide-react"
 import { useState } from "react"
 import { CharacterSidebarSection } from "@/components/character-sidebar-section"
-import CodexModal from "@/components/codex-modal"
 import { LocationSidebarSection } from "@/components/location-sidebar-section"
 import { CharacterGroupSidebarSection } from "@/components/story-bible/character-group-sidebar-section"
-import { StyleDialog } from "@/components/story-bible/style-dialog"
+import { LoreSidebarSection } from "@/components/story-bible/lore-sidebar-section"
+import { NoteSidebarSection } from "@/components/story-bible/note-sidebar-section"
+import { PlotSidebarSection } from "@/components/story-bible/plot-sidebar-section"
 import { WorldElementSidebarSection } from "@/components/story-bible/world-element-sidebar-section"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Logo } from "@/components/ui/logo"
 import {
   Sidebar,
@@ -25,294 +22,144 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import UserMenu from "@/components/user-menu"
-import { api } from "@/lib/api"
 
 interface ProjectSidebarProps {
   projectId: string
 }
 
-interface CollapsibleSectionProps {
-  icon: React.ComponentType<{ className?: string }>
-  isExpanded: boolean
-  items: Array<{ id: string; name: string; role?: string; type?: string }>
-  onOpenModal: (type: string, entry?: string) => void
-  onToggle: () => void
-  secondaryField: "role" | "type"
-  sectionKey: string
-  title: string
-}
-
-function CollapsibleSection({
-  sectionKey,
-  icon: Icon,
-  title,
-  items,
-  isExpanded,
-  onToggle,
-  onOpenModal,
-  secondaryField,
-}: CollapsibleSectionProps) {
-  return (
-    <SidebarMenuItem>
-      <Collapsible onOpenChange={onToggle} open={isExpanded}>
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton>
-            {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-            <Icon className="h-4 w-4" />
-            <span>{title}</span>
-            <Badge className="ml-auto" variant="secondary">
-              {items.length}
-            </Badge>
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="ml-6 space-y-1">
-            <Button
-              className="w-full justify-start text-muted-foreground"
-              onClick={() => onOpenModal(sectionKey)}
-              size="sm"
-              variant="ghost"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New</span>
-            </Button>
-            {items.map((item) => (
-              <Button
-                className="w-full justify-start"
-                key={item.id}
-                onClick={() => onOpenModal(sectionKey, item.name)}
-                size="sm"
-                variant="ghost"
-              >
-                <span className="truncate">{item.name}</span>
-                <span className="ml-auto text-muted-foreground text-xs">
-                  {item[secondaryField]}
-                </span>
-              </Button>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
-  )
+const INITIAL_EXPANDED = {
+  characters: false,
+  groups: false,
+  worldbuilding: false,
+  notes: false,
+  locations: false,
+  lore: false,
+  plot: false,
 }
 
 export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
-  const [isCodexModalOpen, setIsCodexModalOpen] = useState(false)
-  const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false)
-  const [codexModalConfig, setCodexModalConfig] = useState<{
-    initialType?: string | null
-    initialEntry?: string | null
-  }>({})
-  const [expandedCodexSections, setExpandedCodexSections] = useState<Record<string, boolean>>({
-    characters: false,
-    locations: false,
-    lore: false,
-    plot: false,
-    notes: false,
-    worldbuilding: false,
-    groups: false,
-  })
+  const [expandedSections, setExpandedSections] =
+    useState<Record<string, boolean>>(INITIAL_EXPANDED)
 
-  // Fetch lore entries
-  const { data: loreEntries = [] } = useQuery({
-    queryKey: ["lore", projectId],
-    queryFn: async () => {
-      const result = await api.lore.list(projectId)
-      return result.map((entry) => ({
-        id: entry.id,
-        name: entry.name,
-        type: entry.type || "General",
-      }))
-    },
-  })
-
-  // Fetch plot threads
-  const { data: plotThreads = [] } = useQuery({
-    queryKey: ["plot", projectId],
-    queryFn: async () => {
-      const result = await api.plot.list(projectId)
-      return result.map((thread) => ({
-        id: thread.id,
-        name: thread.title,
-        role: thread.status || "Planned",
-      }))
-    },
-  })
-
-  // For now, keeping notes as empty until there's a proper API endpoint
-  // This could be extended to use lore entries with a specific type filter
-  const notes: Array<{ id: string; name: string; role: string }> = []
-
-  const toggleCodexSection = (section: string) => {
-    setExpandedCodexSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
-
-  const openCodexModal = (type?: string, entry?: string) => {
-    setCodexModalConfig({
-      initialType: type || null,
-      initialEntry: entry || null,
-    })
-    setIsCodexModalOpen(true)
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
   }
 
   return (
-    <>
-      <Sidebar side="left" variant="sidebar">
-        <SidebarHeader>
-          <div className="px-4 py-3">
-            <Logo size="md" to="/dashboard" />
-          </div>
-        </SidebarHeader>
+    <Sidebar side="left" variant="sidebar">
+      <SidebarHeader>
+        <div className="px-4 py-3">
+          <Logo size="md" to="/dashboard" />
+        </div>
+      </SidebarHeader>
 
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Structure</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link params={{ projectId }} to="/projects/$projectId/write">
-                      <PenTool />
-                      <span>Write</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link params={{ projectId }} to="/projects/$projectId/canvas">
-                      <FileText />
-                      <span>Canvas</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Structure</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link params={{ projectId }} to="/projects/$projectId/write">
+                    <PenTool />
+                    <span>Write</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link params={{ projectId }} to="/projects/$projectId/canvas">
+                    <FileText />
+                    <span>Canvas</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-          <SidebarGroup>
-            <SidebarGroupLabel>Story Bible</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => setIsStyleDialogOpen(true)}>
+        <SidebarGroup>
+          <SidebarGroupLabel>Story Bible</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link params={{ projectId }} to="/projects/$projectId/story-bible/style">
                     <Feather className="h-4 w-4" />
                     <span>Style</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
-                <WorldElementSidebarSection
-                  isExpanded={expandedCodexSections.worldbuilding}
-                  key="worldbuilding-section"
-                  onToggle={() => toggleCodexSection("worldbuilding")}
-                  projectId={projectId}
-                />
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link params={{ projectId }} to="/projects/$projectId/story-bible/braindump">
+                    <NotebookPen className="h-4 w-4" />
+                    <span>Braindump</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
-                <CharacterGroupSidebarSection
-                  isExpanded={expandedCodexSections.groups}
-                  key="character-groups-section"
-                  onToggle={() => toggleCodexSection("groups")}
-                  projectId={projectId}
-                />
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+              <CharacterSidebarSection
+                isExpanded={expandedSections.characters}
+                key="characters-section"
+                onToggle={() => toggleSection("characters")}
+                projectId={projectId}
+              />
 
-          <SidebarGroup>
-            <SidebarGroupLabel>Codex</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {/* Characters */}
-                <CharacterSidebarSection
-                  isExpanded={expandedCodexSections.characters}
-                  key="characters-section"
-                  onOpenCodexModal={openCodexModal}
-                  onToggle={() => toggleCodexSection("characters")}
-                  projectId={projectId}
-                />
+              <CharacterGroupSidebarSection
+                isExpanded={expandedSections.groups}
+                key="character-groups-section"
+                onToggle={() => toggleSection("groups")}
+                projectId={projectId}
+              />
 
-                {/* Locations */}
-                <LocationSidebarSection
-                  isExpanded={expandedCodexSections.locations}
-                  key="locations-section"
-                  onOpenCodexModal={openCodexModal}
-                  onToggle={() => toggleCodexSection("locations")}
-                  projectId={projectId}
-                />
+              <WorldElementSidebarSection
+                isExpanded={expandedSections.worldbuilding}
+                key="worldbuilding-section"
+                onToggle={() => toggleSection("worldbuilding")}
+                projectId={projectId}
+              />
 
-                {/* Lore */}
-                <CollapsibleSection
-                  icon={Scroll}
-                  isExpanded={expandedCodexSections.lore}
-                  items={loreEntries}
-                  onOpenModal={openCodexModal}
-                  onToggle={() => toggleCodexSection("lore")}
-                  secondaryField="type"
-                  sectionKey="lore"
-                  title="Lore"
-                />
+              <LocationSidebarSection
+                isExpanded={expandedSections.locations}
+                key="locations-section"
+                onToggle={() => toggleSection("locations")}
+                projectId={projectId}
+              />
 
-                {/* Plot Threads */}
-                <CollapsibleSection
-                  icon={FileText}
-                  isExpanded={expandedCodexSections.plot}
-                  items={plotThreads}
-                  onOpenModal={openCodexModal}
-                  onToggle={() => toggleCodexSection("plot")}
-                  secondaryField="role"
-                  sectionKey="plot"
-                  title="Plot Threads"
-                />
+              <LoreSidebarSection
+                isExpanded={expandedSections.lore}
+                key="lore-section"
+                onToggle={() => toggleSection("lore")}
+                projectId={projectId}
+              />
 
-                {/* Notes */}
-                <CollapsibleSection
-                  icon={FileText}
-                  isExpanded={expandedCodexSections.notes}
-                  items={notes}
-                  onOpenModal={openCodexModal}
-                  onToggle={() => toggleCodexSection("notes")}
-                  secondaryField="role"
-                  sectionKey="notes"
-                  title="Notes & Ideas"
-                />
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+              <PlotSidebarSection
+                isExpanded={expandedSections.plot}
+                key="plot-section"
+                onToggle={() => toggleSection("plot")}
+                projectId={projectId}
+              />
 
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <UserMenu />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
+              <NoteSidebarSection
+                isExpanded={expandedSections.notes}
+                key="notes-section"
+                onToggle={() => toggleSection("notes")}
+                projectId={projectId}
+              />
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      {/* Codex Modal */}
-      <CodexModal
-        initialEntry={codexModalConfig.initialEntry}
-        initialType={codexModalConfig.initialType}
-        isOpen={isCodexModalOpen}
-        onClose={() => {
-          setIsCodexModalOpen(false)
-          setCodexModalConfig({})
-        }}
-        projectId={projectId}
-      />
-
-      <StyleDialog
-        onOpenChange={setIsStyleDialogOpen}
-        open={isStyleDialogOpen}
-        projectId={projectId}
-      />
-    </>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <UserMenu />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   )
 }

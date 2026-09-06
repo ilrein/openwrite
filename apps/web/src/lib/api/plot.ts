@@ -30,6 +30,22 @@ export interface CreatePlotData {
   type?: string
 }
 
+export const PLOT_TYPE_OPTIONS: { label: string; value: string }[] = [
+  { value: "inciting_incident", label: "Inciting Incident" },
+  { value: "plot_point_1", label: "Plot Point 1" },
+  { value: "midpoint", label: "Midpoint" },
+  { value: "plot_point_2", label: "Plot Point 2" },
+  { value: "climax", label: "Climax" },
+  { value: "resolution", label: "Resolution" },
+  { value: "custom", label: "Custom" },
+]
+
+export const PLOT_STATUS_OPTIONS: { label: string; value: string }[] = [
+  { value: "planned", label: "Planned" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+]
+
 export interface UpdatePlotData extends Partial<CreatePlotData> {}
 
 /**

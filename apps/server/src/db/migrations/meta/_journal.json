@@ -78,6 +78,13 @@
       "when": 1788524221572,
       "tag": "0010_famous_metal_master",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1788528502318,
+      "tag": "0011_young_black_queen",
+      "breakpoints": true
     }
   ]
 }

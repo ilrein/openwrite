@@ -65,14 +65,14 @@ export type {
   UpdateLoreData,
 } from "./lore"
 // Lore API
-export { createLoreApi, loreApi } from "./lore"
+export { createLoreApi, LORE_TYPE_OPTIONS, loreApi } from "./lore"
 export type {
   CreatePlotData,
   PlotThread,
   UpdatePlotData,
 } from "./plot"
 // Plot API
-export { createPlotApi, plotApi } from "./plot"
+export { createPlotApi, PLOT_STATUS_OPTIONS, PLOT_TYPE_OPTIONS, plotApi } from "./plot"
 export type {
   CreateNovelData,
   CreateProjectData,
@@ -89,6 +89,8 @@ export type {
   CharacterGroupInput,
   CharacterRole,
   GenerateOptionsResult,
+  Note,
+  NoteInput,
   Trait,
   WorldElement,
   WorldElementInput,

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ChevronDown, ChevronRight, Plus, Trash2, Users2 } from "lucide-react"
+import { ChevronDown, ChevronRight, GitBranch, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,37 +12,33 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { storyBibleApi } from "@/lib/api"
+import { api } from "@/lib/api"
 
-interface CharacterGroupSidebarSectionProps {
+interface PlotSidebarSectionProps {
   isExpanded: boolean
   onToggle: () => void
   projectId: string
 }
 
-export function CharacterGroupSidebarSection({
-  projectId,
-  isExpanded,
-  onToggle,
-}: CharacterGroupSidebarSectionProps) {
+export function PlotSidebarSection({ projectId, isExpanded, onToggle }: PlotSidebarSectionProps) {
   const queryClient = useQueryClient()
 
   const {
-    data: groups = [],
+    data: threads = [],
     isError,
     error,
   } = useQuery({
-    queryKey: ["character-groups", projectId],
-    queryFn: () => storyBibleApi.characterGroups.list(projectId),
+    queryKey: ["plot", projectId],
+    queryFn: () => api.plot.list(projectId),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => storyBibleApi.characterGroups.delete(projectId, id),
+    mutationFn: (id: string) => api.plot.delete(projectId, id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["character-groups", projectId] })
-      toast.success("Group deleted")
+      queryClient.invalidateQueries({ queryKey: ["plot", projectId] })
+      toast.success("Plot thread deleted")
     },
-    onError: () => toast.error("Failed to delete group"),
+    onError: () => toast.error("Failed to delete plot thread"),
   })
 
   return (
@@ -55,10 +51,10 @@ export function CharacterGroupSidebarSection({
             ) : (
               <ChevronRight className="h-4 w-4" />
             )}
-            <Users2 className="h-4 w-4" />
-            <span>Character Groups</span>
+            <GitBranch className="h-4 w-4" />
+            <span>Plot Threads</span>
             <Badge className="ml-auto" variant="secondary">
-              {groups.length}
+              {threads.length}
             </Badge>
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -71,8 +67,8 @@ export function CharacterGroupSidebarSection({
               variant="ghost"
             >
               <Link
-                params={{ projectId, groupId: "new" }}
-                to="/projects/$projectId/story-bible/group/$groupId"
+                params={{ projectId, plotId: "new" }}
+                to="/projects/$projectId/story-bible/plot/$plotId"
               >
                 <Plus className="h-4 w-4" />
                 <span>New</span>
@@ -80,28 +76,26 @@ export function CharacterGroupSidebarSection({
             </Button>
             {isError && (
               <p className="px-2 text-destructive text-xs">
-                Couldn't load groups: {error instanceof Error ? error.message : "unknown error"}
+                Couldn't load plot threads:{" "}
+                {error instanceof Error ? error.message : "unknown error"}
               </p>
             )}
-            {groups.map((group) => (
-              <ContextMenu key={group.id}>
+            {threads.map((thread) => (
+              <ContextMenu key={thread.id}>
                 <ContextMenuTrigger asChild>
                   <Button asChild className="w-full justify-start" size="sm" variant="ghost">
                     <Link
-                      params={{ projectId, groupId: group.id }}
-                      to="/projects/$projectId/story-bible/group/$groupId"
+                      params={{ projectId, plotId: thread.id }}
+                      to="/projects/$projectId/story-bible/plot/$plotId"
                     >
-                      <span className="truncate">{group.name}</span>
-                      <span className="ml-auto text-muted-foreground text-xs">
-                        {group.memberIds.length}
-                      </span>
+                      <span className="truncate">{thread.title}</span>
                     </Link>
                   </Button>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   <ContextMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={() => deleteMutation.mutate(group.id)}
+                    onClick={() => deleteMutation.mutate(thread.id)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete

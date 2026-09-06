@@ -26,6 +26,17 @@ export interface CreateLoreData {
   type?: string
 }
 
+export const LORE_TYPE_OPTIONS: { label: string; value: string }[] = [
+  { value: "core_rule", label: "Core Rule" },
+  { value: "history", label: "History" },
+  { value: "culture", label: "Culture" },
+  { value: "magic_system", label: "Magic System" },
+  { value: "technology", label: "Technology" },
+  { value: "religion", label: "Religion" },
+  { value: "politics", label: "Politics" },
+  { value: "custom", label: "Custom" },
+]
+
 export interface UpdateLoreData extends Partial<CreateLoreData> {}
 
 /**

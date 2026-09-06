@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm"
 import { type Context, Hono } from "hono"
 import { db } from "../db"
-import { chapter, character, characterGroup, project, work, worldElement } from "../db/schema"
+import { chapter, character, characterGroup, note, project, work, worldElement } from "../db/schema"
 import {
   BRAINDUMP_SYSTEM_PROMPT,
   buildBraindumpPrompt,
@@ -114,6 +114,25 @@ storyBibleRouter.get(
       .where(eq(worldElement.projectId, param(c, "projectId")))
       .orderBy(asc(worldElement.name))
     return c.json({ worldElements: rows.map(serializeWorldElement) })
+  }
+)
+
+storyBibleRouter.get(
+  "/projects/:projectId/world-elements/:id",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const row = await db
+      .select()
+      .from(worldElement)
+      .where(
+        and(eq(worldElement.id, param(c, "id")), eq(worldElement.projectId, param(c, "projectId")))
+      )
+      .get()
+    if (!row) {
+      return c.json({ error: "Worldbuilding element not found" }, 404)
+    }
+    return c.json({ worldElement: serializeWorldElement(row) })
   }
 )
 
@@ -250,6 +269,28 @@ storyBibleRouter.get(
   }
 )
 
+storyBibleRouter.get(
+  "/projects/:projectId/character-groups/:id",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const row = await db
+      .select()
+      .from(characterGroup)
+      .where(
+        and(
+          eq(characterGroup.id, param(c, "id")),
+          eq(characterGroup.projectId, param(c, "projectId"))
+        )
+      )
+      .get()
+    if (!row) {
+      return c.json({ error: "Character group not found" }, 404)
+    }
+    return c.json({ characterGroup: serializeGroup(row) })
+  }
+)
+
 const readGroupBody = (body: Record<string, unknown>) => ({
   name: trimField(body.name, MAX_NAME_CHARS),
   description: trimField(body.description, MAX_DESCRIPTION_CHARS),
@@ -330,6 +371,112 @@ storyBibleRouter.delete(
           eq(characterGroup.projectId, param(c, "projectId"))
         )
       )
+    return c.json({ success: true })
+  }
+)
+
+// ---------------------------------------------------------------------------
+// Notes — Story Bible "Notes" section: freeform titled notes, write-in-and-go.
+
+const serializeNote = (row: typeof note.$inferSelect) => ({
+  id: row.id,
+  title: row.title,
+  content: row.content,
+  createdAt: row.createdAt.toISOString(),
+  updatedAt: row.updatedAt.toISOString(),
+})
+
+storyBibleRouter.get(
+  "/projects/:projectId/notes",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const rows = await db
+      .select()
+      .from(note)
+      .where(eq(note.projectId, param(c, "projectId")))
+      .orderBy(asc(note.title))
+    return c.json({ notes: rows.map(serializeNote) })
+  }
+)
+
+storyBibleRouter.get(
+  "/projects/:projectId/notes/:id",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const row = await db
+      .select()
+      .from(note)
+      .where(and(eq(note.id, param(c, "id")), eq(note.projectId, param(c, "projectId"))))
+      .get()
+    if (!row) {
+      return c.json({ error: "Note not found" }, 404)
+    }
+    return c.json({ note: serializeNote(row) })
+  }
+)
+
+const MAX_NOTE_CONTENT_CHARS = 200_000
+
+storyBibleRouter.post(
+  "/projects/:projectId/notes",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const raw = await readJsonBody(c)
+    if (!raw) {
+      return c.json({ error: "Invalid JSON body" }, 400)
+    }
+    const title = trimField(raw.title, MAX_NAME_CHARS) ?? "Untitled note"
+    const content = trimField(raw.content, MAX_NOTE_CONTENT_CHARS)
+    const id = crypto.randomUUID()
+    const timestamp = now()
+    await db.insert(note).values({
+      id,
+      projectId: param(c, "projectId"),
+      title,
+      content: content ?? null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    })
+    return c.json({ success: true, id }, 201)
+  }
+)
+
+storyBibleRouter.put(
+  "/projects/:projectId/notes/:id",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const raw = await readJsonBody(c)
+    if (!raw) {
+      return c.json({ error: "Invalid JSON body" }, 400)
+    }
+    const updates: Partial<typeof note.$inferInsert> = { updatedAt: now() }
+    if (raw.title !== undefined) {
+      updates.title = trimField(raw.title, MAX_NAME_CHARS) ?? "Untitled note"
+    }
+    if (raw.content !== undefined) {
+      updates.content =
+        typeof raw.content === "string" ? raw.content.slice(0, MAX_NOTE_CONTENT_CHARS) : null
+    }
+    await db
+      .update(note)
+      .set(updates)
+      .where(and(eq(note.id, param(c, "id")), eq(note.projectId, param(c, "projectId"))))
+    return c.json({ success: true })
+  }
+)
+
+storyBibleRouter.delete(
+  "/projects/:projectId/notes/:id",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    await db
+      .delete(note)
+      .where(and(eq(note.id, param(c, "id")), eq(note.projectId, param(c, "projectId"))))
     return c.json({ success: true })
   }
 )
@@ -535,6 +682,47 @@ storyBibleRouter.post(
       chapterTitle: chapterRow.title,
       chapterSummary: chapterRow.summary,
       chapterText: htmlToText(chapterRow.content),
+      instructions: trimField(body.instructions, MAX_INSTRUCTION_CHARS),
+    })
+
+    const result = await runGeneration({ c, system: BRAINDUMP_SYSTEM_PROMPT, prompt })
+    if (result.error) {
+      return failGeneration(c, result)
+    }
+    return c.json({
+      text: (result.text ?? "").trim(),
+      provider: result.provider,
+      model: result.model,
+    })
+  }
+)
+
+storyBibleRouter.post(
+  "/projects/:projectId/braindump/generate",
+  requireAuth,
+  verifyProjectAccess,
+  async (c: AppContext) => {
+    const body = (await c.req.json().catch(() => ({}))) as { instructions?: unknown }
+    const row = await db
+      .select({
+        title: project.title,
+        genre: project.genre,
+        description: project.description,
+        styleBible: project.styleBible,
+        braindump: project.braindump,
+      })
+      .from(project)
+      .where(eq(project.id, param(c, "projectId")))
+      .get()
+    if (!row) {
+      return c.json({ error: "Project not found" }, 404)
+    }
+
+    const prompt = buildBraindumpPrompt({
+      project: { title: row.title, genre: row.genre, styleBible: row.styleBible },
+      chapterTitle: "the whole project",
+      chapterSummary: row.description,
+      chapterText: row.braindump ?? "",
       instructions: trimField(body.instructions, MAX_INSTRUCTION_CHARS),
     })
 
